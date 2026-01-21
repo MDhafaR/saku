@@ -108,6 +108,10 @@ class SettingsItemWidget extends StatelessWidget {
         return Icons.language;
       case 'theme':
         return Icons.palette;
+      case 'import':
+        return Icons.file_upload; // or import_export
+      case 'notification':
+        return Icons.notifications;
       case 'share':
         return Icons.share;
       case 'about':

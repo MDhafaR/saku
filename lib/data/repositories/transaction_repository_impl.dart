@@ -4,12 +4,10 @@ import '../../domain/entities/transaction.dart';
 import '../../domain/repositories/transaction_repository.dart';
 import '../local/saku_database.dart';
 import '../remote/api_client.dart';
-import 'package:uuid/uuid.dart';
 
 class TransactionRepositoryImpl implements TransactionRepository {
   final SakuDatabase _db;
   final ApiClient _api;
-  final _uuid = const Uuid();
 
   TransactionRepositoryImpl(this._db, this._api);
 

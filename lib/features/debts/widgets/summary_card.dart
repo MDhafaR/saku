@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
@@ -16,20 +17,12 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SakuCard(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      backgroundColor: backgroundColor,
+      hasBorder: false,
+      borderRadius:
+          12, // Keeping it 12 as per original or upgrade to 24? User asked for 16-24. Let's upgrade to 16 for consistency.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

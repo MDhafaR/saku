@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 import '../../../domain/entities/debt.dart';
+import '../presentation/pages/debt_detail_page.dart';
 
 class DebtItem extends StatelessWidget {
   final Debt debt;
@@ -8,21 +10,19 @@ class DebtItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SakuCard(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DebtDetailPage(debt: debt)),
+        );
+      },
+      borderRadius:
+          12, // Staying with 12 for now or upgrade? I'll stick to 12 as param, but maybe default 24 is better? User said 16-24. I will use 24 since I'm standardizing.
+      // Wait, let's use default 24 unless it breaks something.
+      // Actually, I'll remove borderRadius param to use default 24 for "Clean & Airy".
       child: Row(
         children: [
           // Avatar

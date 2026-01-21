@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme_service.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 import '../components/statistics_summary_card.dart';
 import '../components/time_period_selector.dart';
 import '../components/line_chart_widget.dart';
 import '../components/donut_chart_widget.dart';
 import '../components/top_categories_widget.dart';
+import 'category_detail_page.dart';
 
 class StatisticsPage extends StatefulWidget {
   const StatisticsPage({super.key});
@@ -19,7 +21,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: const Color(0xFFFAFAFA), // Global "Clean & Airy" bg
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
@@ -39,8 +41,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     'Statistics',
                     style: TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      fontWeight: FontWeight.w800, // Thicker
+                      color: Color(0xFF111111), // Darker Black
+                      letterSpacing: -0.5,
                     ),
                   ),
                   IconButton(
@@ -80,9 +83,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       amount: '\$4,250',
                       percentage: '+12.5%',
                       icon: Icons.trending_up,
-                      iconColor: Colors.white,
+                      iconColor: const Color(0xFF10B981),
                       backgroundColor: const Color(0xFF10B981),
-                      percentageColor: Colors.white,
+                      percentageColor: const Color(0xFF10B981),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -92,9 +95,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       amount: '\$2,890',
                       percentage: '-8.2%',
                       icon: Icons.trending_down,
-                      iconColor: Colors.white,
+                      iconColor: const Color(0xFFEF4444),
                       backgroundColor: const Color(0xFFEF4444),
-                      percentageColor: Colors.white,
+                      percentageColor: const Color(0xFFEF4444),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -104,9 +107,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       amount: '\$1,360',
                       percentage: '+4.3%',
                       icon: Icons.account_balance_wallet,
-                      iconColor: Colors.white,
+                      iconColor: const Color(0xFF6366F1),
                       backgroundColor: const Color(0xFF6366F1),
-                      percentageColor: Colors.white,
+                      percentageColor: const Color(0xFF6366F1),
                     ),
                   ),
                 ],
@@ -114,19 +117,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               const SizedBox(height: 24),
 
               // Income vs Expense Chart
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+              SakuCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -137,8 +128,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                           'Income vs Expense',
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF111111),
+                            letterSpacing: -0.5,
                           ),
                         ),
                         Row(
@@ -180,19 +172,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
               const SizedBox(height: 24),
 
               // Category Breakdown
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+              // Category Breakdown
+              SakuCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -203,16 +184,28 @@ class _StatisticsPageState extends State<StatisticsPage> {
                           'Category Breakdown',
                           style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF1F2937),
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF111111),
+                            letterSpacing: -0.5,
                           ),
                         ),
-                        const Text(
-                          'View Details',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF3B82F6),
+                        InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CategoryDetailPage(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'View Details',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF2563EB), // Royal Blue
+                            ),
                           ),
                         ),
                       ],
@@ -225,19 +218,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               const SizedBox(height: 24),
 
               // Top Categories
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
+              SakuCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -245,8 +226,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       'Top Categories',
                       style: TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F2937),
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF111111),
+                        letterSpacing: -0.5,
                       ),
                     ),
                     const SizedBox(height: 16),

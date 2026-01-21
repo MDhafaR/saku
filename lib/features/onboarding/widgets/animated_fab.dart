@@ -2,6 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
+import '../../../../core/theme/app_theme.dart';
+import '../../debts/presentation/pages/add_loan_page.dart';
+import '../../transactions/presentation/pages/transfer_page.dart';
+
 class AnimatedFab extends StatefulWidget {
   final VoidCallback onPressed;
   final VoidCallback? onShowAddTransaction;
@@ -190,7 +194,10 @@ class _AnimatedFabState extends State<AnimatedFab> {
               label: 'Transfer',
               onTap: () {
                 _toggleFabExpansion();
-                // TODO: Implement transfer functionality
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TransferPage()),
+                );
               },
               delay: 100,
             ),
@@ -204,7 +211,10 @@ class _AnimatedFabState extends State<AnimatedFab> {
               label: 'Loan',
               onTap: () {
                 _toggleFabExpansion();
-                // TODO: Implement loan functionality
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AddLoanPage()),
+                );
               },
               delay: 200,
             ),
@@ -222,7 +232,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   FloatingActionButton(
                         key: ValueKey('fab_$_animationKey'),
                         onPressed: _toggleFabExpansion,
-                        backgroundColor: const Color(0xFF6C5CE7),
+                        backgroundColor: AppTheme.primaryBlue,
                         child: Icon(
                           _isFabExpanded ? Icons.close : Icons.add,
                           color: Colors.white,
@@ -265,7 +275,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
                         alignment: Alignment.center,
                         child: const Icon(
                           Icons.arrow_back_ios_new_outlined,
-                          color: Color(0xFF6C5CE7),
+                          color: AppTheme.primaryBlue,
                           size: 24,
                         ),
                       )

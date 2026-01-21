@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../components/components.dart' as components;
+import '../components/filter_bottom_sheet.dart';
 
 /// Dashboard page showing recent transactions and summary information.
 class DashboardPage extends StatefulWidget {
@@ -25,7 +26,19 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _onFilterTap() {
-    // TODO: Implement filter logic
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: const FilterBottomSheet(),
+      ),
+    );
   }
 
   @override
@@ -37,13 +50,13 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             // Fixed header section
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header with app name and theme toggle
                   _buildHeader(),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
 
                   // Month navigation
                   components.MonthNavigation(
@@ -54,7 +67,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                   // Summary cards
                   _buildSummaryCards(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
 
                   // Search bar
                   components.SearchBar(
@@ -68,13 +81,13 @@ class _DashboardPageState extends State<DashboardPage> {
             // Scrollable transaction sections
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTransactionSections(),
                     // Bottom padding for FAB
-                    const SizedBox(height: 164),
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),

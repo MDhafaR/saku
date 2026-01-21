@@ -22,8 +22,9 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFFE5E7EB),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white, // Transparent on white bg
+        borderRadius: BorderRadius.circular(100), // Fully rounded
+        border: Border.all(color: const Color(0xFFF0F0F0)), // Subtle border
       ),
       child: Row(
         children: periods.map((period) {
@@ -31,16 +32,18 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
           return Expanded(
             child: GestureDetector(
               onTap: () => widget.onPeriodChanged(period),
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInOut,
                 padding: const EdgeInsets.symmetric(
                   vertical: 12,
                   horizontal: 16,
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF8B5CF6)
+                      ? const Color(0xFF111111) // Black selection
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(100),
                 ),
                 child: Text(
                   period,

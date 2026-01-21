@@ -7,6 +7,7 @@ class Account {
   final double balance;
   final String iconPath;
   final Color iconColor;
+  final bool isHidden;
 
   Account({
     required this.id,
@@ -15,6 +16,7 @@ class Account {
     required this.balance,
     required this.iconPath,
     required this.iconColor,
+    this.isHidden = false,
   });
 }
 

@@ -87,7 +87,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     _buildTransactionSections(),
                     // Bottom padding for FAB
-                    const SizedBox(height: 100),
+                    const SizedBox(height: 160),
                   ],
                 ),
               ),

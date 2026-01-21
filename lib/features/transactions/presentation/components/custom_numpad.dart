@@ -27,7 +27,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '3'),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -71,22 +71,6 @@ class CustomNumpad extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 24),
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: onSubmit,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: submitColor ?? Theme.of(context).primaryColor,
-              // Shape is defined in AppTheme
-            ),
-            child: const Text(
-              'Simpan', // Generic "Save"
-            ),
-          ),
-        ),
-        const SizedBox(height: 20),
       ],
     );
   }
@@ -110,15 +94,15 @@ class CustomNumpad extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Container(
-      width: 80, // Fixed width for consistency
-      height: 60,
+      width: 64, // Fixed width for consistency
+      height: 48,
       alignment: Alignment.center,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(24),
         child: Container(
-          width: 80,
-          height: 60,
+          width: 64,
+          height: 48,
           alignment: Alignment.center,
           child: child,
         ),

@@ -488,9 +488,17 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
+                  side: const BorderSide(
+                    color: Color.fromARGB(255, 236, 236, 236),
+                  ),
+                  backgroundColor: Colors.white,
+                  shadowColor: Colors.black,
+                  elevation: 2,
                 ),
-                child: const Text('Simpan'),
+                child: const Text(
+                  'Simpan',
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
             ),
           ),
@@ -559,7 +567,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: AppTheme.primaryBlue),
+            Icon(icon, size: 20, color: AppTheme.darkBackground),
             const SizedBox(width: 8),
             Text(
               label,

@@ -126,7 +126,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(icon, color: const Color(0xFF6C5CE7), size: 20),
+                    Icon(icon, color: AppTheme.darkBackground, size: 20),
                     const SizedBox(width: 8),
                     Text(
                       label,
@@ -194,10 +194,30 @@ class _AnimatedFabState extends State<AnimatedFab> {
               label: 'Transfer',
               onTap: () {
                 _toggleFabExpansion();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const TransferPage()),
-                );
+                if (TransferPage.mockWallets.length < 2) {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Wallet Tidak Cukup'),
+                      content: const Text(
+                        'Anda memerlukan minimal 2 wallet untuk melakukan transfer antar akun. Silakan tambahkan wallet baru terlebih dahulu.',
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const TransferPage(),
+                    ),
+                  );
+                }
               },
               delay: 100,
             ),
@@ -232,10 +252,10 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   FloatingActionButton(
                         key: ValueKey('fab_$_animationKey'),
                         onPressed: _toggleFabExpansion,
-                        backgroundColor: AppTheme.primaryBlue,
+                        backgroundColor: Colors.white,
                         child: Icon(
                           _isFabExpanded ? Icons.close : Icons.add,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       )
                       .animate()
@@ -275,7 +295,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
                         alignment: Alignment.center,
                         child: const Icon(
                           Icons.arrow_back_ios_new_outlined,
-                          color: AppTheme.primaryBlue,
+                          color: AppTheme.darkBackground,
                           size: 24,
                         ),
                       )

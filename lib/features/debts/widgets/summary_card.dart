@@ -4,43 +4,58 @@ import '../../../../core/presentation/components/saku_card.dart';
 class SummaryCard extends StatelessWidget {
   final String title;
   final String amount;
-  final Color backgroundColor;
-  final Color textColor;
+  final IconData icon;
+  final Color iconColor;
+  final bool isNegative;
 
   const SummaryCard({
     super.key,
     required this.title,
     required this.amount,
-    required this.backgroundColor,
-    required this.textColor,
+    required this.icon,
+    required this.iconColor,
+    this.isNegative = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return SakuCard(
       padding: const EdgeInsets.all(16),
-      backgroundColor: backgroundColor,
-      hasBorder: false,
-      borderRadius:
-          12, // Keeping it 12 as per original or upgrade to 24? User asked for 16-24. Let's upgrade to 16 for consistency.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: iconColor, size: 18),
+              ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 12),
           Text(
             title,
             style: TextStyle(
-              color: textColor,
-              fontSize: 14,
+              color: Colors.grey[600],
+              fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
             amount,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+            style: TextStyle(
+              color: isNegative
+                  ? const Color(0xFFEF4444)
+                  : const Color(0xFF111111),
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -0.5,
             ),
           ),
         ],

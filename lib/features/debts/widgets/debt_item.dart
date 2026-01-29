@@ -11,7 +11,7 @@ class DebtItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SakuCard(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       onTap: () {
         Navigator.push(
@@ -19,26 +19,28 @@ class DebtItem extends StatelessWidget {
           MaterialPageRoute(builder: (context) => DebtDetailPage(debt: debt)),
         );
       },
-      borderRadius:
-          12, // Staying with 12 for now or upgrade? I'll stick to 12 as param, but maybe default 24 is better? User said 16-24. I will use 24 since I'm standardizing.
-      // Wait, let's use default 24 unless it breaks something.
-      // Actually, I'll remove borderRadius param to use default 24 for "Clean & Airy".
       child: Row(
         children: [
           // Avatar
-          CircleAvatar(
-            radius: 24,
-            backgroundColor: _getAvatarBackgroundColor(debt.name),
-            child: Text(
-              debt.name.split(' ').map((e) => e[0]).join(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: _getAvatarBackgroundColor(debt.name).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Center(
+              child: Text(
+                _getInitials(debt.name),
+                style: TextStyle(
+                  color: _getAvatarBackgroundColor(debt.name),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
               ),
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
           // Name and date info
           Expanded(
             child: Column(
@@ -47,52 +49,47 @@ class DebtItem extends StatelessWidget {
                 Text(
                   debt.name,
                   style: const TextStyle(
-                    color: Color(0xFF333333),
-                    fontSize: 16,
+                    color: Color(0xFF111111),
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  debt.status == DebtStatus.paid
-                      ? 'Paid: ${_formatDate(debt.paidDate!)}'
-                      : 'Due: ${_formatDate(debt.dueDate)}',
-                  style: const TextStyle(
-                    color: Color(0xFF666666),
-                    fontSize: 14,
-                  ),
+                Row(
+                  children: [
+                    _buildStatusBadge(debt.status),
+                    const SizedBox(width: 8),
+                    Text(
+                      debt.status == DebtStatus.paid
+                          ? _formatDate(debt.paidDate!)
+                          : _formatDate(debt.dueDate),
+                      style: const TextStyle(
+                        color: Color(0xFF9CA3AF),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          // Amount and status
+          // Amount
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '\$${debt.amount.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  color: Color(0xFF333333),
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+                'Rp${_formatAmount(debt.amount)}',
+                style: TextStyle(
+                  color: debt.type == 'debt'
+                      ? const Color(0xFFEF4444)
+                      : const Color(0xFF10B981),
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getStatusColor(debt.status),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  debt.status.displayName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
+              Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]),
             ],
           ),
         ],
@@ -100,14 +97,49 @@ class DebtItem extends StatelessWidget {
     );
   }
 
+  Widget _buildStatusBadge(DebtStatus status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: _getStatusColor(status).withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status.displayName,
+        style: TextStyle(
+          color: _getStatusColor(status),
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  String _getInitials(String name) {
+    final parts = name.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, 2).toUpperCase();
+  }
+
+  String _formatAmount(double amount) {
+    final formatted = amount
+        .toStringAsFixed(0)
+        .replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (match) => '${match[1]}.',
+        );
+    return formatted;
+  }
+
   Color _getAvatarBackgroundColor(String name) {
-    // Generate consistent colors based on name
     final colors = [
       const Color(0xFF6366F1), // Purple
       const Color(0xFF3B82F6), // Blue
       const Color(0xFF10B981), // Green
       const Color(0xFFF59E0B), // Orange
-      const Color(0xFFEF4444), // Red
+      const Color(0xFFEC4899), // Pink
     ];
     return colors[name.hashCode % colors.length];
   }
@@ -115,13 +147,13 @@ class DebtItem extends StatelessWidget {
   Color _getStatusColor(DebtStatus status) {
     switch (status) {
       case DebtStatus.overdue:
-        return const Color(0xFFD32F2F); // Red
+        return const Color(0xFFEF4444); // Red
       case DebtStatus.dueSoon:
-        return const Color(0xFFF57C00); // Orange
+        return const Color(0xFFF59E0B); // Amber
       case DebtStatus.pending:
-        return const Color(0xFF1976D2); // Blue
+        return const Color(0xFF3B82F6); // Blue
       case DebtStatus.paid:
-        return const Color(0xFF388E3C); // Green
+        return const Color(0xFF10B981); // Green
     }
   }
 
@@ -131,15 +163,15 @@ class DebtItem extends StatelessWidget {
       'Feb',
       'Mar',
       'Apr',
-      'May',
+      'Mei',
       'Jun',
       'Jul',
-      'Aug',
+      'Agu',
       'Sep',
-      'Oct',
+      'Okt',
       'Nov',
-      'Dec',
+      'Des',
     ];
-    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

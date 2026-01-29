@@ -4,6 +4,7 @@ import '../../../../core/presentation/components/saku_card.dart';
 import '../components/statistics_summary_card.dart';
 import '../components/time_period_selector.dart';
 import '../components/line_chart_widget.dart';
+import '../components/bar_chart_widget.dart';
 import '../components/donut_chart_widget.dart';
 import '../components/top_categories_widget.dart';
 import 'category_detail_page.dart';
@@ -17,6 +18,7 @@ class StatisticsPage extends StatefulWidget {
 
 class _StatisticsPageState extends State<StatisticsPage> {
   String selectedPeriod = 'Daily';
+  bool isLineChart = true; // true = line chart, false = bar chart
 
   @override
   Widget build(BuildContext context) {
@@ -135,29 +137,45 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                         Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF8B5CF6),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.show_chart,
-                                color: Colors.white,
-                                size: 16,
+                            GestureDetector(
+                              onTap: () => setState(() => isLineChart = true),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isLineChart
+                                      ? const Color(0xFF111111)
+                                      : const Color(0xFFF3F4F6),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.show_chart,
+                                  color: isLineChart
+                                      ? Colors.white
+                                      : const Color(0xFF6B7280),
+                                  size: 16,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE5E7EB),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.bar_chart,
-                                color: Color(0xFF6B7280),
-                                size: 16,
+                            GestureDetector(
+                              onTap: () => setState(() => isLineChart = false),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: !isLineChart
+                                      ? const Color(0xFF111111)
+                                      : const Color(0xFFF3F4F6),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Icons.bar_chart,
+                                  color: !isLineChart
+                                      ? Colors.white
+                                      : const Color(0xFF6B7280),
+                                  size: 16,
+                                ),
                               ),
                             ),
                           ],
@@ -165,7 +183,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const LineChartWidget(),
+                    isLineChart
+                        ? const LineChartWidget()
+                        : const BarChartWidget(),
                   ],
                 ),
               ),
@@ -204,7 +224,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF2563EB), // Royal Blue
+                              color: Color(
+                                0xFF111111,
+                              ), // Dark to match design system
                             ),
                           ),
                         ),

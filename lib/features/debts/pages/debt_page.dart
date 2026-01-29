@@ -10,27 +10,27 @@ class DebtPage extends StatelessWidget {
   final List<Debt> unpaidDebts = [
     Debt(
       id: '1',
-      name: 'John Smith',
+      name: 'Budi Santoso',
       avatarUrl: '',
-      amount: 850,
+      amount: 850000,
       dueDate: DateTime(2024, 1, 25),
       status: DebtStatus.overdue,
       type: 'debt',
     ),
     Debt(
       id: '2',
-      name: 'Sarah Johnson',
+      name: 'Sarah Wijaya',
       avatarUrl: '',
-      amount: 1200,
+      amount: 1200000,
       dueDate: DateTime(2024, 2, 15),
       status: DebtStatus.dueSoon,
       type: 'debt',
     ),
     Debt(
       id: '3',
-      name: 'Mike Wilson',
+      name: 'Ahmad Rizki',
       avatarUrl: '',
-      amount: 400,
+      amount: 400000,
       dueDate: DateTime(2024, 3, 10),
       status: DebtStatus.pending,
       type: 'debt',
@@ -40,9 +40,9 @@ class DebtPage extends StatelessWidget {
   final List<Debt> paidDebts = [
     Debt(
       id: '4',
-      name: 'Emma Davis',
+      name: 'Dewi Lestari',
       avatarUrl: '',
-      amount: 300,
+      amount: 300000,
       dueDate: DateTime(2024, 1, 20),
       paidDate: DateTime(2024, 1, 20),
       status: DebtStatus.paid,
@@ -50,9 +50,9 @@ class DebtPage extends StatelessWidget {
     ),
     Debt(
       id: '5',
-      name: 'Alex Brown',
+      name: 'Andi Pratama',
       avatarUrl: '',
-      amount: 280,
+      amount: 280000,
       dueDate: DateTime(2024, 1, 18),
       paidDate: DateTime(2024, 1, 18),
       status: DebtStatus.paid,
@@ -63,12 +63,7 @@ class DebtPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        20,
-        20,
-        20,
-        150,
-      ), // Extra bottom padding for navigation bar and FAB
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 150),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -77,48 +72,89 @@ class DebtPage extends StatelessWidget {
             children: [
               Expanded(
                 child: SummaryCard(
-                  title: 'Total Debt',
-                  amount: '\$2,450',
-                  backgroundColor: const Color(0xFFD32F2F),
-                  textColor: const Color.fromARGB(255, 255, 255, 255),
+                  title: 'Total Utang',
+                  amount: 'Rp2.450.000',
+                  icon: Icons.arrow_downward_rounded,
+                  iconColor: const Color(0xFFEF4444),
+                  isNegative: true,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: SummaryCard(
-                  title: 'Paid This Month',
-                  amount: '\$580',
-                  backgroundColor: const Color(0xFF388E3C),
-                  textColor: const Color.fromARGB(255, 255, 255, 255),
+                  title: 'Sudah Dibayar',
+                  amount: 'Rp580.000',
+                  icon: Icons.check_circle_outline_rounded,
+                  iconColor: const Color(0xFF10B981),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
 
           // Unpaid Debts Section
-          Text(
-            'Unpaid (${unpaidDebts.length})',
-            style: const TextStyle(
-              color: Color(0xFF666666),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Text(
+                'Belum Lunas',
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${unpaidDebts.length}',
+                  style: const TextStyle(
+                    color: Color(0xFF6B7280),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ...unpaidDebts.map((debt) => DebtItem(debt: debt)),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           // Paid Debts Section
-          Text(
-            'Paid (${paidDebts.length})',
-            style: const TextStyle(
-              color: Color(0xFF666666),
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+          Row(
+            children: [
+              Text(
+                'Sudah Lunas',
+                style: TextStyle(
+                  color: Colors.grey[700],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCFCE7),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '${paidDebts.length}',
+                  style: const TextStyle(
+                    color: Color(0xFF10B981),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           ...paidDebts.map((debt) => DebtItem(debt: debt)),
         ],
       ),

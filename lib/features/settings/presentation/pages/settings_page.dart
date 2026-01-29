@@ -467,16 +467,18 @@ class _SettingsPageState extends State<SettingsPage> {
         .fold<double>(0, (sum, account) => sum + account.balance);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFAFAFA),
+        surfaceTintColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
         title: const Text(
-          'Settings',
+          'Pengaturan',
           style: TextStyle(
-            color: Color(0xFF333333),
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+            color: Color(0xFF111111),
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: true,

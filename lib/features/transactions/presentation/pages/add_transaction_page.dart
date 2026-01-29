@@ -147,16 +147,103 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         centerTitle: true,
         title: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFF3F4F6), // Light grey background for toggle
+            color: const Color(0xFFF3F4F6),
             borderRadius: BorderRadius.circular(30),
           ),
           padding: const EdgeInsets.all(4),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTypeToggle('Pengeluaran', true),
-              _buildTypeToggle('Pemasukan', false),
-            ],
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final tabWidth = constraints.maxWidth / 2;
+              return Stack(
+                children: [
+                  // Sliding indicator
+                  AnimatedPositioned(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeInOut,
+                    left: isExpense ? 0 : tabWidth,
+                    top: 0,
+                    bottom: 0,
+                    width: tabWidth,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Tab labels
+                  Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            if (!isExpense) {
+                              setState(() {
+                                isExpense = true;
+                                selectedCategory = null;
+                                selectedWallet = null;
+                                note = '';
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              'Pengeluaran',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: isExpense
+                                    ? AppTheme.semanticRed
+                                    : AppTheme.lightTextSecondary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            if (isExpense) {
+                              setState(() {
+                                isExpense = false;
+                                selectedCategory = null;
+                                selectedWallet = null;
+                                note = '';
+                              });
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            child: Text(
+                              'Pemasukan',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: !isExpense
+                                    ? AppTheme.semanticGreen
+                                    : AppTheme.lightTextSecondary,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
           ),
         ),
         actions: [
@@ -503,49 +590,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTypeToggle(String text, bool isExp) {
-    final isSelected = isExpense == isExp;
-    return GestureDetector(
-      onTap: () {
-        if (isExpense != isExp) {
-          setState(() {
-            isExpense = isExp;
-            selectedCategory = null;
-            selectedWallet = null;
-            note = '';
-          });
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(24),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: isSelected
-                ? (isExp ? AppTheme.semanticRed : AppTheme.semanticGreen)
-                : AppTheme.lightTextSecondary,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
       ),
     );
   }

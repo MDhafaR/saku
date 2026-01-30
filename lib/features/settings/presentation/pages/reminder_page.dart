@@ -28,7 +28,7 @@ class _ReminderPageState extends State<ReminderPage> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF8B5CF6)),
+            colorScheme: const ColorScheme.light(primary: Color(0xFF111111)),
           ),
           child: child!,
         );
@@ -55,12 +55,12 @@ class _ReminderPageState extends State<ReminderPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: const Text(
           'Pengingat Harian',
           style: TextStyle(
-            color: Color(0xFF333333),
+            color: Color(0xFF111111),
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -124,7 +124,7 @@ class _ReminderPageState extends State<ReminderPage> {
                     value: _isReminderEnabled,
                     onChanged: (val) =>
                         setState(() => _isReminderEnabled = val),
-                    activeColor: const Color(0xFF8B5CF6), // Purple
+                    activeColor: const Color(0xFF111111), // Primary Dark
                   ),
                 ],
               ),
@@ -199,7 +199,7 @@ class _ReminderPageState extends State<ReminderPage> {
                             Container(
                               padding: const EdgeInsets.all(2),
                               decoration: const BoxDecoration(
-                                color: Color(0xFF8B5CF6),
+                                color: Color(0xFF111111),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(
@@ -212,7 +212,7 @@ class _ReminderPageState extends State<ReminderPage> {
                             const Text(
                               'Tambah Waktu Pengingat',
                               style: TextStyle(
-                                color: Color(0xFF8B5CF6),
+                                color: Color(0xFF111111),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -315,7 +315,7 @@ class _ReminderPageState extends State<ReminderPage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected ? const Color(0xFF8B5CF6) : Colors.grey[300]!,
+                color: isSelected ? const Color(0xFF111111) : Colors.grey[300]!,
                 width: isSelected ? 6 : 1,
               ),
             ),

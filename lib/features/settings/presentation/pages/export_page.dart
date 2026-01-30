@@ -20,12 +20,12 @@ class _ExportPageState extends State<ExportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: const Text(
           'Report Builder',
           style: TextStyle(
-            color: Color(0xFF333333),
+            color: Color(0xFF111111),
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),

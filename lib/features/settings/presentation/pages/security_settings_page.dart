@@ -17,12 +17,12 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA), // Light background
+      backgroundColor: const Color(0xFFFAFAFA), // Light background
       appBar: AppBar(
         title: const Text(
           'Pengaturan Keamanan',
           style: TextStyle(
-            color: Color(0xFF333333),
+            color: Color(0xFF111111),
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),

@@ -6,18 +6,18 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: const Text(
           'About',
           style: TextStyle(
-            color: Color(0xFF333333),
+            color: Color(0xFF111111),
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFF5F7FA),
+        backgroundColor: const Color(0xFFFAFAFA),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -38,11 +38,11 @@ class AboutPage extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: const Color(0xFF6200EE), // Deep Purple
+                color: const Color(0xFF111111), // Primary Dark
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6200EE).withOpacity(0.3),
+                    color: const Color(0xFF111111).withOpacity(0.2),
                     blurRadius: 20,
                     offset: const Offset(0, 10),
                   ),
@@ -167,7 +167,7 @@ class AboutPage extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: isAction ? const Color(0xFF6200EE) : Colors.grey[500],
+              color: isAction ? const Color(0xFF111111) : Colors.grey[500],
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -177,7 +177,7 @@ class AboutPage extends StatelessWidget {
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: isAction
-                      ? const Color(0xFF6200EE)
+                      ? const Color(0xFF111111)
                       : const Color(0xFF1F2937),
                 ),
               ),

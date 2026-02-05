@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 
@@ -54,11 +55,11 @@ class WalletSelectionPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Pilih Wallet',
           style: TextStyle(
-            color: Color(0xFF333333),
-            fontSize: 18,
+            color: const Color(0xFF333333),
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -67,24 +68,24 @@ class WalletSelectionPage extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             color: Colors.black,
-            size: 20,
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         children: [
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
 
           // Wallet List
           Expanded(
             child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0),
               itemCount: _wallets.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              separatorBuilder: (context, index) => SizedBox(height: 12.h),
               itemBuilder: (context, index) {
                 final wallet = _wallets[index];
                 return GestureDetector(
@@ -92,13 +93,13 @@ class WalletSelectionPage extends StatelessWidget {
                     Navigator.pop(context, wallet);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 16,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 16.h,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.05),
@@ -113,19 +114,19 @@ class WalletSelectionPage extends StatelessWidget {
                       children: [
                         // Icon
                         Container(
-                          width: 44,
-                          height: 44,
+                          width: 44.w,
+                          height: 44.w,
                           decoration: BoxDecoration(
                             color: (wallet['color'] as Color).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: Icon(
                             wallet['icon'] as IconData,
                             color: wallet['color'] as Color,
-                            size: 22,
+                            size: 22.sp,
                           ),
                         ),
-                        const SizedBox(width: 16),
+                        SizedBox(width: 16.w),
                         // Name & Balance
                         Expanded(
                           child: Column(
@@ -133,17 +134,17 @@ class WalletSelectionPage extends StatelessWidget {
                             children: [
                               Text(
                                 wallet['name'] as String,
-                                style: const TextStyle(
-                                  fontSize: 15,
+                                style: TextStyle(
+                                  fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF1F2937),
+                                  color: const Color(0xFF1F2937),
                                 ),
                               ),
-                              const SizedBox(height: 2),
+                              SizedBox(height: 2.h),
                               Text(
                                 'Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
                                 style: TextStyle(
-                                  fontSize: 13,
+                                  fontSize: 13.sp,
                                   color: Colors.grey[500],
                                 ),
                               ),
@@ -151,7 +152,11 @@ class WalletSelectionPage extends StatelessWidget {
                           ),
                         ),
                         // Arrow
-                        Icon(Icons.chevron_right, color: Colors.grey[400]),
+                        Icon(
+                          Icons.chevron_right,
+                          color: Colors.grey[400],
+                          size: 24.sp,
+                        ),
                       ],
                     ),
                   ),
@@ -166,7 +171,7 @@ class WalletSelectionPage extends StatelessWidget {
           // TODO: Navigate to add wallet page
         },
         backgroundColor: AppTheme.primaryBlue,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add, color: Colors.white, size: 24.sp),
       ),
     );
   }

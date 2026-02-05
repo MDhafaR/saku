@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TopCategoriesWidget extends StatelessWidget {
   const TopCategoriesWidget({super.key});
@@ -33,46 +34,46 @@ class TopCategoriesWidget extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       child: Column(
         children: categories.map((category) {
           return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.only(bottom: 16.h),
             child: Row(
               children: [
                 Container(
-                  width: 12,
-                  height: 12,
+                  width: 12.w,
+                  height: 12.w,
                   decoration: BoxDecoration(
                     color: category['color'] as Color,
                     shape: BoxShape.circle,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
                     category['name'] as String,
-                    style: const TextStyle(
-                      color: Color(0xFF1F2937),
-                      fontSize: 14,
+                    style: TextStyle(
+                      color: const Color(0xFF1F2937),
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 Text(
                   category['amount'] as String,
-                  style: const TextStyle(
-                    color: Color(0xFF1F2937),
-                    fontSize: 14,
+                  style: TextStyle(
+                    color: const Color(0xFF1F2937),
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Text(
                   category['percentage'] as String,
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 14,
+                  style: TextStyle(
+                    color: const Color(0xFF6B7280),
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

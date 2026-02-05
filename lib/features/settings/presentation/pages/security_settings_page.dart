@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SecuritySettingsPage extends StatefulWidget {
   const SecuritySettingsPage({super.key});
@@ -19,11 +20,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA), // Light background
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Pengaturan Keamanan',
           style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -31,37 +32,37 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             color: Colors.black,
-            size: 20,
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: Colors.black),
+            icon: Icon(Icons.help_outline, color: Colors.black, size: 24.sp),
             onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionHeader('AKSES APLIKASI'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.05),
                     spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    blurRadius: 4.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
@@ -98,19 +99,19 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _buildSectionHeader('PRIVASI VISUAL'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.05),
                     spreadRadius: 1,
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    blurRadius: 4.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
@@ -138,11 +139,11 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               ),
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: 32.h),
             Center(
               child: Text(
                 'Versi Keamanan 2.4.0 • Terlindungi Enkripsi AES-256',
-                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
               ),
             ),
           ],
@@ -156,9 +157,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
       title,
       style: TextStyle(
         color: Colors.grey[600],
-        fontSize: 12,
+        fontSize: 12.sp,
         fontWeight: FontWeight.bold,
-        letterSpacing: 1.2,
+        letterSpacing: 1.2.w,
       ),
     );
   }
@@ -171,45 +172,41 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.grey[100],
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20),
+            child: Icon(icon, color: Colors.grey[600], size: 20.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
+                    color: const Color(0xFF1F2937),
                   ),
                 ),
                 if (subtitle != null) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     subtitle,
-                    style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[500]),
                   ),
                 ],
               ],
             ),
           ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: const Color(0xFF2563EB), // Blue active
-          ),
+          Switch(value: value, onChanged: onChanged, activeColor: Colors.black),
         ],
       ),
     );
@@ -224,25 +221,25 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.grey[600], size: 20),
+              child: Icon(icon, color: Colors.grey[600], size: 20.sp),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
+                  color: const Color(0xFF1F2937),
                 ),
               ),
             ),
@@ -250,14 +247,14 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               Text(
                 valueText,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   color: Colors.grey[500],
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
             ],
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey[400]),
           ],
         ),
       ),
@@ -266,10 +263,10 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   Widget _buildDivider() {
     return Divider(
-      height: 1,
-      thickness: 1,
+      height: 1.h,
+      thickness: 1.h,
       color: Colors.grey[100],
-      indent: 60,
+      indent: 60.w,
     );
   }
 }

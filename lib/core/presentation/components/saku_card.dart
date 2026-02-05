@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SakuCard extends StatelessWidget {
   final Widget child;
@@ -15,18 +16,18 @@ class SakuCard extends StatelessWidget {
     this.onTap,
     this.padding,
     this.margin,
-    this.backgroundColor,
     this.borderRadius = 24.0,
     this.hasBorder = true,
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: margin ?? const EdgeInsets.only(bottom: 16),
+      margin: margin ?? EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
         color: backgroundColor ?? Colors.white,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(borderRadius.r),
         border: hasBorder
             ? Border.all(color: const Color(0xFFF0F0F0), width: 1)
             : null,
@@ -41,12 +42,12 @@ class SakuCard extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(borderRadius.r),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: padding ?? const EdgeInsets.all(20),
+            padding: padding ?? EdgeInsets.all(20.w),
             child: child,
           ),
         ),

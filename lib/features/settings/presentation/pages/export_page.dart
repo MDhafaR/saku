@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ExportPage extends StatefulWidget {
   const ExportPage({super.key});
@@ -22,11 +23,11 @@ class _ExportPageState extends State<ExportPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Report Builder',
           style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -34,54 +35,54 @@ class _ExportPageState extends State<ExportPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             color: Colors.black,
-            size: 20,
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: Colors.black),
+            icon: Icon(Icons.help_outline, color: Colors.black, size: 24.sp),
             onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildSectionHeader('PILIH FORMAT'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Row(
               children: [
                 Expanded(
                   child: _buildFormatCard(
                     0,
                     Icons.picture_as_pdf,
-                    Colors.red,
+                    const Color(0xFFEF4444),
                     'PDF',
                     'Laporan Rapi',
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: _buildFormatCard(
                     1,
                     Icons.table_view,
-                    Colors.green,
+                    const Color(0xFF10B981),
                     'Excel',
                     'Data Olahan',
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: _buildFormatCard(
                     2,
                     Icons.code,
-                    Colors.grey,
+                    const Color(0xFF6B7280),
                     'CSV',
                     'Backup',
                   ),
@@ -89,44 +90,44 @@ class _ExportPageState extends State<ExportPage> {
               ],
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _buildSectionHeader('RENTANG WAKTU'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
                   _buildFilterChip(0, 'Bulan Ini'),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   _buildFilterChip(1, 'Bulan Lalu'),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   _buildFilterChip(2, 'Tahun Ini'),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   _buildFilterChip(3, 'Semua'),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Row(
               children: [
                 Expanded(child: _buildDatePicker('Dari Tanggal', _startDate)),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(child: _buildDatePicker('Sampai Tanggal', _endDate)),
               ],
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _buildSectionHeader('OPSI TAMBAHAN'),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 4.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
@@ -140,7 +141,7 @@ class _ExportPageState extends State<ExportPage> {
                     onChanged: (val) => setState(() => _includeReceipts = val),
                   ),
                   if (_selectedFormat == 0) ...[
-                    Divider(height: 1, color: Colors.grey[100]),
+                    Divider(height: 1.h, color: Colors.grey[100]),
                     _buildToggleItem(
                       icon: Icons.lock_outline,
                       title: 'Proteksi Password',
@@ -157,14 +158,14 @@ class _ExportPageState extends State<ExportPage> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, -5),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10.r,
+              offset: Offset(0, -5.h),
             ),
           ],
         ),
@@ -174,20 +175,20 @@ class _ExportPageState extends State<ExportPage> {
               context,
             ).showSnackBar(const SnackBar(content: Text('Exporting...')));
           },
-          icon: const Icon(Icons.share, color: Colors.white),
-          label: const Text(
+          icon: Icon(Icons.share, color: Colors.white, size: 24.sp),
+          label: Text(
             'Export & Share',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: const Color(0xFF111111),
+            padding: EdgeInsets.symmetric(vertical: 16.h),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(24.r),
             ),
             elevation: 0,
           ),
@@ -201,9 +202,9 @@ class _ExportPageState extends State<ExportPage> {
       title,
       style: TextStyle(
         color: Colors.grey[400],
-        fontSize: 12,
+        fontSize: 12.sp,
         fontWeight: FontWeight.bold,
-        letterSpacing: 1.2,
+        letterSpacing: 1.2.w,
       ),
     );
   }
@@ -219,55 +220,55 @@ class _ExportPageState extends State<ExportPage> {
     return GestureDetector(
       onTap: () => setState(() => _selectedFormat = index),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 8.w),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
-            width: 2,
+            color: isSelected ? const Color(0xFF111111) : Colors.transparent,
+            width: 2.w,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
         child: Column(
           children: [
             if (isSelected)
-              const Align(
+              Align(
                 alignment: Alignment.topRight,
                 child: Icon(
                   Icons.check_circle,
-                  color: Color(0xFF2563EB),
-                  size: 16,
+                  color: const Color(0xFF111111),
+                  size: 16.sp,
                 ),
               )
             else
-              const SizedBox(
-                height: 16,
+              SizedBox(
+                height: 16.sp,
               ), // Spacer to keep icon centered relative to card
 
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: color, size: 28),
+              child: Icon(icon, color: color, size: 28.sp),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               subtitle,
-              style: const TextStyle(fontSize: 10, color: Colors.grey),
+              style: TextStyle(fontSize: 10.sp, color: Colors.grey),
               textAlign: TextAlign.center,
             ),
           ],
@@ -281,20 +282,20 @@ class _ExportPageState extends State<ExportPage> {
     return GestureDetector(
       onTap: () => setState(() => _selectedDateFilter = index),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? const Color(0xFF111111) : const Color(0xFFF3F4F6),
+          borderRadius: BorderRadius.circular(30.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+            color: isSelected ? const Color(0xFF111111) : Colors.transparent,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey[600],
+            color: isSelected ? Colors.white : const Color(0xFF6B7280),
             fontWeight: FontWeight.w600,
-            fontSize: 12,
+            fontSize: 12.sp,
           ),
         ),
       ),
@@ -303,10 +304,10 @@ class _ExportPageState extends State<ExportPage> {
 
   Widget _buildDatePicker(String label, DateTime date) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
@@ -314,21 +315,21 @@ class _ExportPageState extends State<ExportPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.calendar_today, size: 14, color: Colors.grey[400]),
-              const SizedBox(width: 8),
+              Icon(Icons.calendar_today, size: 14.sp, color: Colors.grey[400]),
+              SizedBox(width: 8.w),
               Text(
                 label,
-                style: TextStyle(fontSize: 10, color: Colors.grey[500]),
+                style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             "${date.day} ${_getMonthName(date.month)} ${date.year}",
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Color(0xFF1F2937),
+              fontSize: 14.sp,
+              color: const Color(0xFF111111),
             ),
           ),
         ],
@@ -344,32 +345,32 @@ class _ExportPageState extends State<ExportPage> {
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20),
+            child: Icon(icon, color: Colors.grey[600], size: 20.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -377,7 +378,7 @@ class _ExportPageState extends State<ExportPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF2563EB),
+            activeColor: const Color(0xFF111111),
           ),
         ],
       ),

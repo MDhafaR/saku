@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TopCategoriesList extends StatelessWidget {
   const TopCategoriesList({super.key});
@@ -41,23 +42,23 @@ class TopCategoriesList extends StatelessWidget {
 
   Widget _buildCategoryItem(CategoryData category) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 16.h),
       child: Row(
         children: [
           Container(
-            width: 12,
-            height: 12,
+            width: 12.w,
+            height: 12.w,
             decoration: BoxDecoration(
               color: category.color,
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               category.name,
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: 14.sp,
                 color: Colors.white,
                 fontWeight: FontWeight.w500,
               ),
@@ -65,17 +66,17 @@ class TopCategoriesList extends StatelessWidget {
           ),
           Text(
             category.amount,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 14.sp,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Text(
             category.percentage,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: Colors.grey[400],
               fontWeight: FontWeight.w500,
             ),

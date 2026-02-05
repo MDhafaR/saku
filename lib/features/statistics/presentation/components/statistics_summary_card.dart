@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 
 class StatisticsSummaryCard extends StatelessWidget {
@@ -24,8 +25,8 @@ class StatisticsSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SakuCard(
-      padding: const EdgeInsets.all(12), // Reduced padding
-      borderRadius: 24,
+      padding: EdgeInsets.all(12.w), // Reduced padding
+      borderRadius: 24.r,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -34,21 +35,21 @@ class StatisticsSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
                   color: backgroundColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: Icon(icon, color: backgroundColor, size: 20),
+                child: Icon(icon, color: backgroundColor, size: 20.sp),
               ),
-              const SizedBox(width: 4),
+              SizedBox(width: 4.w),
               Flexible(
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
+                  padding: EdgeInsets.only(top: 4.h),
                   child: Text(
                     percentage,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w700,
                       color: percentageColor,
                     ),
@@ -58,27 +59,27 @@ class StatisticsSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF6B7280),
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               amount,
-              style: const TextStyle(
-                fontSize: 20,
+              style: TextStyle(
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF111111),
+                color: const Color(0xFF111111),
                 letterSpacing: -0.5,
               ),
             ),

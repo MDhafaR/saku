@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class AppTheme {
   // Light Theme Colors
@@ -30,8 +31,8 @@ class AppTheme {
   static const Color semanticRed = Color(0xFFEF4444);
   static const Color semanticOrange = Color(0xFFF59E0B);
 
-  static const double cardRadius = 24.0;
-  static const double buttonRadius = 24.0;
+  static double cardRadius = 24.r; // .r for radius
+  static double buttonRadius = 24.r;
 
   static ThemeData get lightTheme {
     return ThemeData(
@@ -66,22 +67,19 @@ class AppTheme {
         filled: true,
         fillColor: const Color(0xFFF9FAFB),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: const BorderSide(color: primaryBlue, width: 1.5),
         ),
         hintStyle: const TextStyle(color: lightTextSecondary),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -91,8 +89,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(buttonRadius),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+          textStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -100,59 +98,59 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(
           color: lightTextPrimary,
-          fontSize: 48,
+          fontSize: 48.sp,
           fontWeight: FontWeight.bold,
           letterSpacing: -1.0,
         ),
         displayMedium: TextStyle(
           color: lightTextPrimary,
-          fontSize: 36,
+          fontSize: 36.sp,
           fontWeight: FontWeight.bold,
           letterSpacing: -1.0,
         ),
         headlineLarge: TextStyle(
           color: lightTextPrimary,
-          fontSize: 32,
+          fontSize: 32.sp,
           fontWeight: FontWeight.w800,
           letterSpacing: -1.0,
         ),
         headlineMedium: TextStyle(
           color: lightTextPrimary,
-          fontSize: 24,
+          fontSize: 24.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
         ),
         titleLarge: TextStyle(
           color: lightTextPrimary,
-          fontSize: 20,
+          fontSize: 20.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
         ),
         bodyLarge: TextStyle(
           color: lightTextPrimary,
-          fontSize: 16,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w400, // Regular/Light for body
         ),
         bodyMedium: TextStyle(
           color: lightTextPrimary,
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w400,
         ),
         bodySmall: TextStyle(
           color: lightTextSecondary,
-          fontSize: 12,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w500,
         ),
         labelLarge: TextStyle(
           color: lightTextPrimary,
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w600,
         ),
       ),
-      iconTheme: const IconThemeData(color: lightTextPrimary, size: 24),
+      iconTheme: IconThemeData(color: lightTextPrimary, size: 24.sp),
     );
   }
 
@@ -189,22 +187,19 @@ class AppTheme {
         filled: true,
         fillColor: const Color(0xFF27272A),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: BorderSide.none,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: BorderSide.none,
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           borderSide: const BorderSide(color: primaryBlue, width: 1.5),
         ),
         hintStyle: const TextStyle(color: darkTextSecondary),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 16,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -214,8 +209,8 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(buttonRadius),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
+          textStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 16.sp),
         ),
       ),
       dividerTheme: const DividerThemeData(
@@ -223,59 +218,59 @@ class AppTheme {
         thickness: 1,
         space: 1,
       ),
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         displayLarge: TextStyle(
           color: darkTextPrimary,
-          fontSize: 48,
+          fontSize: 48.sp,
           fontWeight: FontWeight.bold,
           letterSpacing: -1.0,
         ),
         displayMedium: TextStyle(
           color: darkTextPrimary,
-          fontSize: 36,
+          fontSize: 36.sp,
           fontWeight: FontWeight.bold,
           letterSpacing: -1.0,
         ),
         headlineLarge: TextStyle(
           color: darkTextPrimary,
-          fontSize: 32,
+          fontSize: 32.sp,
           fontWeight: FontWeight.w800,
           letterSpacing: -1.0,
         ),
         headlineMedium: TextStyle(
           color: darkTextPrimary,
-          fontSize: 24,
+          fontSize: 24.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
         ),
         titleLarge: TextStyle(
           color: darkTextPrimary,
-          fontSize: 20,
+          fontSize: 20.sp,
           fontWeight: FontWeight.w700,
           letterSpacing: -0.5,
         ),
         bodyLarge: TextStyle(
           color: darkTextPrimary,
-          fontSize: 16,
+          fontSize: 16.sp,
           fontWeight: FontWeight.w400,
         ),
         bodyMedium: TextStyle(
           color: darkTextPrimary,
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w400,
         ),
         bodySmall: TextStyle(
           color: darkTextSecondary,
-          fontSize: 12,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w500,
         ),
         labelLarge: TextStyle(
           color: darkTextPrimary,
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w600,
         ),
       ),
-      iconTheme: const IconThemeData(color: darkTextPrimary, size: 24),
+      iconTheme: IconThemeData(color: darkTextPrimary, size: 24.sp),
     );
   }
 }

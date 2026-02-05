@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../components/category_detail_card.dart';
@@ -68,36 +69,36 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF1F2937),
-            size: 20,
+            color: const Color(0xFF1F2937),
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Rincian Kategori',
           style: TextStyle(
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF111111),
+            color: const Color(0xFF111111),
           ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(
+            icon: Icon(
               Icons.share_outlined,
-              color: Color(0xFF1F2937),
-              size: 24,
+              color: const Color(0xFF1F2937),
+              size: 24.sp,
             ),
             onPressed: () {},
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -112,18 +113,18 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     Text(
                       'Total Pengeluaran',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                         color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
+                    SizedBox(height: 4.h),
+                    Text(
                       'Rp2.890.000',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 28.sp,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF111111),
+                        color: const Color(0xFF111111),
                         letterSpacing: -1,
                       ),
                     ),
@@ -132,29 +133,29 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 GestureDetector(
                   onTap: _showMonthPicker,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Row(
                       children: [
                         Text(
                           selectedMonth,
-                          style: const TextStyle(
-                            fontSize: 13,
+                          style: TextStyle(
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF111111),
+                            color: const Color(0xFF111111),
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(
+                        SizedBox(width: 4.w),
+                        Icon(
                           Icons.keyboard_arrow_down,
-                          size: 16,
-                          color: Color(0xFF111111),
+                          size: 16.sp,
+                          color: const Color(0xFF111111),
                         ),
                       ],
                     ),
@@ -162,11 +163,11 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Comparison Chart
             const ExpenseComparisonChart(),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Category Cards with expand/collapse
             // Makan & Minum - 12 Transaksi
@@ -202,7 +203,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Transportasi - 8 Transaksi
             CategoryDetailCard(
@@ -237,7 +238,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Belanja - 5 Transaksi
             CategoryDetailCard(
@@ -272,7 +273,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Tagihan - 3 Transaksi
             CategoryDetailCard(
@@ -307,7 +308,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
           ],
         ),
       ),

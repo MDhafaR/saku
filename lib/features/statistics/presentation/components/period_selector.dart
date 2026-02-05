@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class PeriodSelector extends StatelessWidget {
   final String selectedPeriod;
@@ -19,7 +20,7 @@ class PeriodSelector extends StatelessWidget {
         final isSelected = period == selectedPeriod;
         return Expanded(
           child: Container(
-            margin: const EdgeInsets.only(right: 8),
+            margin: EdgeInsets.only(right: 8.w),
             child: ElevatedButton(
               onPressed: () => onPeriodChanged(period),
               style: ElevatedButton.styleFrom(
@@ -29,16 +30,13 @@ class PeriodSelector extends StatelessWidget {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: 12.h),
               ),
               child: Text(
                 period,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
+                style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
               ),
             ),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/theme_service.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../components/statistics_summary_card.dart';
@@ -26,11 +27,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
       backgroundColor: const Color(0xFFFAFAFA), // Global "Clean & Airy" bg
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(
-            20,
-            20,
-            20,
-            164,
+          padding: EdgeInsets.fromLTRB(
+            20.w,
+            20.h,
+            20.w,
+            164.h,
           ), // Extra bottom padding for navigation bar
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,12 +40,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
+                  Text(
                     'Statistics',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.w800, // Thicker
-                      color: Color(0xFF111111), // Darker Black
+                      color: const Color(0xFF111111), // Darker Black
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -58,12 +59,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     icon: Icon(
                       ThemeService.isLightMode ? Icons.dark_mode : Icons.sunny,
                       color: const Color(0xFFF59E0B),
-                      size: 24,
+                      size: 24.sp,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Time Period Selector
               TimePeriodSelector(
@@ -74,7 +75,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   });
                 },
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Summary Cards
               Row(
@@ -90,7 +91,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       percentageColor: const Color(0xFF10B981),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: StatisticsSummaryCard(
                       title: 'Expense',
@@ -102,7 +103,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       percentageColor: const Color(0xFFEF4444),
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: StatisticsSummaryCard(
                       title: 'Total',
@@ -116,7 +117,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Income vs Expense Chart
               SakuCard(
@@ -126,12 +127,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Income vs Expense',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF111111),
+                            color: const Color(0xFF111111),
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -141,40 +142,40 @@ class _StatisticsPageState extends State<StatisticsPage> {
                               onTap: () => setState(() => isLineChart = true),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(8.w),
                                 decoration: BoxDecoration(
                                   color: isLineChart
                                       ? const Color(0xFF111111)
                                       : const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8.r),
                                 ),
                                 child: Icon(
                                   Icons.show_chart,
                                   color: isLineChart
                                       ? Colors.white
                                       : const Color(0xFF6B7280),
-                                  size: 16,
+                                  size: 16.sp,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 8),
+                            SizedBox(width: 8.w),
                             GestureDetector(
                               onTap: () => setState(() => isLineChart = false),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.all(8),
+                                padding: EdgeInsets.all(8.w),
                                 decoration: BoxDecoration(
                                   color: !isLineChart
                                       ? const Color(0xFF111111)
                                       : const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(8.r),
                                 ),
                                 child: Icon(
                                   Icons.bar_chart,
                                   color: !isLineChart
                                       ? Colors.white
                                       : const Color(0xFF6B7280),
-                                  size: 16,
+                                  size: 16.sp,
                                 ),
                               ),
                             ),
@@ -182,14 +183,14 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     isLineChart
                         ? const LineChartWidget()
                         : const BarChartWidget(),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Category Breakdown
               // Category Breakdown
@@ -200,12 +201,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'Category Breakdown',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF111111),
+                            color: const Color(0xFF111111),
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -219,12 +220,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             'View Details',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
-                              color: Color(
+                              color: const Color(
                                 0xFF111111,
                               ), // Dark to match design system
                             ),
@@ -232,28 +233,28 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     const DonutChartWidget(),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Top Categories
               SakuCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Top Categories',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF111111),
+                        color: const Color(0xFF111111),
                         letterSpacing: -0.5,
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: 16.h),
                     const TopCategoriesWidget(),
                   ],
                 ),

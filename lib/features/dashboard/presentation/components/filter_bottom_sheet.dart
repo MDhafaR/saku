@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/app_theme.dart';
 
 class FilterBottomSheet extends StatefulWidget {
@@ -17,9 +18,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -28,29 +29,29 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           // Drag Handle
           Center(
             child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 40,
-              height: 4,
+              margin: EdgeInsets.only(top: 12.h),
+              width: 40.w,
+              height: 4.h,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(2.r),
               ),
             ),
           ),
 
           // Header
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const SizedBox(width: 24), // Spacer for title centering
-                const Text(
+                SizedBox(width: 24.w), // Spacer for title centering
+                Text(
                   'Filter Pencarian',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF111111),
+                    color: const Color(0xFF111111),
                   ),
                 ),
                 IconButton(
@@ -58,27 +59,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
-                  splashRadius: 24,
+                  splashRadius: 24.r,
                 ),
               ],
             ),
           ),
 
-          const Divider(color: Color(0xFFF3F4F6), height: 32),
+          Divider(color: const Color(0xFFF3F4F6), height: 32.h),
 
           // Scrollable Content
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Transaction Type
                   _buildSectionTitle('Tipe Transaksi'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: 8.w,
+                    runSpacing: 8.h,
                     children: [
                       _buildChip(
                         'Semua',
@@ -110,14 +111,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
 
                   // Date Range
                   _buildSectionTitle('Rentang Waktu'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: 8.w,
+                    runSpacing: 8.h,
                     children: [
                       _buildChip(
                         'Bulan Ini',
@@ -143,14 +144,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
 
                   // Wallet
                   _buildSectionTitle('Dompet'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: 8.w,
+                    runSpacing: 8.h,
                     children: [
                       _buildChip(
                         'Semua',
@@ -187,7 +188,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
 
                   // Category
                   Row(
@@ -201,19 +202,19 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
                             Text(
                               'Lihat Semua',
                               style: TextStyle(
                                 color: AppTheme.primaryBlue,
-                                fontSize: 12,
+                                fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             Icon(
                               Icons.chevron_right,
-                              size: 16,
+                              size: 16.sp,
                               color: AppTheme.primaryBlue,
                             ),
                           ],
@@ -221,13 +222,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   GridView.count(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 4,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16.h,
+                    crossAxisSpacing: 16.w,
                     childAspectRatio: 0.8,
                     children: [
                       _buildCategoryItem(
@@ -259,28 +260,28 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
 
                   // Nominal Slider
                   _buildSectionTitle('Nominal'),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text(
                         'Rp 0',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF111111),
+                          color: const Color(0xFF111111),
                         ),
                       ),
                       Text(
                         'Rp 10.000.000+',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF111111),
+                          color: const Color(0xFF111111),
                         ),
                       ),
                     ],
@@ -290,8 +291,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       activeTrackColor: AppTheme.primaryBlue,
                       inactiveTrackColor: Colors.grey[200],
                       thumbColor: Colors.white,
-                      thumbShape: const RoundSliderThumbShape(
-                        enabledThumbRadius: 12,
+                      thumbShape: RoundSliderThumbShape(
+                        enabledThumbRadius: 12.r,
                         elevation: 2,
                       ),
                       overlayColor: AppTheme.primaryBlue.withOpacity(0.1),
@@ -309,25 +310,25 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
+                    children: [
                       Text(
                         'Min',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9CA3AF),
+                          fontSize: 12.sp,
+                          color: const Color(0xFF9CA3AF),
                         ),
                       ),
                       Text(
                         'Max',
                         style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9CA3AF),
+                          fontSize: 12.sp,
+                          color: const Color(0xFF9CA3AF),
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 100), // Bottom padding
+                  SizedBox(height: 100.h), // Bottom padding
                 ],
               ),
             ),
@@ -335,7 +336,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
 
           // Bottom Buttons
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
@@ -355,23 +356,23 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryBlue,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(16.r),
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
+                    child: Text(
                       'Terapkan Filter',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -389,10 +390,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 14,
+      style: TextStyle(
+        fontSize: 14.sp,
         fontWeight: FontWeight.w600,
-        color: Color(0xFF4B5563),
+        color: const Color(0xFF4B5563),
       ),
     );
   }
@@ -416,42 +417,42 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           border: Border.all(color: borderColor),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 16, color: textColor),
-              const SizedBox(width: 8),
+              Icon(icon, size: 16.sp, color: textColor),
+              SizedBox(width: 8.w),
             ],
             if (labelPrefix != null) ...[
               Container(
-                padding: const EdgeInsets.all(2),
+                padding: EdgeInsets.all(2.w),
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
                   labelPrefix,
-                  style: const TextStyle(
-                    fontSize: 8,
+                  style: TextStyle(
+                    fontSize: 8.sp,
                     fontWeight: FontWeight.bold,
                     color: Colors.grey,
                   ),
                 ),
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6.w),
             ],
             Text(
               label,
               style: TextStyle(
                 color: textColor,
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
@@ -465,20 +466,20 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     return Column(
       children: [
         Container(
-          width: 56,
-          height: 56,
+          width: 56.w,
+          height: 56.w,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
-          child: Icon(icon, color: Colors.white, size: 24),
+          child: Icon(icon, color: Colors.white, size: 24.sp),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF4B5563),
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: const Color(0xFF4B5563),
             fontWeight: FontWeight.w500,
           ),
           textAlign: TextAlign.center,

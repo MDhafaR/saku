@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../pages/category_transactions_page.dart';
 
@@ -35,7 +36,7 @@ class CategoryDetailCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: SakuCard(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -43,14 +44,14 @@ class CategoryDetailCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: EdgeInsets.all(12.w),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: color, size: 24),
+                  child: Icon(icon, color: color, size: 24.sp),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,63 +61,63 @@ class CategoryDetailCard extends StatelessWidget {
                         children: [
                           Text(
                             categoryName,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: TextStyle(
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF111111),
+                              color: const Color(0xFF111111),
                             ),
                           ),
                           Text(
                             amount,
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: TextStyle(
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xFF111111),
+                              color: const Color(0xFF111111),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             transactionCount, // "12 Transaksi"
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF6B7280),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: const Color(0xFF6B7280),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           Text(
                             percentage, // "29.4%"
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF6B7280),
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              color: const Color(0xFF6B7280),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       // Progress bar line
                       Stack(
                         children: [
                           Container(
-                            height: 4,
+                            height: 4.h,
                             width: double.infinity,
                             decoration: BoxDecoration(
                               color: Colors.grey[100],
-                              borderRadius: BorderRadius.circular(2),
+                              borderRadius: BorderRadius.circular(2.r),
                             ),
                           ),
                           FractionallySizedBox(
                             widthFactor: _parsePercentage(percentage),
                             child: Container(
-                              height: 4,
+                              height: 4.h,
                               decoration: BoxDecoration(
                                 color: color,
-                                borderRadius: BorderRadius.circular(2),
+                                borderRadius: BorderRadius.circular(2.r),
                               ),
                             ),
                           ),
@@ -133,7 +134,7 @@ class CategoryDetailCard extends StatelessWidget {
                   child: Icon(
                     Icons.keyboard_arrow_down,
                     color: Colors.grey[400],
-                    size: 24,
+                    size: 24.sp,
                   ),
                 ),
               ],
@@ -162,18 +163,18 @@ class CategoryDetailCard extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Container(
-            margin: const EdgeInsets.only(top: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            margin: EdgeInsets.only(top: 8.h),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
               color: isTrendUp
                   ? const Color(0xFFFEE2E2) // Red bg
                   : const Color(0xFFDCFCE7), // Green bg
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
               isTrendUp ? '↑ $trendValue' : '↓ $trendValue',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.sp,
                 fontWeight: FontWeight.w700,
                 color: isTrendUp
                     ? const Color(0xFFEF4444)
@@ -184,20 +185,20 @@ class CategoryDetailCard extends StatelessWidget {
         ),
 
         if (topTransactions != null && topTransactions!.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          Divider(color: Colors.grey[200], height: 1),
-          const SizedBox(height: 20),
-          const Text(
+          SizedBox(height: 20.h),
+          Divider(color: Colors.grey[200], height: 1.h),
+          SizedBox(height: 20.h),
+          Text(
             'Top 3 Transaksi Terbesar',
             style: TextStyle(
-              fontSize: 12,
-              color: Color(0xFF9CA3AF),
+              fontSize: 12.sp,
+              color: const Color(0xFF9CA3AF),
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           ...topTransactions!.map((tx) => _buildTransactionItem(tx)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -217,12 +218,12 @@ class CategoryDetailCard extends StatelessWidget {
               minimumSize: const Size(0, 0),
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text(
+            child: Text(
               'Lihat Semua',
               style: TextStyle(
-                color: Color(0xFF111111), // Dark - matches design system
+                color: const Color(0xFF111111), // Dark - matches design system
                 fontWeight: FontWeight.w600,
-                fontSize: 13,
+                fontSize: 13.sp,
               ),
             ),
           ),
@@ -241,41 +242,41 @@ class CategoryDetailCard extends StatelessWidget {
 
   Widget _buildTransactionItem(Map<String, dynamic> tx) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12), // Keep it rounded
+              borderRadius: BorderRadius.circular(12.r), // Keep it rounded
               border: Border.all(color: const Color(0xFFF9FAFB)),
             ),
             child: Icon(
               tx['icon'] as IconData,
               color: const Color(0xFF9CA3AF),
-              size: 18,
+              size: 18.sp,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   tx['name'] as String,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F2937),
+                    color: const Color(0xFF1F2937),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   tx['date'] as String,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF9CA3AF),
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF9CA3AF),
                   ),
                 ),
               ],
@@ -283,10 +284,10 @@ class CategoryDetailCard extends StatelessWidget {
           ),
           Text(
             tx['amount'] as String,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 14.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
+              color: const Color(0xFF1F2937),
             ),
           ),
         ],

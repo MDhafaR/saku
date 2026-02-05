@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomNumpad extends StatelessWidget {
   final Function(String) onKeyPressed;
@@ -27,7 +28,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '3'),
           ],
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -36,7 +37,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '6'),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -45,7 +46,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '9'),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -55,6 +56,7 @@ class CustomNumpad extends StatelessWidget {
                 '000',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
+                  fontSize: 24.sp,
                 ),
               ),
               onTap: () => onKeyPressed('000'),
@@ -65,7 +67,7 @@ class CustomNumpad extends StatelessWidget {
               child: Icon(
                 Icons.backspace_outlined,
                 color: Theme.of(context).iconTheme.color,
-                size: 24,
+                size: 24.sp,
               ),
               onTap: onDelete,
             ),
@@ -80,9 +82,10 @@ class CustomNumpad extends StatelessWidget {
       context: context,
       child: Text(
         value,
-        style: Theme.of(
-          context,
-        ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w600),
+        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          fontSize: 24.sp,
+        ),
       ),
       onTap: () => onKeyPressed(value),
     );
@@ -94,15 +97,15 @@ class CustomNumpad extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Container(
-      width: 64, // Fixed width for consistency
-      height: 48,
+      width: 64.w, // Fixed width for consistency
+      height: 48.h,
       alignment: Alignment.center,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         child: Container(
-          width: 64,
-          height: 48,
+          width: 64.w,
+          height: 48.h,
           alignment: Alignment.center,
           child: child,
         ),

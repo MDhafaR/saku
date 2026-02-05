@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../cubit/onboarding_cubit.dart';
 import 'onboarding_page.dart';
 import '../../../dashboard/presentation/pages/dashboard_page.dart';
@@ -78,7 +79,7 @@ class _MainAppContentState extends State<MainAppContent> {
               buttonBackgroundColor: const Color(
                 0xFF111111,
               ), // Darker button for selected
-              height: 65,
+              height: 65.h.clamp(0.0, 75.0),
               animationDuration: const Duration(milliseconds: 300),
               animationCurve: Curves.easeInOut,
               items: List.generate(4, (index) {
@@ -91,7 +92,7 @@ class _MainAppContentState extends State<MainAppContent> {
                 return Icon(
                   icons[index],
                   color: Colors.white, // All icons white
-                  size: 24,
+                  size: 24.sp,
                 );
               }),
             ),

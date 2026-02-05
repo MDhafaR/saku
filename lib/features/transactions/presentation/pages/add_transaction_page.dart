@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -139,7 +140,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: Icon(Icons.close, size: 24.sp),
           // Icon theme should handle color, but ensure it's visible
           color: Theme.of(context).iconTheme.color,
           onPressed: () => Navigator.pop(context),
@@ -148,9 +149,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         title: Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(30.r),
           ),
-          padding: const EdgeInsets.all(4),
+          padding: EdgeInsets.all(4.w),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final tabWidth = constraints.maxWidth / 2;
@@ -167,7 +168,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(24.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
@@ -195,7 +196,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             }
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: EdgeInsets.symmetric(vertical: 10.h),
                             child: Text(
                               'Pengeluaran',
                               textAlign: TextAlign.center,
@@ -204,7 +205,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     ? AppTheme.semanticRed
                                     : AppTheme.lightTextSecondary,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 14.sp,
                               ),
                             ),
                           ),
@@ -224,7 +225,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             }
                           },
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: EdgeInsets.symmetric(vertical: 10.h),
                             child: Text(
                               'Pemasukan',
                               textAlign: TextAlign.center,
@@ -233,7 +234,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     ? AppTheme.semanticGreen
                                     : AppTheme.lightTextSecondary,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 14.sp,
                               ),
                             ),
                           ),
@@ -248,7 +249,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_horiz),
+            icon: Icon(Icons.more_horiz, size: 24.sp),
             color: Theme.of(context).iconTheme.color,
             onPressed: () {},
           ),
@@ -270,23 +271,24 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       children: [
                         // Amount Section - Compact
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 32),
+                          padding: EdgeInsets.symmetric(vertical: 32.h),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Masukkan Jumlah',
                                 style: TextStyle(
                                   color: AppTheme.lightTextSecondary,
-                                  fontSize: 14,
+                                  fontSize: 14.sp,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              SizedBox(height: 8.h),
                               Text(
                                 'Rp ${CurrencyFormatter.format(amount)}',
                                 style: Theme.of(context).textTheme.displayMedium
                                     ?.copyWith(
                                       fontWeight: FontWeight.w700,
+                                      fontSize: 36.sp,
                                       color: isExpense
                                           ? AppTheme.semanticRed
                                           : AppTheme.semanticGreen,
@@ -301,8 +303,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardTheme.color,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(32),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(32.r),
                             ),
                             boxShadow: [
                               BoxShadow(
@@ -312,7 +314,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               ),
                             ],
                           ),
-                          padding: const EdgeInsets.all(24),
+                          padding: EdgeInsets.all(24.w),
                           child: Column(
                             children: [
                               // Date & Time
@@ -325,7 +327,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                       onTap: _selectDate,
                                     ),
                                   ),
-                                  const SizedBox(width: 12),
+                                  SizedBox(width: 12.w),
                                   Expanded(
                                     child: _buildInputChip(
                                       icon: Icons.access_time_outlined,
@@ -335,7 +337,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12.h),
 
                               // Category
                               _buildSelectionField(
@@ -374,7 +376,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   }
                                 },
                               ),
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12.h),
 
                               // Wallet
                               GestureDetector(
@@ -396,13 +398,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   }
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 14.w,
+                                    vertical: 12.h,
                                   ),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF9FAFB),
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
                                       color: const Color(0xFFE5E7EB),
                                     ),
@@ -418,51 +420,53 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                         color: selectedWallet != null
                                             ? selectedWallet!['color'] as Color
                                             : AppTheme.lightTextSecondary,
-                                        size: 20,
+                                        size: 20.sp,
                                       ),
-                                      const SizedBox(width: 12),
+                                      SizedBox(width: 12.w),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            const Text(
+                                            Text(
                                               'Wallet',
                                               style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 12.sp,
                                                 color:
                                                     AppTheme.lightTextSecondary,
                                               ),
                                             ),
-                                            const SizedBox(height: 2),
+                                            SizedBox(height: 2.h),
                                             if (selectedWallet != null)
                                               Row(
                                                 children: [
                                                   Text(
                                                     selectedWallet!['name']
                                                         as String,
-                                                    style: const TextStyle(
-                                                      fontSize: 14,
+                                                    style: TextStyle(
+                                                      fontSize: 14.sp,
                                                       fontWeight:
                                                           FontWeight.w500,
-                                                      color: Color(0xFF1F2937),
+                                                      color: const Color(
+                                                        0xFF1F2937,
+                                                      ),
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 6),
+                                                  SizedBox(width: 6.w),
                                                   Text(
                                                     '( Rp ${CurrencyFormatter.format((selectedWallet!['balance'] as double).toStringAsFixed(0))} )',
                                                     style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 12.sp,
                                                       color: Colors.grey[500],
                                                     ),
                                                   ),
                                                 ],
                                               )
                                             else
-                                              const Text(
+                                              Text(
                                                 'Pilih wallet...',
                                                 style: TextStyle(
-                                                  fontSize: 14,
+                                                  fontSize: 14.sp,
                                                   fontWeight: FontWeight.w500,
                                                   color: AppTheme
                                                       .lightTextSecondary,
@@ -471,26 +475,27 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                           ],
                                         ),
                                       ),
-                                      const Icon(
+                                      Icon(
                                         Icons.chevron_right,
                                         color: AppTheme.lightTextSecondary,
+                                        size: 24.sp,
                                       ),
                                     ],
                                   ),
                                 ),
                               ),
 
-                              const SizedBox(height: 12),
+                              SizedBox(height: 12.h),
 
                               // Note
                               Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                  vertical: 8.h,
                                 ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFFF9FAFB),
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(12.r),
                                   border: Border.all(
                                     color: const Color(0xFFE5E7EB),
                                   ),
@@ -498,15 +503,15 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 child: Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Padding(
-                                      padding: EdgeInsets.only(top: 4),
+                                    Padding(
+                                      padding: EdgeInsets.only(top: 4.h),
                                       child: Icon(
                                         Icons.edit_outlined,
                                         color: AppTheme.lightTextSecondary,
-                                        size: 20,
+                                        size: 20.sp,
                                       ),
                                     ),
-                                    const SizedBox(width: 12),
+                                    SizedBox(width: 12.w),
                                     Expanded(
                                       child: TextField(
                                         onChanged: (value) {
@@ -517,11 +522,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                         maxLines: 3,
                                         minLines: 2,
                                         cursorColor: const Color(0xFF6B7280),
-                                        decoration: const InputDecoration(
+                                        decoration: InputDecoration(
                                           hintText: 'Tulis catatan...',
                                           hintStyle: TextStyle(
                                             color: AppTheme.lightTextSecondary,
-                                            fontSize: 16,
+                                            fontSize: 16.sp,
                                           ),
                                           border: InputBorder.none,
                                           enabledBorder: InputBorder.none,
@@ -529,10 +534,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                           isDense: true,
                                           contentPadding: EdgeInsets.zero,
                                         ),
-                                        style: const TextStyle(
-                                          fontSize: 16,
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
                                           fontWeight: FontWeight.w500,
-                                          color: Color(0xFF1F2937),
+                                          color: const Color(0xFF1F2937),
                                         ),
                                       ),
                                     ),
@@ -540,7 +545,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 ),
                               ),
 
-                              const SizedBox(height: 24),
+                              SizedBox(height: 24.h),
 
                               // Numpad
                               CustomNumpad(
@@ -564,14 +569,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
           Container(
             width: double.infinity,
             padding: EdgeInsets.fromLTRB(
-              24,
-              16,
-              24,
-              MediaQuery.of(context).padding.bottom + 16,
+              24.w,
+              16.h,
+              24.w,
+              MediaQuery.of(context).padding.bottom + 16.h,
             ),
             color: Theme.of(context).cardTheme.color,
             child: SizedBox(
-              height: 48,
+              height: 48.h,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
@@ -582,9 +587,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                   shadowColor: Colors.black,
                   elevation: 2,
                 ),
-                child: const Text(
+                child: Text(
                   'Simpan',
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black, fontSize: 16.sp),
                 ),
               ),
             ),
@@ -602,22 +607,23 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 20, color: AppTheme.darkBackground),
-            const SizedBox(width: 8),
+            Icon(icon, size: 20.sp, color: AppTheme.darkBackground),
+            SizedBox(width: 8.w),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF1F2937),
+                fontSize: 14.sp,
+                color: const Color(0xFF1F2937),
               ),
             ),
           ],
@@ -637,10 +643,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
         child: Row(
@@ -648,25 +654,25 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             Icon(
               icon,
               color: iconColor ?? AppTheme.lightTextSecondary,
-              size: 20,
+              size: 20.sp,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontSize: 12.sp,
                       color: AppTheme.lightTextSecondary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     value,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w500,
                       color: isPlaceholder
                           ? AppTheme.lightTextSecondary
@@ -676,7 +682,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppTheme.lightTextSecondary),
+            Icon(
+              Icons.chevron_right,
+              color: AppTheme.lightTextSecondary,
+              size: 24.sp,
+            ),
           ],
         ),
       ),

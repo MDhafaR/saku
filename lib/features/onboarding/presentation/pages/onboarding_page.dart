@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../cubit/onboarding_cubit.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -59,21 +60,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           children: [
             // Top section with skip button
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   // App logo/icon
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.account_balance_wallet,
-                      color: Color(0xFF111111),
-                      size: 24,
+                      color: const Color(0xFF111111),
+                      size: 24.sp,
                     ),
                   ),
                   // Skip button
@@ -81,11 +82,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: () {
                       context.read<OnboardingCubit>().completeOnboarding();
                     },
-                    child: const Text(
+                    child: Text(
                       'Lewati',
                       style: TextStyle(
-                        color: Color(0xFF9CA3AF), // Muted Gray
-                        fontSize: 16,
+                        color: const Color(0xFF9CA3AF), // Muted Gray
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -110,7 +111,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
             // Bottom section with dots and next button
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               child: Column(
                 children: [
                   // Pagination dots
@@ -120,11 +121,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _onboardingData.length,
                       (index) => AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: index == _currentPage ? 24 : 8,
-                        height: 8,
+                        margin: EdgeInsets.symmetric(horizontal: 4.w),
+                        width: index == _currentPage ? 24.w : 8.w,
+                        height: 8.h,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(4),
+                          borderRadius: BorderRadius.circular(4.r),
                           color: index == _currentPage
                               ? const Color(0xFF111111) // Primary Dark
                               : const Color(0xFFE5E7EB), // Light border
@@ -132,11 +133,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30.h),
                   // Next/Get Started button
                   SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 56.h,
                     child: ElevatedButton(
                       onPressed: () {
                         if (_currentPage < _onboardingData.length - 1) {
@@ -154,7 +155,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ), // Primary Dark
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
-                            24,
+                            24.r,
                           ), // Button radius
                         ),
                         elevation: 0,
@@ -163,9 +164,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _currentPage < _onboardingData.length - 1
                             ? 'Lanjut'
                             : 'Mulai Sekarang',
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -182,39 +183,39 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildOnboardingPage(OnboardingData data) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
+      padding: EdgeInsets.symmetric(horizontal: 40.w),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Icon container
           Container(
-            width: 120,
-            height: 120,
+            width: 120.w,
+            height: 120.w,
             decoration: BoxDecoration(
               color: data.color.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(32.r),
             ),
-            child: Icon(data.icon, size: 60, color: data.color),
+            child: Icon(data.icon, size: 60.sp, color: data.color),
           ),
-          const SizedBox(height: 40),
+          SizedBox(height: 40.h),
           // Title
           Text(
             data.title,
-            style: const TextStyle(
-              color: Color(0xFF111111), // Primary Dark
-              fontSize: 28,
+            style: TextStyle(
+              color: const Color(0xFF111111), // Primary Dark
+              fontSize: 28.sp,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           // Description
           Text(
             data.description,
-            style: const TextStyle(
-              color: Color(0xFF6B7280), // Dark Muted
-              fontSize: 16,
+            style: TextStyle(
+              color: const Color(0xFF6B7280), // Dark Muted
+              fontSize: 16.sp,
               height: 1.6,
             ),
             textAlign: TextAlign.center,

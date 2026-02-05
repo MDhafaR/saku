@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'transaction_item.dart';
 
 class TransactionSection extends StatelessWidget {
@@ -17,11 +18,11 @@ class TransactionSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 16.h),
           child: Text(
             sectionTitle,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
               color: Colors.black87,
             ),

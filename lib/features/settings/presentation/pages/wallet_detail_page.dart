@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../domain/entities/account.dart';
 
 class WalletDetailPage extends StatefulWidget {
@@ -48,30 +49,30 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2563EB), // Blue primary
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.white,
-            size: 20,
+            color: const Color(0xFF111111),
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Detail Rekening',
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_horiz, color: Colors.white),
+            icon: const Icon(Icons.more_horiz, color: Color(0xFF111111)),
             onSelected: (value) {
               if (value == 'hide') {
                 _toggleHideWallet();
@@ -85,10 +86,13 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     Icon(
                       _isHidden ? Icons.visibility : Icons.visibility_off,
                       color: Colors.grey[700],
-                      size: 20,
+                      size: 20.sp,
                     ),
-                    const SizedBox(width: 12),
-                    Text(_isHidden ? 'Show Wallet' : 'Hide Wallet'),
+                    SizedBox(width: 12.w),
+                    Text(
+                      _isHidden ? 'Show Wallet' : 'Hide Wallet',
+                      style: TextStyle(fontSize: 14.sp),
+                    ),
                   ],
                 ),
               ),
@@ -102,12 +106,19 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
             // Blue Header Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
-              decoration: const BoxDecoration(
-                color: Color(0xFF2563EB),
+              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 30.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
                 borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(30),
+                  bottom: Radius.circular(30.r),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 4.h),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,83 +126,83 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 8.w,
+                          vertical: 4.h,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(4),
+                          color: Colors.grey[100],
+                          borderRadius: BorderRadius.circular(4.r),
                         ),
                         child: Text(
                           widget.account.type.toUpperCase(), // e.g. BCA
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: const Color(0xFF111111),
                             fontWeight: FontWeight.bold,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Text(
                         widget.account.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+                        style: TextStyle(
+                          color: const Color(0xFF111111),
+                          fontSize: 14.sp,
                         ),
                       ),
                       const Spacer(),
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.grey[100],
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.edit,
-                          color: Colors.white,
-                          size: 16,
+                          color: const Color(0xFF111111),
+                          size: 16.sp,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
                   Row(
                     children: [
                       Text(
                         '5220 •••• 1234',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.8),
-                          fontSize: 16,
-                          letterSpacing: 1,
+                          color: const Color(0xFF111111).withOpacity(0.8),
+                          fontSize: 16.sp,
+                          letterSpacing: 1.w,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: 8.w),
                       Icon(
                         Icons.copy,
-                        color: Colors.white.withOpacity(0.8),
-                        size: 16,
+                        color: const Color(0xFF111111).withOpacity(0.8),
+                        size: 16.sp,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Text(
                     'Saldo Utama',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 12,
+                      color: const Color(0xFF111111).withOpacity(0.6),
+                      fontSize: 12.sp,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     'Rp ${_formatCurrency(widget.account.balance)}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 32,
+                    style: TextStyle(
+                      color: const Color(0xFF111111),
+                      fontSize: 32.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 30),
+                  SizedBox(height: 30.h),
 
                   // Action Buttons
                   Row(
@@ -208,16 +219,16 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
 
             // Income/Expense Summary
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              padding: const EdgeInsets.all(20),
+              margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+              padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
                 border: Border.all(color: Colors.grey[100]!),
@@ -231,77 +242,79 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(4),
+                              padding: EdgeInsets.all(4.w),
                               decoration: BoxDecoration(
-                                color: Colors.green[100],
+                                color: const Color(0xFF10B981).withOpacity(0.1),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.arrow_downward,
-                                size: 12,
-                                color: Colors.green[700],
+                                size: 12.sp,
+                                color: const Color(0xFF10B981),
                               ),
                             ),
-                            const SizedBox(width: 6),
+                            SizedBox(width: 6.w),
                             Text(
                               'Pemasukan',
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 12,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           'Rp 8.500.000',
                           style: TextStyle(
-                            color: Colors.green[600],
+                            color: const Color(0xFF10B981),
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: 16.sp,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Container(width: 1, height: 40, color: Colors.grey[200]),
+                  Container(width: 1.w, height: 40.h, color: Colors.grey[200]),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
+                      padding: EdgeInsets.only(left: 20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(4),
+                                padding: EdgeInsets.all(4.w),
                                 decoration: BoxDecoration(
-                                  color: Colors.red[100],
+                                  color: const Color(
+                                    0xFFEF4444,
+                                  ).withOpacity(0.1),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
                                   Icons.arrow_upward,
-                                  size: 12,
-                                  color: Colors.red[700],
+                                  size: 12.sp,
+                                  color: const Color(0xFFEF4444),
                                 ),
                               ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: 6.w),
                               Text(
                                 'Pengeluaran',
                                 style: TextStyle(
                                   color: Colors.grey[600],
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4.h),
                           Text(
                             'Rp 4.200.000',
                             style: TextStyle(
-                              color: Colors.red[600],
+                              color: const Color(0xFFEF4444),
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 16.sp,
                             ),
                           ),
                         ],
@@ -314,41 +327,48 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
 
             // Transactions Title
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: const Text(
+                child: Text(
                   'Mutasi Terakhir',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF111111),
+                    color: const Color(0xFF111111),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Search Bar
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.search, color: Colors.grey[400], size: 20),
-                  const SizedBox(width: 12),
-                  const Text(
+                  Icon(
+                    Icons.search,
+                    color: const Color(0xFF9CA3AF),
+                    size: 20.sp,
+                  ),
+                  SizedBox(width: 12.w),
+                  Text(
                     'Cari transaksi (cth: Netflix)...',
-                    style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 14),
+                    style: TextStyle(
+                      color: const Color(0xFF9CA3AF),
+                      fontSize: 14.sp,
+                    ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
 
             // Transaction List (Mock)
             _buildTransactionItem(
@@ -388,7 +408,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               Colors.red,
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
           ],
         ),
       ),
@@ -399,20 +419,20 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     return Column(
       children: [
         Container(
-          width: 50,
-          height: 50,
+          width: 50.w,
+          height: 50.w,
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: Color(0xFFF3F4F6), // Light Gray
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF2563EB), size: 24),
+          child: Icon(icon, color: const Color(0xFF111111), size: 24.sp),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 12,
+          style: TextStyle(
+            color: const Color(0xFF111111),
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -429,36 +449,36 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     bool isIncome = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 48.w,
+            height: 48.w,
             decoration: BoxDecoration(
               color: iconColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(icon, color: iconColor, size: 24.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF1F2937),
+                    fontSize: 14.sp,
+                    color: const Color(0xFF111111),
                   ),
                 ),
                 Text(
                   date,
-                  style: const TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 12,
+                  style: TextStyle(
+                    color: const Color(0xFF6B7280),
+                    fontSize: 12.sp,
                   ),
                 ),
               ],
@@ -468,8 +488,10 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
             amount,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: isIncome ? Colors.green[600] : const Color(0xFF1F2937),
+              fontSize: 14.sp,
+              color: isIncome
+                  ? const Color(0xFF10B981)
+                  : const Color(0xFF111111),
             ),
           ),
         ],

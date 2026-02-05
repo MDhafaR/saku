@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 
 class TransactionItem extends StatelessWidget {
@@ -32,37 +33,37 @@ class TransactionItem extends StatelessWidget {
           builder: (context) => _buildBottomSheet(context),
         );
       },
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 48.w,
+            height: 48.w,
             decoration: BoxDecoration(
               color: backgroundColor.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(icon, color: iconColor, size: 24.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   category,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF111111), // Darker black
+                    color: const Color(0xFF111111), // Darker black
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   paymentMethod,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     color: Colors.grey[500],
                     fontWeight: FontWeight.w500,
                   ),
@@ -73,7 +74,7 @@ class TransactionItem extends StatelessWidget {
           Text(
             amount,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w800,
               color: isIncome
                   ? const Color(0xFF2E7D32)
@@ -88,48 +89,48 @@ class TransactionItem extends StatelessWidget {
 
   Widget _buildBottomSheet(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(32),
+          top: Radius.circular(32.r),
         ), // More rounded top
       ),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag Handle
           Center(
             child: Container(
-              width: 48,
-              height: 5,
+              width: 48.w,
+              height: 5.h,
               decoration: BoxDecoration(
                 color: Colors.grey[200], // Lighter handle
-                borderRadius: BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(100.r),
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Icon
           Container(
-            width: 88,
-            height: 88,
+            width: 88.w,
+            height: 88.w,
             decoration: BoxDecoration(
               color: backgroundColor.withOpacity(
                 0.15,
               ), // Consistent soft background
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 40),
+            child: Icon(icon, color: iconColor, size: 40.sp),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Amount
           Text(
             amount,
             style: TextStyle(
-              fontSize: 36, // Larger
+              fontSize: 36.sp, // Larger
               fontWeight: FontWeight.w800, // Thicker
               color: isIncome
                   ? const Color(0xFF2E7D32)
@@ -137,30 +138,30 @@ class TransactionItem extends StatelessWidget {
               letterSpacing: -1.0,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Voice Input Badge (Softened)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: const Color(
                 0xFFF3F4F6,
               ), // Very light grey instead of purple for neutrality
-              borderRadius: BorderRadius.circular(100),
+              borderRadius: BorderRadius.circular(100.r),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.mic_none_rounded,
-                  size: 16,
+                  size: 16.sp,
                   color: Colors.grey[700],
                 ), // Line icon
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Text(
                   "Voice Input",
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: 13.sp,
                     color: Colors.grey[800],
                     fontWeight: FontWeight.w600,
                   ),
@@ -168,7 +169,7 @@ class TransactionItem extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Info Row (Date & Method) - Centered and Clean
           Row(
@@ -177,15 +178,15 @@ class TransactionItem extends StatelessWidget {
               Text(
                 "Today, 12:30 PM",
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   color: Colors.grey[400], // Softer grey
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Container(
-                margin: const EdgeInsets.symmetric(horizontal: 12),
-                width: 4,
-                height: 4,
+                margin: EdgeInsets.symmetric(horizontal: 12.w),
+                width: 4.w,
+                height: 4.w,
                 decoration: BoxDecoration(
                   color: Colors.grey[300],
                   shape: BoxShape.circle,
@@ -194,22 +195,22 @@ class TransactionItem extends StatelessWidget {
               Text(
                 paymentMethod,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   color: Colors.grey[800], // Darker for emphasis
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Description Box (Cleaner, less boxy)
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
               color: const Color(0xFFFAFAFA), // Almost white
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24.r),
               border: Border.all(
                 color: const Color(0xFFF0F0F0),
               ), // Subtle border
@@ -219,19 +220,19 @@ class TransactionItem extends StatelessWidget {
               children: [
                 Text(
                   "Team lunch at Saku Diner. Discussed Q4 marketing strategy with the creative team.",
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF444444),
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    color: const Color(0xFF444444),
                     height: 1.6,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 // Mock Image (Rounded)
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                   child: Container(
-                    height: 140,
+                    height: 140.h,
                     width: double.infinity,
                     color: Colors.grey[100],
                     child: Stack(
@@ -244,7 +245,7 @@ class TransactionItem extends StatelessWidget {
                         ),
                         Center(
                           child: Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: EdgeInsets.all(12.w),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.9),
                               shape: BoxShape.circle,
@@ -255,10 +256,10 @@ class TransactionItem extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.remove_red_eye_rounded,
                               color: Colors.black87,
-                              size: 24,
+                              size: 24.sp,
                             ),
                           ),
                         ),
@@ -269,7 +270,7 @@ class TransactionItem extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Action Buttons (Modern Pills)
           Row(
@@ -278,24 +279,24 @@ class TransactionItem extends StatelessWidget {
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                       side: BorderSide(color: Colors.grey[200]!, width: 1.5),
                     ),
                     overlayColor: Colors.grey[100],
                   ),
-                  child: const Text(
+                  child: Text(
                     "Edit",
                     style: TextStyle(
                       color: Colors.black, // Stark black
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
@@ -304,24 +305,24 @@ class TransactionItem extends StatelessWidget {
                       0xFF111111,
                     ), // Black instead of Red for modern monochrome feel
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: EdgeInsets.symmetric(vertical: 20.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     "Delete",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
         ],
       ),
     );

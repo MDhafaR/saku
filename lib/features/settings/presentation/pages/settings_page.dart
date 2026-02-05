@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../domain/entities/account.dart';
 
 import '../../widgets/settings_item.dart';
@@ -147,39 +148,39 @@ class _SettingsPageState extends State<SettingsPage> {
   void _showLanguageBottomSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       backgroundColor: Colors.white,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Padding(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0.w),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Center(
                     child: Container(
-                      width: 40,
-                      height: 4,
+                      width: 40.w,
+                      height: 4.h,
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2),
+                        borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
+                  SizedBox(height: 24.h),
+                  Text(
                     'Select Language',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      color: const Color(0xFF1F2937),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
                   _buildLanguageOption(
                     'English',
                     '🇺🇸',
@@ -188,7 +189,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       () => setState(() => _selectedLanguage = 'English'),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildLanguageOption(
                     'Bahasa Indonesia',
                     '🇮🇩',
@@ -199,7 +200,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
                 ],
               ),
             );
@@ -213,72 +214,72 @@ class _SettingsPageState extends State<SettingsPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       backgroundColor: Colors.white,
       builder: (context) {
         return Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: EdgeInsets.all(24.0.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Center(
                 child: Container(
-                  width: 40,
-                  height: 4,
+                  width: 40.w,
+                  height: 4.h,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
 
               // Link Preview Card
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
                   color: Colors.grey[50],
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(16.r),
                   border: Border.all(color: Colors.grey[200]!),
                 ),
                 child: Row(
                   children: [
                     Container(
-                      width: 60,
-                      height: 60,
+                      width: 60.w,
+                      height: 60.w,
                       decoration: BoxDecoration(
                         color: const Color(0xFF8B5CF6),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.account_balance_wallet,
                         color: Colors.white,
-                        size: 30,
+                        size: 30.sp,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: 16.w),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Yuk atur keuangan bareng Saku!',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Color(0xFF1F2937),
+                              fontSize: 14.sp,
+                              color: const Color(0xFF1F2937),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4.h),
                           Text(
                             'saku.app',
                             style: TextStyle(
                               color: Colors.grey[500],
-                              fontSize: 12,
+                              fontSize: 12.sp,
                             ),
                           ),
                         ],
@@ -288,7 +289,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
               // Contacts Row
               SingleChildScrollView(
@@ -296,17 +297,17 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Row(
                   children: [
                     _buildContactItem('Dika', Colors.brown),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20.w),
                     _buildContactItem('Putri', Colors.pink),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20.w),
                     _buildContactItem('Mama', Colors.orange),
-                    const SizedBox(width: 20),
+                    SizedBox(width: 20.w),
                     _buildContactItem('Budi', Colors.blue),
                   ],
                 ),
               ),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 32.h),
 
               // Apps Row
               Row(
@@ -338,7 +339,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
             ],
           ),
         );
@@ -352,14 +353,14 @@ class _SettingsPageState extends State<SettingsPage> {
         Stack(
           children: [
             CircleAvatar(
-              radius: 28,
+              radius: 28.r,
               backgroundColor: color.withOpacity(0.2),
               child: Text(
                 name[0],
                 style: TextStyle(
                   color: color,
                   fontWeight: FontWeight.bold,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                 ),
               ),
             ),
@@ -367,24 +368,24 @@ class _SettingsPageState extends State<SettingsPage> {
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: EdgeInsets.all(4.w),
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.chat_bubble,
-                  size: 12,
-                  color: Color(0xFF25D366),
+                  size: 12.sp,
+                  color: const Color(0xFF25D366),
                 ),
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           name,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF4B5563)),
+          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF4B5563)),
         ),
       ],
     );
@@ -399,18 +400,18 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       children: [
         Container(
-          width: 56,
-          height: 56,
+          width: 56.w,
+          height: 56.w,
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
           child: Icon(icon, color: iconColor),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF4B5563)),
+          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF4B5563)),
         ),
       ],
     );
@@ -424,35 +425,44 @@ class _SettingsPageState extends State<SettingsPage> {
   ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFFF3E8FF)
               : Colors.transparent, // Light Purple
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? const Color(0xFF8B5CF6) : Colors.transparent,
           ),
         ),
         child: Row(
           children: [
-            Text(flag, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 16),
+            Text(flag, style: TextStyle(fontSize: 24.sp)),
+            SizedBox(width: 16.w),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: const Color(0xFF1F2937),
+                  fontSize: 14.sp,
                 ),
               ),
             ),
             if (isSelected)
-              const Icon(Icons.radio_button_checked, color: Color(0xFF8B5CF6))
+              Icon(
+                Icons.radio_button_checked,
+                color: const Color(0xFF8B5CF6),
+                size: 24.sp,
+              )
             else
-              const Icon(Icons.radio_button_unchecked, color: Colors.grey),
+              Icon(
+                Icons.radio_button_unchecked,
+                color: Colors.grey,
+                size: 24.sp,
+              ),
           ],
         ),
       ),
@@ -473,33 +483,33 @@ class _SettingsPageState extends State<SettingsPage> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: const Text(
+        title: Text(
           'Pengaturan',
           style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 150),
+        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 150.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Accounts Section
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.1),
                     spreadRadius: 1,
                     blurRadius: 8,
-                    offset: const Offset(0, 4),
+                    offset: Offset(0, 4.h),
                   ),
                 ],
               ),
@@ -524,20 +534,20 @@ class _SettingsPageState extends State<SettingsPage> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'Accounts',
                               style: TextStyle(
-                                color: Color(0xFF333333),
-                                fontSize: 18,
+                                color: const Color(0xFF333333),
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            const Text(
+                            SizedBox(height: 4.h),
+                            Text(
                               'Total Balance',
                               style: TextStyle(
-                                color: Color(0xFF666666),
-                                fontSize: 14,
+                                color: const Color(0xFF666666),
+                                fontSize: 14.sp,
                               ),
                             ),
                           ],
@@ -546,36 +556,36 @@ class _SettingsPageState extends State<SettingsPage> {
                           children: [
                             Text(
                               'Rp ${_formatCurrency(totalBalance)}',
-                              style: const TextStyle(
-                                color: Color(0xFF333333),
-                                fontSize: 20,
+                              style: TextStyle(
+                                color: const Color(0xFF333333),
+                                fontSize: 20.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            const Icon(
+                            SizedBox(width: 8.w),
+                            Icon(
                               Icons.arrow_forward_ios,
-                              color: Color(0xFF999999),
-                              size: 16,
+                              color: const Color(0xFF999999),
+                              size: 16.sp,
                             ),
                           ],
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     // Display top 3 accounts (Preview, even if hidden? User said "in data but not read in total". Usually hidden wallets are hidden from lists too, but let's keep them visible in list for management, maybe with an icon. For preview, let's just show them all for now or filter. Let's show all but maybe with dimming or icon if I had design. User just said "not read in total balance".)
                     ...accounts
                         .take(3)
                         .map((account) => AccountCard(account: account)),
                     if (accounts.length > 3) ...[
                       Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
+                        padding: EdgeInsets.only(top: 8.0.h),
                         child: Center(
                           child: Text(
                             '+ ${accounts.length - 3} More',
                             style: TextStyle(
                               color: Colors.grey[500],
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -586,7 +596,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // General Settings
             ...settingsItems.map(

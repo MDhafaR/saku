@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../domain/entities/debt.dart';
 import '../presentation/pages/debt_detail_page.dart';
@@ -11,8 +12,8 @@ class DebtItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SakuCard(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.all(16.w),
       onTap: () {
         Navigator.push(
           context,
@@ -23,11 +24,11 @@ class DebtItem extends StatelessWidget {
         children: [
           // Avatar
           Container(
-            width: 48,
-            height: 48,
+            width: 48.w,
+            height: 48.w,
             decoration: BoxDecoration(
               color: _getAvatarBackgroundColor(debt.name).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(14.r),
             ),
             child: Center(
               child: Text(
@@ -35,12 +36,12 @@ class DebtItem extends StatelessWidget {
                 style: TextStyle(
                   color: _getAvatarBackgroundColor(debt.name),
                   fontWeight: FontWeight.w700,
-                  fontSize: 16,
+                  fontSize: 16.sp,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 14),
+          SizedBox(width: 14.w),
           // Name and date info
           Expanded(
             child: Column(
@@ -48,24 +49,24 @@ class DebtItem extends StatelessWidget {
               children: [
                 Text(
                   debt.name,
-                  style: const TextStyle(
-                    color: Color(0xFF111111),
-                    fontSize: 15,
+                  style: TextStyle(
+                    color: const Color(0xFF111111),
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Row(
                   children: [
                     _buildStatusBadge(debt.status),
-                    const SizedBox(width: 8),
+                    SizedBox(width: 8.w),
                     Text(
                       debt.status == DebtStatus.paid
                           ? _formatDate(debt.paidDate!)
                           : _formatDate(debt.dueDate),
-                      style: const TextStyle(
-                        color: Color(0xFF9CA3AF),
-                        fontSize: 12,
+                      style: TextStyle(
+                        color: const Color(0xFF9CA3AF),
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -84,12 +85,10 @@ class DebtItem extends StatelessWidget {
                   color: debt.type == 'debt'
                       ? const Color(0xFFEF4444)
                       : const Color(0xFF10B981),
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
-              const SizedBox(height: 4),
-              Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey[400]),
             ],
           ),
         ],
@@ -99,16 +98,16 @@ class DebtItem extends StatelessWidget {
 
   Widget _buildStatusBadge(DebtStatus status) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
       decoration: BoxDecoration(
         color: _getStatusColor(status).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(20.r),
       ),
       child: Text(
         status.displayName,
         style: TextStyle(
           color: _getStatusColor(status),
-          fontSize: 11,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
         ),
       ),

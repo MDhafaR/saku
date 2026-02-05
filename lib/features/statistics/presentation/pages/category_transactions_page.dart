@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 
 class CategoryTransactionsPage extends StatelessWidget {
@@ -47,19 +48,19 @@ class CategoryTransactionsPage extends StatelessWidget {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF1F2937),
-            size: 20,
+            color: const Color(0xFF1F2937),
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           categoryName,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF111111),
+            color: const Color(0xFF111111),
           ),
         ),
         centerTitle: true,
@@ -67,7 +68,7 @@ class CategoryTransactionsPage extends StatelessWidget {
       body: transactions.isEmpty
           ? _buildEmptyState()
           : ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               itemCount: transactions.length + 1, // +1 for header
               itemBuilder: (context, index) {
                 if (index == 0) {
@@ -89,18 +90,18 @@ class CategoryTransactionsPage extends StatelessWidget {
       children: [
         // Total Summary Card
         SakuCard(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.w),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(14),
+                padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
                   color: color.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 28),
+                child: Icon(icon, color: color, size: 28.sp),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,18 +109,18 @@ class CategoryTransactionsPage extends StatelessWidget {
                     Text(
                       'Total $categoryName',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w500,
                         color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       _calculateTotal(),
-                      style: const TextStyle(
-                        fontSize: 24,
+                      style: TextStyle(
+                        fontSize: 24.sp,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFF111111),
+                        color: const Color(0xFF111111),
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -127,40 +128,37 @@ class CategoryTransactionsPage extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Text(
                   '${transactions.length} Transaksi',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF6B7280),
+                    color: const Color(0xFF6B7280),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         // Section Title
         Align(
           alignment: Alignment.centerLeft,
           child: Text(
             'Riwayat Transaksi',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: Colors.grey[700],
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
       ],
     );
   }
@@ -171,27 +169,27 @@ class CategoryTransactionsPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
               color: color.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 48, color: color),
+            child: Icon(icon, size: 48.sp, color: color),
           ),
-          const SizedBox(height: 24),
-          const Text(
+          SizedBox(height: 24.h),
+          Text(
             'Belum ada transaksi',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF111111),
+              color: const Color(0xFF111111),
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             'Transaksi untuk kategori $categoryName\nakan muncul di sini',
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+            style: TextStyle(fontSize: 14.sp, color: const Color(0xFF6B7280)),
           ),
         ],
       ),
@@ -209,39 +207,39 @@ class CategoryTransactionsPage extends StatelessWidget {
     final txAmount = tx['amount'] as String? ?? '';
 
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 8),
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 8.h),
       child: SakuCard(
         onTap: () => _showTransactionBottomSheet(context, tx),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(txIcon, color: color, size: 18),
+              child: Icon(txIcon, color: color, size: 18.sp),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     txName,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF111111),
+                      color: const Color(0xFF111111),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     txDate,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF9CA3AF),
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: const Color(0xFF9CA3AF),
                     ),
                   ),
                 ],
@@ -249,10 +247,10 @@ class CategoryTransactionsPage extends StatelessWidget {
             ),
             Text(
               txAmount,
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFEF4444),
+                color: const Color(0xFFEF4444),
               ),
             ),
           ],
@@ -275,61 +273,61 @@ class CategoryTransactionsPage extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
         ),
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(12.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Drag Handle
             Center(
               child: Container(
-                width: 48,
-                height: 5,
+                width: 48.w,
+                height: 5.h,
                 decoration: BoxDecoration(
                   color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(100),
+                  borderRadius: BorderRadius.circular(100.r),
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Icon
             Container(
-              width: 88,
-              height: 88,
+              width: 88.w,
+              height: 88.w,
               decoration: BoxDecoration(
                 color: color.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(txIcon, color: color, size: 40),
+              child: Icon(txIcon, color: color, size: 40.sp),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Transaction Name
             Text(
               txName,
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF111111),
+                color: const Color(0xFF111111),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
 
             // Amount
             Text(
               txAmount,
-              style: const TextStyle(
-                fontSize: 36,
+              style: TextStyle(
+                fontSize: 36.sp,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFFEF4444),
+                color: const Color(0xFFEF4444),
                 letterSpacing: -1.0,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Info Row (Date & Category)
             Row(
@@ -338,15 +336,15 @@ class CategoryTransactionsPage extends StatelessWidget {
                 Text(
                   txDate,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     color: Colors.grey[400],
                     fontWeight: FontWeight.w500,
                   ),
                 ),
                 Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 12),
-                  width: 4,
-                  height: 4,
+                  margin: EdgeInsets.symmetric(horizontal: 12.w),
+                  width: 4.w,
+                  height: 4.w,
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
                     shape: BoxShape.circle,
@@ -355,22 +353,22 @@ class CategoryTransactionsPage extends StatelessWidget {
                 Text(
                   categoryName,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     color: Colors.grey[800],
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Description Box
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
                 color: const Color(0xFFFAFAFA),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24.r),
                 border: Border.all(color: const Color(0xFFF0F0F0)),
               ),
               child: Column(
@@ -379,14 +377,14 @@ class CategoryTransactionsPage extends StatelessWidget {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
                           color: color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
-                        child: Icon(icon, color: color, size: 16),
+                        child: Icon(icon, color: color, size: 16.sp),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -394,16 +392,16 @@ class CategoryTransactionsPage extends StatelessWidget {
                             Text(
                               'Kategori',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 12.sp,
                                 color: Colors.grey[500],
                               ),
                             ),
                             Text(
                               categoryName,
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
-                                color: Color(0xFF111111),
+                                color: const Color(0xFF111111),
                               ),
                             ),
                           ],
@@ -411,21 +409,21 @@ class CategoryTransactionsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  Divider(color: Colors.grey[200], height: 1),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
+                  Divider(color: Colors.grey[200], height: 1.h),
+                  SizedBox(height: 16.h),
                   Text(
                     'Transaksi $txName pada tanggal $txDate untuk kategori $categoryName.',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: const Color(0xFF6B7280),
                       height: 1.5,
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Action Buttons
             Row(
@@ -434,47 +432,50 @@ class CategoryTransactionsPage extends StatelessWidget {
                   child: TextButton(
                     onPressed: () => Navigator.pop(context),
                     style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      padding: EdgeInsets.symmetric(vertical: 18.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: BorderSide(color: Colors.grey[200]!, width: 1.5),
+                        borderRadius: BorderRadius.circular(20.r),
+                        side: BorderSide(
+                          color: Colors.grey[200]!,
+                          width: 1.5.w,
+                        ),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Edit',
                       style: TextStyle(
                         color: Colors.black,
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: 16.w),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF111111),
                       elevation: 0,
-                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      padding: EdgeInsets.symmetric(vertical: 18.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(20.r),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       'Delete',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                       ),
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
           ],
         ),
       ),

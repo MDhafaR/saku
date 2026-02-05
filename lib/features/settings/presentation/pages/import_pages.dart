@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // --- Import Menu Page ---
 class ImportMenuPage extends StatefulWidget {
@@ -14,24 +15,24 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Import Data',
           style: TextStyle(
-            color: Color(0xFF333333),
-            fontSize: 18,
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFAFAFA),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             color: Colors.black,
-            size: 20,
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -40,37 +41,37 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               child: Column(
                 children: [
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   // Cloud Icon
-                  const Icon(
+                  Icon(
                     Icons.cloud_upload_outlined,
-                    size: 80,
-                    color: Color(0xFF3B82F6),
+                    size: 80.sp,
+                    color: const Color(0xFF111111),
                   ),
-                  const SizedBox(height: 24),
-                  const Text(
+                  SizedBox(height: 24.h),
+                  Text(
                     'Pindahkan Data Keuangan',
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      color: const Color(0xFF1F2937),
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 12),
-                  const Text(
+                  SizedBox(height: 12.h),
+                  Text(
                     'Pindahkan data keuanganmu dari aplikasi lain atau rekening koran bank dengan mudah.',
                     style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
+                      fontSize: 14.sp,
+                      color: const Color(0xFF6B7280),
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32.h),
 
                   // Options
                   Align(
@@ -80,28 +81,29 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[800],
+                        fontSize: 14.sp,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildOptionCard(
                     index: 0,
                     icon: Icons.table_chart_outlined,
-                    iconColor: Colors.green,
+                    iconColor: const Color(0xFF111111),
                     title: 'Bank Statement / Excel',
                     subtitle:
                         'Import transaksi dari file CSV atau Excel eksternal.',
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _buildOptionCard(
                     index: 1,
                     icon: Icons.storage_outlined,
-                    iconColor: Colors.blue,
+                    iconColor: const Color(0xFF111111),
                     title: 'Saku Backup File',
                     subtitle: 'Restore data dari cadangan aplikasi Saku.',
                   ),
 
-                  const SizedBox(height: 32),
+                  SizedBox(height: 32.h),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Row(
@@ -112,11 +114,15 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.grey[800],
+                            fontSize: 14.sp,
                           ),
                         ),
                         TextButton(
                           onPressed: () {},
-                          child: const Text('Lihat Semua'),
+                          child: Text(
+                            'Lihat Semua',
+                            style: TextStyle(fontSize: 14.sp),
+                          ),
                         ),
                       ],
                     ),
@@ -133,7 +139,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
           ),
           // Bottom Button
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             child: SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -145,19 +151,20 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     ),
                   );
                 },
-                icon: const Icon(Icons.add, color: Colors.white),
-                label: const Text(
+                icon: Icon(Icons.add, color: Colors.white, size: 24.sp),
+                label: Text(
                   'Pilih File dari Penyimpanan',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: 16.sp,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: const Color(0xFF111111),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(24.r),
                   ),
                   elevation: 0,
                 ),
@@ -180,63 +187,63 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
     return GestureDetector(
       onTap: () => setState(() => _selectedOption = index),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.grey[200]!,
-            width: isSelected ? 2 : 1,
+            color: isSelected ? const Color(0xFF111111) : Colors.grey[200]!,
+            width: isSelected ? 1.5.w : 1.w,
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.05),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              blurRadius: 4.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
                 color: iconColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 24),
+              child: Icon(icon, color: iconColor, size: 24.sp),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Container(
-              width: 20,
-              height: 20,
+              width: 20.w,
+              height: 20.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFF2563EB)
+                      ? const Color(0xFF111111)
                       : Colors.grey[400]!,
-                  width: isSelected ? 5 : 1,
+                  width: isSelected ? 5.w : 1.w,
                 ),
               ),
             ),
@@ -248,52 +255,56 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
 
   Widget _buildHistoryItem(String name, String date, bool isSuccess) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.grey[100]!),
       ),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: const Icon(Icons.description_outlined, color: Colors.grey),
+            child: Icon(
+              Icons.description_outlined,
+              color: Colors.grey,
+              size: 24.sp,
+            ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
                 Text(
                   date,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                 ),
               ],
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
               color: isSuccess ? Colors.green[50] : Colors.red[50],
-              borderRadius: BorderRadius.circular(4),
+              borderRadius: BorderRadius.circular(4.r),
             ),
             child: Text(
               isSuccess ? 'Sukses' : 'Gagal',
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 10.sp,
                 fontWeight: FontWeight.bold,
                 color: isSuccess ? Colors.green[700] : Colors.red[700],
               ),
@@ -326,24 +337,24 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
     if (_currentStep == 3) title = 'Konfirmasi Import';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA), // Light grey bg
+      backgroundColor: const Color(0xFFFAFAFA), // Light grey bg
       appBar: AppBar(
         title: Text(
           title,
-          style: const TextStyle(
-            color: Color(0xFF333333),
-            fontSize: 18,
+          style: TextStyle(
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFAFAFA),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20,
+            color: const Color(0xFF111111),
+            size: 20.sp,
           ),
           onPressed: () {
             if (_currentStep > 1) {
@@ -355,16 +366,20 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: Colors.black),
+            icon: Icon(
+              Icons.help_outline,
+              color: const Color(0xFF111111),
+              size: 24.sp,
+            ),
             onPressed: () {},
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(1.0),
+          preferredSize: Size.fromHeight(1.0.h),
           child: LinearProgressIndicator(
             value: _currentStep / 3,
             backgroundColor: Colors.grey[200],
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF111111)),
           ),
         ),
       ),
@@ -373,26 +388,27 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           // Step indicator text for > 1
           if (_currentStep > 1)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
               child: Text(
                 'Langkah $_currentStep dari 3: ${_getStepName()}',
-                style: const TextStyle(
-                  color: Color(0xFF2563EB),
+                style: TextStyle(
+                  color: const Color(0xFF1F2937),
                   fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
                 ),
               ),
             ),
 
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               child: _buildCurrentStep(),
             ),
           ),
 
           // Bottom Button
           Container(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             color: Colors.white,
             child: SizedBox(
               width: double.infinity,
@@ -409,10 +425,10 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: const Color(0xFF111111),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(24.r),
                   ),
                   elevation: 0,
                 ),
@@ -422,10 +438,10 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                       : (_currentStep == 2
                             ? 'Simpan & Lanjut'
                             : 'Mulai Import Sekarang'),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                   ),
                 ),
               ),
@@ -434,13 +450,13 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           if (_currentStep == 3)
             Container(
               color: Colors.white,
-              padding: const EdgeInsets.only(bottom: 20),
+              padding: EdgeInsets.only(bottom: 20.h),
               alignment: Alignment.center,
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text(
+                child: Text(
                   'Batalkan',
-                  style: TextStyle(color: Colors.grey),
+                  style: TextStyle(color: Colors.grey, fontSize: 14.sp),
                 ),
               ),
             ),
@@ -468,62 +484,69 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
       children: [
         // File Info
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: Colors.grey[200]!),
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8.w),
                 decoration: BoxDecoration(
                   color: Colors.green[50],
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.table_chart, color: Colors.green),
+                child: Icon(
+                  Icons.table_chart,
+                  color: Colors.green,
+                  size: 24.sp,
+                ),
               ),
-              const SizedBox(width: 12),
-              const Column(
+              SizedBox(width: 12.w),
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'mutasi_bca_januari.csv',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
                   ),
                   Text(
                     '24 KB • 150 Baris',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
+                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
                   ),
                 ],
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'Abaikan baris pertama (Header)',
-              style: TextStyle(color: Colors.grey[800]),
+              style: TextStyle(color: Colors.grey[800], fontSize: 14.sp),
             ),
             Checkbox(
               value: true,
               onChanged: (v) {},
-              activeColor: const Color(0xFF2563EB),
+              activeColor: const Color(0xFF111111),
             ),
           ],
         ),
 
-        const SizedBox(height: 12),
-        const Text(
+        SizedBox(height: 12.h),
+        Text(
           'Tentukan jenis data untuk setiap kolom',
-          style: TextStyle(color: Colors.grey),
+          style: TextStyle(color: Colors.grey, fontSize: 14.sp),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
 
         // Mapping Cards (Scrollable Horizontally ideally, but vertical for simplicity here)
         SingleChildScrollView(
@@ -535,13 +558,13 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                 '02/01/2024',
                 '05/01/2024',
               ]),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               _buildMappingColumn('Deskripsi', [
                 'TRSF E-BANKING',
                 'QRIS KOPI KEN...',
                 'BIAYA ADMIN',
               ]),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               _buildMappingColumn('Abaikan / Hide', [
                 'DB',
                 'CR',
@@ -551,16 +574,16 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           ),
         ),
 
-        const SizedBox(height: 32),
+        SizedBox(height: 32.h),
         Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green[600], size: 16),
-            const SizedBox(width: 8),
+            Icon(Icons.check_circle, color: Colors.green[600], size: 16.sp),
+            SizedBox(width: 8.w),
             Text(
               '2 kolom wajib (Tanggal, Nominal) ditemukan',
               style: TextStyle(
                 color: Colors.green[700],
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -576,24 +599,22 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
     bool isIgnored = false,
   }) {
     return Container(
-      width: 140,
+      width: 140.w,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(
           color: isIgnored ? Colors.grey[200]! : Colors.green[200]!,
-          width: isIgnored ? 1 : 1.5,
+          width: isIgnored ? 1.w : 1.5.w,
         ),
       ),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: isIgnored ? Colors.grey[50] : Colors.green[50],
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(10),
-              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10.r)),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -602,7 +623,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                   child: Text(
                     selectedType,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                       color: isIgnored ? Colors.grey : Colors.green[800],
                     ),
@@ -611,7 +632,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                 ),
                 Icon(
                   Icons.keyboard_arrow_down,
-                  size: 16,
+                  size: 16.sp,
                   color: isIgnored ? Colors.grey : Colors.green[800],
                 ),
               ],
@@ -619,19 +640,22 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           ),
           ...previews.map(
             (p) => Container(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
                 border: Border(top: BorderSide(color: Colors.grey[100]!)),
               ),
               child: Text(
                 p,
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: const Color(0xFF6B7280),
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
-          Container(height: 20), // Spacer
+          Container(height: 20.h), // Spacer
         ],
       ),
     );
@@ -642,11 +666,11 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: Colors.blue[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.blue[100]!),
+            color: const Color(0xFFF3F4F6),
+            borderRadius: BorderRadius.circular(12.r),
+            border: Border.all(color: Colors.grey[200]!),
           ),
           child: Row(
             children: [
@@ -654,18 +678,21 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Buat kategori baru untuk yang tidak cocok',
                       style: TextStyle(
-                        color: Color(0xFF1E3A8A),
+                        color: const Color(0xFF1F2937),
                         fontWeight: FontWeight.bold,
-                        fontSize: 13,
+                        fontSize: 13.sp,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       'Otomatis buat kategori jika tidak ada di Saku',
-                      style: TextStyle(color: Colors.blue[600], fontSize: 11),
+                      style: TextStyle(
+                        color: const Color(0xFF6B7280),
+                        fontSize: 11.sp,
+                      ),
                     ),
                   ],
                 ),
@@ -673,12 +700,12 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
               Switch(
                 value: _autoCreateCategory,
                 onChanged: (v) => setState(() => _autoCreateCategory = v),
-                activeColor: const Color(0xFF2563EB),
+                activeColor: const Color(0xFF111111),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -686,7 +713,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
             Text(
               'DARI CSV (SUMBER)',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[500],
               ),
@@ -694,14 +721,14 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
             Text(
               'KE SAKU (TUJUAN)',
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.grey[500],
               ),
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
 
         _buildCategoryMappingItem('Gofood', 'Food & Dining', Colors.green),
         _buildCategoryMappingItem('Indomaret', 'Groceries', Colors.green),
@@ -717,10 +744,10 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
         ),
         _buildCategoryMappingItem('Biaya Admin', 'Abaikan / Hide', Colors.grey),
 
-        const SizedBox(height: 20),
+        SizedBox(height: 20.h),
         Text(
           '5 kategori dipetakan, 2 baru akan dibuat',
-          style: TextStyle(color: Colors.grey[500], fontSize: 12),
+          style: TextStyle(color: Colors.grey[500], fontSize: 12.sp),
         ),
       ],
     );
@@ -731,30 +758,31 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
     bool isIgnore = dest == 'Abaikan / Hide';
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Row(
         children: [
           Expanded(
             child: Text(
               source,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF4B5563),
+                color: const Color(0xFF4B5563),
+                fontSize: 14.sp,
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Icon(Icons.arrow_forward, size: 16, color: Colors.grey),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.w),
+            child: Icon(Icons.arrow_forward, size: 16.sp, color: Colors.grey),
           ),
           Container(
-            width: 150,
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            width: 150.w,
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: isIgnore
                   ? Colors.grey[50]
                   : (isSelect ? Colors.white : Colors.green[50]),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               border: Border.all(
                 color: isIgnore
                     ? Colors.grey[200]!
@@ -768,7 +796,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                   child: Text(
                     dest,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       color: isSelect
                           ? Colors.grey
                           : (isIgnore ? Colors.grey : Colors.green[800]),
@@ -781,7 +809,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                 ),
                 Icon(
                   Icons.keyboard_arrow_down,
-                  size: 16,
+                  size: 16.sp,
                   color: Colors.grey[500],
                 ),
               ],
@@ -798,13 +826,13 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
       children: [
         // Stats Card
         Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.all(color: Colors.blue[100]!),
             boxShadow: [
-              BoxShadow(color: Colors.blue.withOpacity(0.05), blurRadius: 10),
+              BoxShadow(color: Colors.blue.withOpacity(0.05), blurRadius: 10.r),
             ],
           ),
           child: Column(
@@ -812,43 +840,43 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
                       color: Colors.blue[50],
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.file_present,
-                      color: Color(0xFF2563EB),
-                      size: 20,
+                      color: const Color(0xFF2563EB),
+                      size: 20.sp,
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  const Column(
+                  SizedBox(width: 16.w),
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         '150 Transaksi',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E3A8A),
+                          color: const Color(0xFF1E3A8A),
                         ),
                       ),
                       Text(
                         'Siap untuk diimport',
                         style: TextStyle(
-                          color: Color(0xFF3B82F6),
-                          fontSize: 13,
+                          color: const Color(0xFF3B82F6),
+                          fontSize: 13.sp,
                         ),
                       ),
                     ],
                   ),
                 ],
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 20),
-                child: Divider(height: 1),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 20.h),
+                child: Divider(height: 1.h),
               ),
               Row(
                 children: [
@@ -856,31 +884,31 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Pengeluaran',
-                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                          style: TextStyle(color: Colors.grey, fontSize: 12.sp),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Row(
                           children: [
-                            const Text(
+                            Text(
                               '120',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFFEF4444),
+                                color: const Color(0xFFEF4444),
                               ),
                             ),
-                            const SizedBox(width: 4),
+                            SizedBox(width: 4.w),
                             Container(
-                              padding: const EdgeInsets.all(2),
+                              padding: EdgeInsets.all(2.w),
                               decoration: BoxDecoration(
                                 color: Colors.red[100],
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.arrow_downward,
-                                size: 8,
+                                size: 8.sp,
                                 color: Colors.red,
                               ),
                             ),
@@ -889,38 +917,41 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                       ],
                     ),
                   ),
-                  Container(width: 1, height: 30, color: Colors.grey[200]),
+                  Container(width: 1.w, height: 30.h, color: Colors.grey[200]),
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(left: 20),
+                      padding: EdgeInsets.only(left: 20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'Pemasukan',
-                            style: TextStyle(color: Colors.grey, fontSize: 12),
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 12.sp,
+                            ),
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4.h),
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 '30',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 16.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF10B981),
+                                  color: const Color(0xFF10B981),
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: 4.w),
                               Container(
-                                padding: const EdgeInsets.all(2),
+                                padding: EdgeInsets.all(2.w),
                                 decoration: BoxDecoration(
                                   color: Colors.green[100],
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.arrow_upward,
-                                  size: 8,
+                                  size: 8.sp,
                                   color: Colors.green,
                                 ),
                               ),
@@ -936,26 +967,30 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
 
         // Duplicate Warning
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: const Color(0xFFFFFBEB), // Yellow bg
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: const Color(0xFFFEF3C7)),
           ),
           child: Row(
             children: [
-              const Icon(Icons.warning_amber_rounded, color: Color(0xFFD97706)),
-              const SizedBox(width: 12),
-              const Expanded(
+              Icon(
+                Icons.warning_amber_rounded,
+                color: const Color(0xFFD97706),
+                size: 24.sp,
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
                 child: Text(
                   '2 transaksi duplikat ditemukan dan akan dilewati otomatis.',
                   style: TextStyle(
-                    color: Color(0xFF92400E),
-                    fontSize: 13,
+                    color: const Color(0xFF92400E),
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -964,24 +999,24 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           ),
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
 
         // Date Info
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: Row(
             children: [
-              Icon(Icons.calendar_today, size: 16, color: Colors.grey[600]),
-              const SizedBox(width: 12),
+              Icon(Icons.calendar_today, size: 16.sp, color: Colors.grey[600]),
+              SizedBox(width: 12.w),
               Text(
                 'Data dari 01 Jan 2026 s/d 31 Jan 2026',
                 style: TextStyle(
                   color: Colors.grey[700],
-                  fontSize: 13,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -989,15 +1024,15 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           ),
         ),
 
-        const SizedBox(height: 40),
+        SizedBox(height: 40.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.lock_outline, size: 12, color: Colors.grey[400]),
-            const SizedBox(width: 6),
+            Icon(Icons.lock_outline, size: 12.sp, color: Colors.grey[400]),
+            SizedBox(width: 6.w),
             Text(
               'Data Anda aman dan terenkripsi',
-              style: TextStyle(color: Colors.grey[400], fontSize: 11),
+              style: TextStyle(color: Colors.grey[400], fontSize: 11.sp),
             ),
           ],
         ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../domain/entities/account.dart';
 import '../../widgets/account_card.dart';
 import 'wallet_detail_page.dart';
@@ -18,11 +19,11 @@ class WalletListPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Wallets',
           style: TextStyle(
-            color: Color(0xFF333333),
-            fontSize: 20,
+            color: const Color(0xFF333333),
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -30,16 +31,16 @@ class WalletListPage extends StatelessWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             color: Colors.black,
-            size: 20,
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           children: accounts
               .map(

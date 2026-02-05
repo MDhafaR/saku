@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class LineChartWidget extends StatelessWidget {
   const LineChartWidget({super.key});
@@ -7,8 +8,8 @@ class LineChartWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200,
-      padding: const EdgeInsets.all(16),
+      height: 200.h,
+      padding: EdgeInsets.all(16.w),
       child: LineChart(
         LineChartData(
           gridData: const FlGridData(show: false),
@@ -16,22 +17,22 @@ class LineChartWidget extends StatelessWidget {
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 30,
+                reservedSize: 30.w,
                 getTitlesWidget: (value, meta) {
-                  const style = TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 12,
+                  final style = TextStyle(
+                    color: const Color(0xFF6B7280),
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   );
                   switch (value.toInt()) {
                     case 2:
-                      return const Text('2k', style: style);
+                      return Text('2k', style: style);
                     case 3:
-                      return const Text('3k', style: style);
+                      return Text('3k', style: style);
                     case 4:
-                      return const Text('4k', style: style);
+                      return Text('4k', style: style);
                     case 5:
-                      return const Text('5k', style: style);
+                      return Text('5k', style: style);
                     default:
                       return const Text('');
                   }
@@ -47,26 +48,26 @@ class LineChartWidget extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 30,
+                reservedSize: 30.h,
                 getTitlesWidget: (value, meta) {
-                  const style = TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 12,
+                  final style = TextStyle(
+                    color: const Color(0xFF6B7280),
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   );
                   switch (value.toInt()) {
                     case 0:
-                      return const Text('Jan', style: style);
+                      return Text('Jan', style: style);
                     case 1:
-                      return const Text('Feb', style: style);
+                      return Text('Feb', style: style);
                     case 2:
-                      return const Text('Mar', style: style);
+                      return Text('Mar', style: style);
                     case 3:
-                      return const Text('Apr', style: style);
+                      return Text('Apr', style: style);
                     case 4:
-                      return const Text('May', style: style);
+                      return Text('May', style: style);
                     case 5:
-                      return const Text('Jun', style: style);
+                      return Text('Jun', style: style);
                     default:
                       return const Text('');
                   }
@@ -87,7 +88,7 @@ class LineChartWidget extends StatelessWidget {
               ],
               isCurved: true,
               color: const Color(0xFF10B981),
-              barWidth: 3,
+              barWidth: 3.w,
               isStrokeCapRound: true,
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
@@ -106,7 +107,7 @@ class LineChartWidget extends StatelessWidget {
               ],
               isCurved: true,
               color: const Color(0xFFEF4444),
-              barWidth: 3,
+              barWidth: 3.w,
               isStrokeCapRound: true,
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(

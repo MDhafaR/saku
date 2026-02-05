@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -23,36 +24,36 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: SakuCard(
-        padding: const EdgeInsets.all(16),
-        borderRadius: 24, // Consistent with global style
+        padding: EdgeInsets.all(16.w),
+        borderRadius: 24.r, // Consistent with global style
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.w,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(
-                  16,
+                  16.r,
                 ), // Softer corners for icon bg
               ),
-              child: Icon(icon, color: iconColor, size: 20),
+              child: Icon(icon, color: iconColor, size: 20.sp),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: 14.sp,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               amount,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
                 color: textColor,
               ),

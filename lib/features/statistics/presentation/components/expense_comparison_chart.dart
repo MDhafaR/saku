@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 
 class ExpenseComparisonChart extends StatelessWidget {
@@ -10,21 +11,21 @@ class ExpenseComparisonChart extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Komparasi Pengeluaran',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF111111),
+              color: const Color(0xFF111111),
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildComparisonRow('Makan', 850, 0.7, const Color(0xFFF59E0B)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildComparisonRow('Transport', 620, 0.5, const Color(0xFF2563EB)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildComparisonRow('Belanja', 450, 0.35, const Color(0xFFE91E63)),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildComparisonRow('Lainnya', 200, 0.15, const Color(0xFF9CA3AF)),
         ],
       ),
@@ -40,50 +41,50 @@ class ExpenseComparisonChart extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 70,
+          width: 70.w,
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF4B5563),
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: const Color(0xFF4B5563),
               fontWeight: FontWeight.w500,
             ),
           ),
         ),
-        const SizedBox(width: 8),
+        SizedBox(width: 8.w),
         Expanded(
           child: Stack(
             children: [
               Container(
-                height: 8,
+                height: 8.h,
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(4.r),
                 ),
               ),
               FractionallySizedBox(
                 widthFactor: percentage,
                 child: Container(
-                  height: 8,
+                  height: 8.h,
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         SizedBox(
-          width: 40,
+          width: 40.w,
           child: Text(
             '\$$amount',
             textAlign: TextAlign.end,
-            style: const TextStyle(
-              fontSize: 13,
+            style: TextStyle(
+              fontSize: 13.sp,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF111111),
+              color: const Color(0xFF111111),
             ),
           ),
         ),

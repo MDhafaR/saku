@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class MonthNavigation extends StatelessWidget {
   final String currentMonth;
@@ -15,29 +16,29 @@ class MonthNavigation extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: EdgeInsets.symmetric(vertical: 16.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           GestureDetector(
             onTap: onPreviousMonth,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 Icons.chevron_left,
                 color: Colors.grey[600],
-                size: 20,
+                size: 20.sp,
               ),
             ),
           ),
           Text(
             currentMonth,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black87,
             ),
@@ -45,15 +46,15 @@ class MonthNavigation extends StatelessWidget {
           GestureDetector(
             onTap: onNextMonth,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 Icons.chevron_right,
                 color: Colors.grey[600],
-                size: 20,
+                size: 20.sp,
               ),
             ),
           ),

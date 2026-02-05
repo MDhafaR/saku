@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class BackupPage extends StatefulWidget {
   const BackupPage({super.key});
@@ -17,11 +18,11 @@ class _BackupPageState extends State<BackupPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Cloud Backup',
           style: TextStyle(
-            color: Color(0xFF111111),
-            fontSize: 18,
+            color: const Color(0xFF111111),
+            fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -29,45 +30,37 @@ class _BackupPageState extends State<BackupPage> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
             color: Colors.black,
-            size: 20,
+            size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, color: Colors.black),
+            icon: Icon(Icons.help_outline, color: Colors.black, size: 24.sp),
             onPressed: () {},
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Account Status Card
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
-                // Dark card for contrast like design, or white?
-                // Plan said "Light Theme adaptation".
-                // Reference image showed a Dark card with Cloud icon at the top.
-                // To fit "Clean & Airy" light theme, I should probably make this White with a nice shadow, OR keeps it dark as a featured card?
-                // Let's try White card to be consistent with other pages (Wallet Detail Header was Blue, maybe this can be White or colored).
-                // Let's go with a Dark card (Color(0xFF1F2937)) to make it stand out as "Cloud" status, similar to Wallet Card which has color.
-                // Wait, Wallet Card was Blue. Account Card in Settings was White.
-                // Let's use a Dark Grey card to match the "Cloud" vibe from the dark mode image but keep the background light.
                 color: const Color(0xFF1F2937),
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.blue.withOpacity(0.2),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+                    blurRadius: 10.r,
+                    offset: Offset(0, 4.h),
                   ),
                 ],
               ),
@@ -76,14 +69,14 @@ class _BackupPageState extends State<BackupPage> {
                   Stack(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
                           color: Colors.white.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.cloud_outlined,
-                          size: 48,
+                          size: 48.sp,
                           color: Colors.white,
                         ),
                       ),
@@ -91,48 +84,51 @@ class _BackupPageState extends State<BackupPage> {
                         right: 0,
                         bottom: 0,
                         child: Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(4.w),
                           decoration: const BoxDecoration(
                             color: Colors.green,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.check,
-                            size: 12,
+                            size: 12.sp,
                             color: Colors.white,
                           ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
+                  SizedBox(height: 16.h),
+                  Text(
                     'user@gmail.com',
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Terakhir sinkronisasi: ',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 12.sp,
+                        ),
                       ),
-                      const Text(
+                      Text(
                         'Baru saja',
                         style: TextStyle(
                           color: Colors.greenAccent,
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24.h),
 
                   // Progress Bar
                   Column(
@@ -144,29 +140,29 @@ class _BackupPageState extends State<BackupPage> {
                             'Penyimpanan Cloud',
                             style: TextStyle(
                               color: Colors.grey[400],
-                              fontSize: 12,
+                              fontSize: 12.sp,
                             ),
                           ),
-                          const Text(
+                          Text(
                             '15 MB dari 15 GB',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
+                        borderRadius: BorderRadius.circular(4.r),
                         child: LinearProgressIndicator(
                           value: 0.01,
                           backgroundColor: Colors.grey[700],
                           valueColor: const AlwaysStoppedAnimation<Color>(
                             Colors.blue,
                           ),
-                          minHeight: 6,
+                          minHeight: 6.h,
                         ),
                       ),
                     ],
@@ -175,7 +171,7 @@ class _BackupPageState extends State<BackupPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Sync Button
             SizedBox(
@@ -186,20 +182,20 @@ class _BackupPageState extends State<BackupPage> {
                     context,
                   ).showSnackBar(const SnackBar(content: Text('Syncing...')));
                 },
-                icon: const Icon(Icons.sync, color: Colors.white),
-                label: const Text(
+                icon: Icon(Icons.sync, color: Colors.white, size: 24.sp),
+                label: Text(
                   'Sinkronisasi Sekarang',
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2563EB),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(16.r),
                   ),
                   elevation: 4,
                   shadowColor: Colors.blue.withOpacity(0.4),
@@ -207,30 +203,30 @@ class _BackupPageState extends State<BackupPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 'PREFERENSI',
                 style: TextStyle(
                   color: Colors.grey[400],
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
+                  letterSpacing: 1.2.w,
                 ),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
 
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
+                    blurRadius: 4.r,
+                    offset: Offset(0, 2.h),
                   ),
                 ],
               ),
@@ -243,7 +239,7 @@ class _BackupPageState extends State<BackupPage> {
                     valueText: 'Real-time',
                     onTap: () {},
                   ),
-                  Divider(height: 1, color: Colors.grey[100]),
+                  Divider(height: 1.h, color: Colors.grey[100]),
                   _buildToggleItem(
                     icon: Icons.wifi,
                     title: 'Hanya via Wi-Fi',
@@ -251,7 +247,7 @@ class _BackupPageState extends State<BackupPage> {
                     value: _wifiOnly,
                     onChanged: (val) => setState(() => _wifiOnly = val),
                   ),
-                  Divider(height: 1, color: Colors.grey[100]),
+                  Divider(height: 1.h, color: Colors.grey[100]),
                   _buildToggleItem(
                     icon:
                         Icons.receipt_long, // Icon suitable for Evidence/Struk
@@ -264,20 +260,21 @@ class _BackupPageState extends State<BackupPage> {
               ),
             ),
 
-            const SizedBox(height: 40),
+            SizedBox(height: 40.h),
             TextButton(
               onPressed: () {},
-              child: const Text(
+              child: Text(
                 'Putuskan Akun',
                 style: TextStyle(
                   color: Colors.red,
                   fontWeight: FontWeight.bold,
+                  fontSize: 14.sp,
                 ),
               ),
             ),
             Text(
               'Versi 2.4.0 • Aman Terenkripsi',
-              style: TextStyle(color: Colors.grey[400], fontSize: 12),
+              style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
             ),
           ],
         ),
@@ -293,32 +290,32 @@ class _BackupPageState extends State<BackupPage> {
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20),
+            child: Icon(icon, color: Colors.grey[600], size: 20.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -343,23 +340,23 @@ class _BackupPageState extends State<BackupPage> {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
                 color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
-              child: Icon(icon, color: Colors.grey[600], size: 20),
+              child: Icon(icon, color: Colors.grey[600], size: 20.sp),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Text(
                 title,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: titleColor ?? const Color(0xFF1F2937),
                 ),
@@ -368,15 +365,15 @@ class _BackupPageState extends State<BackupPage> {
             if (valueText != null) ...[
               Text(
                 valueText,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF2563EB), // Blue text for value
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF2563EB), // Blue text for value
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
             ],
-            Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey[400]),
           ],
         ),
       ),

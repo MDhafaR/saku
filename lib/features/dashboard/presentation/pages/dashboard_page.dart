@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../components/components.dart' as components;
 import '../components/filter_bottom_sheet.dart';
 
@@ -32,9 +33,9 @@ class _DashboardPageState extends State<DashboardPage> {
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
         child: const FilterBottomSheet(),
       ),
@@ -50,13 +51,13 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             // Fixed header section
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header with app name and theme toggle
                   _buildHeader(),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
 
                   // Month navigation
                   components.MonthNavigation(
@@ -67,7 +68,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                   // Summary cards
                   _buildSummaryCards(),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
 
                   // Search bar
                   components.SearchBar(
@@ -81,13 +82,13 @@ class _DashboardPageState extends State<DashboardPage> {
             // Scrollable transaction sections
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTransactionSections(),
                     // Bottom padding for FAB
-                    const SizedBox(height: 160),
+                    SizedBox(height: 160.h),
                   ],
                 ),
               ),
@@ -102,24 +103,24 @@ class _DashboardPageState extends State<DashboardPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           'Saku',
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 24.sp,
             fontWeight: FontWeight.bold,
             color: Colors.black87,
           ),
         ),
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
             color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
           ),
           child: Icon(
             Icons.dark_mode_outlined,
             color: Colors.grey[600],
-            size: 20,
+            size: 20.sp,
           ),
         ),
       ],
@@ -136,7 +137,7 @@ class _DashboardPageState extends State<DashboardPage> {
           iconColor: Colors.green[700]!,
           backgroundColor: Colors.green[100]!,
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         components.SummaryCard(
           title: 'Expense',
           amount: '\$2,840',
@@ -144,7 +145,7 @@ class _DashboardPageState extends State<DashboardPage> {
           iconColor: Colors.red[700]!,
           backgroundColor: Colors.red[100]!,
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: 12.w),
         components.SummaryCard(
           title: 'Total',
           amount: '\$1,410',

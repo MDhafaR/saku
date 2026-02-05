@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/injection.dart';
 import 'core/theme/app_theme.dart';
@@ -18,19 +19,21 @@ class SakuApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Saku',
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeService.currentThemeMode,
-      locale: const Locale('id'),
-      supportedLocales: const [Locale('id'), Locale('en')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: const OnboardingWrapper(),
+    return ScreenUtilInit(
+      designSize: const Size(360, 690),
+      minTextAdapt: true,
+      builder: (context, child) => MaterialApp(
+        title: 'Saku',
+        theme: AppTheme.lightTheme,
+        locale: const Locale('id'),
+        supportedLocales: const [Locale('id'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: const OnboardingWrapper(),
+      ),
     );
   }
 }

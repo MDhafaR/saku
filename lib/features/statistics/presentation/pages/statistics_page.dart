@@ -31,7 +31,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
             20.w,
             20.h,
             20.w,
-            164.h,
+            140.h,
           ), // Extra bottom padding for navigation bar
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +43,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   Text(
                     'Statistics',
                     style: TextStyle(
-                      fontSize: 24.sp,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w800, // Thicker
                       color: const Color(0xFF111111), // Darker Black
                       letterSpacing: -0.5,
@@ -59,12 +59,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     icon: Icon(
                       ThemeService.isLightMode ? Icons.dark_mode : Icons.sunny,
                       color: const Color(0xFFF59E0B),
-                      size: 24.sp,
+                      size: 20.sp,
                     ),
                   ),
                 ],
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 16.h),
 
               // Time Period Selector
               TimePeriodSelector(
@@ -75,7 +75,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   });
                 },
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 16.h),
 
               // Summary Cards
               Row(
@@ -91,7 +91,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       percentageColor: const Color(0xFF10B981),
                     ),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: StatisticsSummaryCard(
                       title: 'Expense',
@@ -103,7 +103,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       percentageColor: const Color(0xFFEF4444),
                     ),
                   ),
-                  SizedBox(width: 16.w),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: StatisticsSummaryCard(
                       title: 'Total',
@@ -117,7 +117,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   ),
                 ],
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 12.h),
 
               // Income vs Expense Chart
               SakuCard(
@@ -130,7 +130,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         Text(
                           'Income vs Expense',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF111111),
                             letterSpacing: -0.5,
@@ -142,7 +142,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                               onTap: () => setState(() => isLineChart = true),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: EdgeInsets.all(8.w),
+                                padding: EdgeInsets.all(6.w),
                                 decoration: BoxDecoration(
                                   color: isLineChart
                                       ? const Color(0xFF111111)
@@ -154,28 +154,28 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                   color: isLineChart
                                       ? Colors.white
                                       : const Color(0xFF6B7280),
-                                  size: 16.sp,
+                                  size: 14.sp,
                                 ),
                               ),
                             ),
-                            SizedBox(width: 8.w),
+                            SizedBox(width: 6.w),
                             GestureDetector(
                               onTap: () => setState(() => isLineChart = false),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                padding: EdgeInsets.all(8.w),
+                                padding: EdgeInsets.all(6.w),
                                 decoration: BoxDecoration(
                                   color: !isLineChart
                                       ? const Color(0xFF111111)
                                       : const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(8.r),
+                                  borderRadius: BorderRadius.circular(6.r),
                                 ),
                                 child: Icon(
                                   Icons.bar_chart,
                                   color: !isLineChart
                                       ? Colors.white
                                       : const Color(0xFF6B7280),
-                                  size: 16.sp,
+                                  size: 14.sp,
                                 ),
                               ),
                             ),
@@ -183,14 +183,14 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 12.h),
                     isLineChart
                         ? const LineChartWidget()
                         : const BarChartWidget(),
                   ],
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 12.h),
 
               // Category Breakdown
               // Category Breakdown
@@ -204,7 +204,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         Text(
                           'Category Breakdown',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF111111),
                             letterSpacing: -0.5,
@@ -223,7 +223,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                           child: Text(
                             'View Details',
                             style: TextStyle(
-                              fontSize: 14.sp,
+                              fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
                               color: const Color(
                                 0xFF111111,
@@ -233,12 +233,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 12.h),
                     const DonutChartWidget(),
                   ],
                 ),
               ),
-              SizedBox(height: 24.h),
+              SizedBox(height: 12.h),
 
               // Top Categories
               SakuCard(
@@ -248,13 +248,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     Text(
                       'Top Categories',
                       style: TextStyle(
-                        fontSize: 18.sp,
+                        fontSize: 15.sp,
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF111111),
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 12.h),
                     const TopCategoriesWidget(),
                   ],
                 ),

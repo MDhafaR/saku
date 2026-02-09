@@ -65,7 +65,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           'Detail Rekening',
           style: TextStyle(
             color: const Color(0xFF111111),
-            fontSize: 18.sp,
+            fontSize: 15.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -106,11 +106,11 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
             // Blue Header Card
             Container(
               width: double.infinity,
-              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 30.h),
+              padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(30.r),
+                  bottom: Radius.circular(24.r),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -127,8 +127,8 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     children: [
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 8.w,
-                          vertical: 4.h,
+                          horizontal: 6.w,
+                          vertical: 3.h,
                         ),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
@@ -139,21 +139,21 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                           style: TextStyle(
                             color: const Color(0xFF111111),
                             fontWeight: FontWeight.bold,
-                            fontSize: 12.sp,
+                            fontSize: 10.sp,
                           ),
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 6.w),
                       Text(
                         widget.account.name,
                         style: TextStyle(
                           color: const Color(0xFF111111),
-                          fontSize: 14.sp,
+                          fontSize: 12.sp,
                         ),
                       ),
                       const Spacer(),
                       Container(
-                        padding: EdgeInsets.all(8.w),
+                        padding: EdgeInsets.all(6.w),
                         decoration: BoxDecoration(
                           color: Colors.grey[100],
                           shape: BoxShape.circle,
@@ -161,48 +161,48 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                         child: Icon(
                           Icons.edit,
                           color: const Color(0xFF111111),
-                          size: 16.sp,
+                          size: 14.sp,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 24.h),
+                  SizedBox(height: 16.h),
                   Row(
                     children: [
                       Text(
                         '5220 •••• 1234',
                         style: TextStyle(
                           color: const Color(0xFF111111).withOpacity(0.8),
-                          fontSize: 16.sp,
+                          fontSize: 13.sp,
                           letterSpacing: 1.w,
                         ),
                       ),
-                      SizedBox(width: 8.w),
+                      SizedBox(width: 6.w),
                       Icon(
                         Icons.copy,
                         color: const Color(0xFF111111).withOpacity(0.8),
-                        size: 16.sp,
+                        size: 14.sp,
                       ),
                     ],
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 6.h),
                   Text(
                     'Saldo Utama',
                     style: TextStyle(
                       color: const Color(0xFF111111).withOpacity(0.6),
-                      fontSize: 12.sp,
+                      fontSize: 10.sp,
                     ),
                   ),
-                  SizedBox(height: 4.h),
+                  SizedBox(height: 2.h),
                   Text(
                     'Rp ${_formatCurrency(widget.account.balance)}',
                     style: TextStyle(
                       color: const Color(0xFF111111),
-                      fontSize: 32.sp,
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  SizedBox(height: 30.h),
+                  SizedBox(height: 20.h),
 
                   // Action Buttons
                   Row(
@@ -219,11 +219,11 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
 
             // Income/Expense Summary
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
-              padding: EdgeInsets.all(20.w),
+              margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.05),
@@ -253,32 +253,32 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                                 color: const Color(0xFF10B981),
                               ),
                             ),
-                            SizedBox(width: 6.w),
+                            SizedBox(width: 5.w),
                             Text(
                               'Pemasukan',
                               style: TextStyle(
                                 color: Colors.grey[600],
-                                fontSize: 12.sp,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 4.h),
+                        SizedBox(height: 3.h),
                         Text(
                           'Rp 8.500.000',
                           style: TextStyle(
                             color: const Color(0xFF10B981),
                             fontWeight: FontWeight.bold,
-                            fontSize: 16.sp,
+                            fontSize: 15.sp,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  Container(width: 1.w, height: 40.h, color: Colors.grey[200]),
+                  Container(width: 1.w, height: 36.h, color: Colors.grey[200]),
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.only(left: 20.w),
+                      padding: EdgeInsets.only(left: 16.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -298,23 +298,23 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                                   color: const Color(0xFFEF4444),
                                 ),
                               ),
-                              SizedBox(width: 6.w),
+                              SizedBox(width: 5.w),
                               Text(
                                 'Pengeluaran',
                                 style: TextStyle(
                                   color: Colors.grey[600],
-                                  fontSize: 12.sp,
+                                  fontSize: 11.sp,
                                 ),
                               ),
                             ],
                           ),
-                          SizedBox(height: 4.h),
+                          SizedBox(height: 3.h),
                           Text(
                             'Rp 4.200.000',
                             style: TextStyle(
                               color: const Color(0xFFEF4444),
                               fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
+                              fontSize: 15.sp,
                             ),
                           ),
                         ],
@@ -333,42 +333,42 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                 child: Text(
                   'Mutasi Terakhir',
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                     color: const Color(0xFF111111),
                   ),
                 ),
               ),
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 12.h),
 
             // Search Bar
             Container(
               margin: EdgeInsets.symmetric(horizontal: 20.w),
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
               decoration: BoxDecoration(
                 color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(10.r),
               ),
               child: Row(
                 children: [
                   Icon(
                     Icons.search,
                     color: const Color(0xFF9CA3AF),
-                    size: 20.sp,
+                    size: 18.sp,
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 10.w),
                   Text(
                     'Cari transaksi (cth: Netflix)...',
                     style: TextStyle(
                       color: const Color(0xFF9CA3AF),
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 20.h),
+            SizedBox(height: 16.h),
 
             // Transaction List (Mock)
             _buildTransactionItem(
@@ -419,20 +419,20 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     return Column(
       children: [
         Container(
-          width: 50.w,
-          height: 50.w,
+          width: 40.w,
+          height: 40.w,
           decoration: const BoxDecoration(
             color: Color(0xFFF3F4F6), // Light Gray
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF111111), size: 24.sp),
+          child: Icon(icon, color: const Color(0xFF111111), size: 18.sp),
         ),
-        SizedBox(height: 8.h),
+        SizedBox(height: 6.h),
         Text(
           label,
           style: TextStyle(
             color: const Color(0xFF111111),
-            fontSize: 12.sp,
+            fontSize: 10.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -448,52 +448,268 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     Color iconColor, {
     bool isIncome = false,
   }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-      child: Row(
+    return InkWell(
+      onTap: () {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (context) => _buildTransactionBottomSheet(
+            title: title,
+            date: date,
+            amount: amount,
+            icon: icon,
+            iconColor: iconColor,
+            isIncome: isIncome,
+          ),
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+        child: Row(
+          children: [
+            Container(
+              width: 40.w,
+              height: 40.w,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: iconColor, size: 18.sp),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp,
+                      color: const Color(0xFF111111),
+                    ),
+                  ),
+                  Text(
+                    date,
+                    style: TextStyle(
+                      color: const Color(0xFF6B7280),
+                      fontSize: 11.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              amount,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13.sp,
+                color: isIncome
+                    ? const Color(0xFF10B981)
+                    : const Color(0xFF111111),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTransactionBottomSheet({
+    required String title,
+    required String date,
+    required String amount,
+    required IconData icon,
+    required Color iconColor,
+    required bool isIncome,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      padding: EdgeInsets.all(16.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
+          // Drag Handle
+          Center(
+            child: Container(
+              width: 40.w,
+              height: 4.h,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(100.r),
+              ),
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Header Row - Icon left, details right
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon
+              Container(
+                width: 52.w,
+                height: 52.w,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Icon(icon, color: iconColor, size: 26.sp),
+              ),
+              SizedBox(width: 14.w),
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category & Amount Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF111111),
+                          ),
+                        ),
+                        Text(
+                          amount,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: isIncome
+                                ? const Color(0xFF10B981)
+                                : const Color(0xFFD32F2F),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6.h),
+                    // Date & Method Row
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12.sp,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          date,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 8.w),
+                          width: 3.w,
+                          height: 3.w,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Icon(
+                          Icons.account_balance_wallet_outlined,
+                          size: 12.sp,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          widget.account.name,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 14.h),
+
+          // Description Box
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: double.infinity,
+            padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              shape: BoxShape.circle,
+              color: const Color(0xFFFAFAFA),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFFF0F0F0)),
             ),
-            child: Icon(icon, color: iconColor, size: 24.sp),
+            child: Text(
+              "Transaction details for $title",
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: const Color(0xFF444444),
+                height: 1.5,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
-          SizedBox(width: 16.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14.sp,
-                    color: const Color(0xFF111111),
+          SizedBox(height: 12.h),
+
+          // Action Buttons
+          Row(
+            children: [
+              Expanded(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                      side: BorderSide(color: Colors.grey[200]!, width: 1.5),
+                    ),
+                    overlayColor: Colors.grey[100],
+                  ),
+                  child: Text(
+                    "Edit",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp,
+                    ),
                   ),
                 ),
-                Text(
-                  date,
-                  style: TextStyle(
-                    color: const Color(0xFF6B7280),
-                    fontSize: 12.sp,
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF111111),
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                  ),
+                  child: Text(
+                    "Delete",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp,
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-          Text(
-            amount,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14.sp,
-              color: isIncome
-                  ? const Color(0xFF10B981)
-                  : const Color(0xFF111111),
-            ),
-          ),
+          SizedBox(height: 8.h),
         ],
       ),
     );

@@ -34,7 +34,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
           'Utang & Piutang',
           style: TextStyle(
             color: const Color(0xFF111111),
-            fontSize: 18.sp,
+            fontSize: 15.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -60,10 +60,10 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Container(
-              padding: EdgeInsets.all(4.w),
+              padding: EdgeInsets.all(3.w),
               decoration: BoxDecoration(
                 color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(32.r),
+                borderRadius: BorderRadius.circular(24.r),
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -81,7 +81,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(28.r),
+                            borderRadius: BorderRadius.circular(20.r),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.05),
@@ -104,18 +104,18 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                                 }
                               },
                               child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 8.h),
+                                padding: EdgeInsets.symmetric(vertical: 6.h),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.arrow_downward_rounded,
-                                      size: 16.sp,
+                                      size: 14.sp,
                                       color: _selectedTab == 0
                                           ? const Color(0xFFEF4444)
                                           : const Color(0xFF9CA3AF),
                                     ),
-                                    SizedBox(width: 8.w),
+                                    SizedBox(width: 6.w),
                                     Text(
                                       'Utang',
                                       style: TextStyle(
@@ -123,7 +123,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                                             ? const Color(0xFFEF4444)
                                             : const Color(0xFF9CA3AF),
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14.sp,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],
@@ -140,18 +140,18 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                                 }
                               },
                               child: Container(
-                                padding: EdgeInsets.symmetric(vertical: 12.h),
+                                padding: EdgeInsets.symmetric(vertical: 8.h),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
                                       Icons.arrow_upward_rounded,
-                                      size: 16.sp,
+                                      size: 14.sp,
                                       color: _selectedTab == 1
                                           ? const Color(0xFF10B981)
                                           : const Color(0xFF9CA3AF),
                                     ),
-                                    SizedBox(width: 8.w),
+                                    SizedBox(width: 6.w),
                                     Text(
                                       'Piutang',
                                       style: TextStyle(
@@ -159,7 +159,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                                             ? const Color(0xFF10B981)
                                             : const Color(0xFF9CA3AF),
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 14.sp,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],

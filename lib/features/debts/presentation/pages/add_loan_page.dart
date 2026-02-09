@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../transactions/presentation/components/custom_numpad.dart';
 
 class AddLoanPage extends StatefulWidget {
   const AddLoanPage({super.key});
@@ -45,9 +47,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
   ];
 
   bool isDebt = true; // "Saya Hutang" = true, "Pinjamkan" = false
-  final TextEditingController _amountController = TextEditingController(
-    text: '0',
-  );
+  String _amount = '0';
   final TextEditingController _contactController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   DateTime _transactionDate = DateTime.now();
@@ -68,10 +68,30 @@ class _AddLoanPageState extends State<AddLoanPage> {
 
   @override
   void dispose() {
-    _amountController.dispose();
     _contactController.dispose();
     _noteController.dispose();
     super.dispose();
+  }
+
+  void _onKeyPressed(String value) {
+    setState(() {
+      if (_amount == '0') {
+        _amount = value;
+      } else {
+        _amount += value;
+      }
+    });
+  }
+
+  void _onDelete() {
+    setState(() {
+      if (_amount.isNotEmpty) {
+        _amount = _amount.substring(0, _amount.length - 1);
+        if (_amount.isEmpty) {
+          _amount = '0';
+        }
+      }
+    });
   }
 
   Future<void> _selectTransactionDate() async {
@@ -161,9 +181,9 @@ class _AddLoanPageState extends State<AddLoanPage> {
         title: Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF3F4F6),
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(24.r),
           ),
-          padding: const EdgeInsets.all(4),
+          padding: EdgeInsets.all(3.w),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final tabWidth = constraints.maxWidth / 2;
@@ -180,7 +200,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(20.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
@@ -199,7 +219,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                           behavior: HitTestBehavior.opaque,
                           onTap: () => setState(() => isDebt = true),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
                             child: Text(
                               'Saya Hutang',
                               textAlign: TextAlign.center,
@@ -208,7 +228,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                     ? AppTheme.semanticRed
                                     : AppTheme.lightTextSecondary,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),
@@ -219,7 +239,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                           behavior: HitTestBehavior.opaque,
                           onTap: () => setState(() => isDebt = false),
                           child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            padding: EdgeInsets.symmetric(vertical: 8.h),
                             child: Text(
                               'Pinjamkan',
                               textAlign: TextAlign.center,
@@ -228,7 +248,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                     ? AppTheme.semanticGreen
                                     : AppTheme.lightTextSecondary,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
+                                fontSize: 12.sp,
                               ),
                             ),
                           ),
@@ -251,169 +271,150 @@ class _AddLoanPageState extends State<AddLoanPage> {
       ),
       body: Column(
         children: [
-          // Amount Section - Compact (outside the card)
-          Padding(
-            padding: const EdgeInsets.only(top: 16, bottom: 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  'Jumlah Nominal',
-                  style: TextStyle(
-                    color: AppTheme.lightTextSecondary,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Editable Amount
-                IntrinsicWidth(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Rp ',
-                        style: Theme.of(context).textTheme.displayMedium
-                            ?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              color: feedbackColor,
-                            ),
-                      ),
-                      IntrinsicWidth(
-                        child: TextField(
-                          controller: _amountController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.displayMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w700,
-                                color: feedbackColor,
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // Amount Section - Larger
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Jumlah Nominal',
+                                style: TextStyle(
+                                  color: AppTheme.lightTextSecondary,
+                                  fontSize: 12.sp,
+                                ),
                               ),
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            contentPadding: EdgeInsets.zero,
-                            isDense: true,
+                              SizedBox(height: 6.h),
+                              // Amount Display (no keyboard input)
+                              Text(
+                                'Rp ${CurrencyFormatter.format(_amount)}',
+                                style: Theme.of(context).textTheme.displayMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      color: feedbackColor,
+                                    ),
+                              ),
+                            ],
                           ),
-                          onChanged: (value) {
-                            // Format the amount while typing
-                            final cleanValue = value
-                                .replaceAll('.', '')
-                                .replaceAll(',', '');
-                            if (cleanValue.isEmpty) {
-                              _amountController.text = '0';
-                              _amountController.selection =
-                                  TextSelection.fromPosition(
-                                    const TextPosition(offset: 1),
-                                  );
-                            } else {
-                              final formatted = CurrencyFormatter.format(
-                                cleanValue,
-                              );
-                              if (formatted != value) {
-                                _amountController.text = formatted;
-                                _amountController.selection =
-                                    TextSelection.fromPosition(
-                                      TextPosition(offset: formatted.length),
-                                    );
-                              }
-                            }
-                            setState(() {});
-                          },
                         ),
-                      ),
-                    ],
+
+                        // Details Card
+                        Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardTheme.color,
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(24.r),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, -3),
+                              ),
+                            ],
+                          ),
+                          padding: EdgeInsets.all(16.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Contact Field - Text Input
+                              _buildContactField(),
+                              SizedBox(height: 10.h),
+
+                              // Transaction Date
+                              _buildDateField(
+                                icon: Icons.calendar_today_outlined,
+                                label: 'Tanggal Transaksi',
+                                value: _getDateLabel(_transactionDate),
+                                onTap: _selectTransactionDate,
+                              ),
+                              SizedBox(height: 10.h),
+
+                              // Due Date Toggle Row
+                              _buildDueDateField(),
+                              SizedBox(height: 10.h),
+
+                              // Wallet Field
+                              _buildWalletField(),
+                              SizedBox(height: 10.h),
+
+                              // Notes
+                              _buildNotesField(),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                );
+              },
             ),
           ),
 
-          // Details Card - Expanded to fill remaining space
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
-                borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(32),
+          // Fixed Numpad and Submit Button at bottom
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.fromLTRB(
+              20.w,
+              12.h,
+              20.w,
+              MediaQuery.of(context).padding.bottom + 16.h,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF9FAFB),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+              border: const Border(
+                top: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Numpad
+                CustomNumpad(
+                  onKeyPressed: _onKeyPressed,
+                  onDelete: _onDelete,
+                  onSubmit: () => Navigator.pop(context),
+                  submitColor: feedbackColor,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  // Scrollable form fields
-                  Expanded(
-                    child: SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Contact Field - Text Input
-                          _buildContactField(),
-                          const SizedBox(height: 12),
-
-                          // Transaction Date
-                          _buildDateField(
-                            icon: Icons.calendar_today_outlined,
-                            label: 'Tanggal Transaksi',
-                            value: _getDateLabel(_transactionDate),
-                            onTap: _selectTransactionDate,
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Due Date Toggle Row
-                          _buildDueDateField(),
-                          const SizedBox(height: 12),
-
-                          // Wallet Field
-                          _buildWalletField(),
-                          const SizedBox(height: 12),
-
-                          // Notes
-                          _buildNotesField(),
-                        ],
+                SizedBox(height: 12.h),
+                // Submit Button
+                SizedBox(
+                  width: double.infinity,
+                  height: 48.h,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF111111),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.r),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'Simpan',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-
-                  // Submit Button (inside the card)
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      24,
-                      16,
-                      24,
-                      MediaQuery.of(context).padding.bottom + 16,
-                    ),
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          side: const BorderSide(
-                            color: Color.fromARGB(255, 236, 236, 236),
-                          ),
-                          backgroundColor: Colors.white,
-                          shadowColor: Colors.black,
-                          elevation: 2,
-                        ),
-                        child: const Text(
-                          'Simpan',
-                          style: TextStyle(color: Colors.black),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ],
@@ -423,39 +424,39 @@ class _AddLoanPageState extends State<AddLoanPage> {
 
   Widget _buildContactField() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.person_outline,
             color: AppTheme.lightTextSecondary,
-            size: 20,
+            size: 18.sp,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   'Kontak',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11.sp,
                     color: AppTheme.lightTextSecondary,
                   ),
                 ),
                 TextField(
                   controller: _contactController,
                   cursorColor: const Color(0xFF6B7280),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     hintText: 'Masukkan nama kontak...',
                     hintStyle: TextStyle(
                       color: AppTheme.lightTextSecondary,
-                      fontSize: 16,
+                      fontSize: 14.sp,
                     ),
                     border: InputBorder.none,
                     enabledBorder: InputBorder.none,
@@ -463,10 +464,10 @@ class _AddLoanPageState extends State<AddLoanPage> {
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
                   ),
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF1F2937),
+                    color: const Color(0xFF1F2937),
                   ),
                 ),
               ],
@@ -486,34 +487,34 @@ class _AddLoanPageState extends State<AddLoanPage> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10.r),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
         child: Row(
           children: [
-            Icon(icon, color: AppTheme.lightTextSecondary, size: 20),
-            const SizedBox(width: 12),
+            Icon(icon, color: AppTheme.lightTextSecondary, size: 18.sp),
+            SizedBox(width: 10.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontSize: 11.sp,
                       color: AppTheme.lightTextSecondary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 1.h),
                   Text(
                     value,
-                    style: const TextStyle(
-                      fontSize: 16,
+                    style: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1F2937),
+                      color: const Color(0xFF1F2937),
                     ),
                   ),
                 ],
@@ -529,36 +530,36 @@ class _AddLoanPageState extends State<AddLoanPage> {
     return GestureDetector(
       onTap: _hasDueDate ? _selectDueDate : null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(10.r),
           border: Border.all(color: const Color(0xFFE5E7EB)),
         ),
         child: Row(
           children: [
-            const Icon(
+            Icon(
               Icons.event_available_outlined,
               color: AppTheme.lightTextSecondary,
-              size: 20,
+              size: 18.sp,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 10.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Jatuh Tempo',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 11.sp,
                       color: AppTheme.lightTextSecondary,
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 1.h),
                   Text(
                     _hasDueDate ? _getDateLabel(_dueDate) : 'Tidak ada',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: _hasDueDate
                           ? const Color(0xFF1F2937)
@@ -569,7 +570,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
               ),
             ),
             Transform.scale(
-              scale: 0.8,
+              scale: 0.7,
               child: CupertinoSwitch(
                 value: _hasDueDate,
                 activeColor: AppTheme.primaryBlue,
@@ -584,47 +585,54 @@ class _AddLoanPageState extends State<AddLoanPage> {
 
   Widget _buildNotesField() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 4),
-            child: Icon(
-              Icons.edit_outlined,
-              color: AppTheme.lightTextSecondary,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: _noteController,
-              maxLines: 3,
-              minLines: 2,
-              cursorColor: const Color(0xFF6B7280),
-              decoration: const InputDecoration(
-                hintText: 'Tulis catatan...',
-                hintStyle: TextStyle(
+          Row(
+            children: [
+              Icon(
+                Icons.edit_outlined,
+                color: AppTheme.lightTextSecondary,
+                size: 18.sp,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'Catatan',
+                style: TextStyle(
+                  fontSize: 11.sp,
                   color: AppTheme.lightTextSecondary,
-                  fontSize: 16,
                 ),
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
               ),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF1F2937),
+            ],
+          ),
+          SizedBox(height: 6.h),
+          TextField(
+            controller: _noteController,
+            maxLines: 4,
+            minLines: 2,
+            cursorColor: const Color(0xFF6B7280),
+            decoration: InputDecoration(
+              hintText: 'Tulis catatan di sini...',
+              hintStyle: TextStyle(
+                color: AppTheme.lightTextSecondary,
+                fontSize: 14.sp,
               ),
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF1F2937),
             ),
           ),
         ],
@@ -636,7 +644,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: const Color(0xFFE5E7EB)),
       ),
       child: Column(
@@ -649,19 +657,19 @@ class _AddLoanPageState extends State<AddLoanPage> {
               setState(() => _isWalletDropdownOpen = !_isWalletDropdownOpen);
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
               child: Row(
                 children: [
                   // Wallet Icon
                   Container(
-                    width: 36,
-                    height: 36,
+                    width: 32.w,
+                    height: 32.w,
                     decoration: BoxDecoration(
                       color:
                           (_selectedWallet?['color'] as Color? ??
                                   const Color(0xFFE8F0FE))
                               .withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     alignment: Alignment.center,
                     child: Icon(
@@ -670,26 +678,26 @@ class _AddLoanPageState extends State<AddLoanPage> {
                       color:
                           _selectedWallet?['color'] as Color? ??
                           const Color(0xFF1976D2),
-                      size: 18,
+                      size: 16.sp,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Akun / Wallet',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11.sp,
                             color: AppTheme.lightTextSecondary,
                           ),
                         ),
-                        const SizedBox(height: 2),
+                        SizedBox(height: 1.h),
                         Text(
                           _selectedWallet?['name'] as String? ?? 'Pilih Wallet',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
                             color: _selectedWallet != null
                                 ? const Color(0xFF1F2937)
@@ -704,7 +712,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
                     color: AppTheme.lightTextSecondary,
-                    size: 20,
+                    size: 18.sp,
                   ),
                 ],
               ),
@@ -720,12 +728,12 @@ class _AddLoanPageState extends State<AddLoanPage> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             height: _isWalletDropdownOpen
-                ? (_mockWallets.length * 64.0).clamp(0.0, 256.0)
+                ? (_mockWallets.length * 52.0).clamp(0.0, 208.0)
                 : 0,
             child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(11),
-                bottomRight: Radius.circular(11),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(9.r),
+                bottomRight: Radius.circular(9.r),
               ),
               child: SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
@@ -740,9 +748,9 @@ class _AddLoanPageState extends State<AddLoanPage> {
                         });
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 12,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 10.h,
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
@@ -752,39 +760,39 @@ class _AddLoanPageState extends State<AddLoanPage> {
                         child: Row(
                           children: [
                             Container(
-                              width: 36,
-                              height: 36,
+                              width: 32.w,
+                              height: 32.w,
                               decoration: BoxDecoration(
                                 color: (wallet['color'] as Color).withOpacity(
                                   0.15,
                                 ),
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(8.r),
                               ),
                               alignment: Alignment.center,
                               child: Icon(
                                 wallet['icon'] as IconData,
                                 color: wallet['color'] as Color,
-                                size: 18,
+                                size: 16.sp,
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 10.w),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     wallet['name'] as String,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF1F2937),
+                                      color: const Color(0xFF1F2937),
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  SizedBox(height: 1.h),
                                   Text(
                                     'Saldo: Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
-                                    style: const TextStyle(
-                                      fontSize: 12,
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
                                       color: AppTheme.lightTextSecondary,
                                     ),
                                   ),
@@ -792,10 +800,10 @@ class _AddLoanPageState extends State<AddLoanPage> {
                               ),
                             ),
                             if (isSelected)
-                              const Icon(
+                              Icon(
                                 Icons.check_circle,
                                 color: AppTheme.primaryBlue,
-                                size: 20,
+                                size: 18.sp,
                               ),
                           ],
                         ),

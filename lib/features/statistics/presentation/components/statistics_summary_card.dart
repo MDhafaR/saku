@@ -25,8 +25,8 @@ class StatisticsSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SakuCard(
-      padding: EdgeInsets.all(12.w), // Reduced padding
-      borderRadius: 24.r,
+      padding: EdgeInsets.all(10.w), // Reduced padding
+      borderRadius: 20.r,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -35,12 +35,12 @@ class StatisticsSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(6.w),
                 decoration: BoxDecoration(
                   color: backgroundColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: backgroundColor, size: 20.sp),
+                child: Icon(icon, color: backgroundColor, size: 16.sp),
               ),
               SizedBox(width: 4.w),
               Flexible(
@@ -59,25 +59,25 @@ class StatisticsSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Text(
             title,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 11.sp,
               color: const Color(0xFF6B7280),
               fontWeight: FontWeight.w500,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 2.h),
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
               amount,
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w800,
                 color: const Color(0xFF111111),
                 letterSpacing: -0.5,

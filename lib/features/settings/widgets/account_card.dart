@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../domain/entities/account.dart';
 
 class AccountCard extends StatelessWidget {
@@ -9,17 +10,17 @@ class AccountCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 6.h),
+      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10.r),
         boxShadow: [
           BoxShadow(
             color: Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2.h),
           ),
         ],
       ),
@@ -27,19 +28,19 @@ class AccountCard extends StatelessWidget {
         children: [
           // Icon
           Container(
-            width: 40,
-            height: 40,
+            width: 32.w,
+            height: 32.w,
             decoration: BoxDecoration(
               color: account.iconColor,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
               _getIconData(account.iconPath),
               color: Colors.white,
-              size: 20,
+              size: 16.sp,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 10.w),
           // Account info
           Expanded(
             child: Column(
@@ -47,27 +48,27 @@ class AccountCard extends StatelessWidget {
               children: [
                 Text(
                   account.name,
-                  style: const TextStyle(
-                    color: Color(0xFF333333),
-                    fontSize: 16,
+                  style: TextStyle(
+                    color: const Color(0xFF333333),
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
                   'Rp ${_formatCurrency(account.balance)}',
-                  style: const TextStyle(
-                    color: Color(0xFF666666),
-                    fontSize: 14,
+                  style: TextStyle(
+                    color: const Color(0xFF666666),
+                    fontSize: 11.sp,
                   ),
                 ),
               ],
             ),
           ),
           // Arrow icon
-          const Icon(
+          Icon(
             Icons.arrow_forward_ios,
-            color: Color(0xFF999999),
-            size: 16,
+            color: const Color(0xFF999999),
+            size: 12.sp,
           ),
         ],
       ),

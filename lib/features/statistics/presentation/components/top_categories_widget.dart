@@ -34,28 +34,28 @@ class TopCategoriesWidget extends StatelessWidget {
     ];
 
     return Container(
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(12.w),
       child: Column(
         children: categories.map((category) {
           return Padding(
-            padding: EdgeInsets.only(bottom: 16.h),
+            padding: EdgeInsets.only(bottom: 10.h),
             child: Row(
               children: [
                 Container(
-                  width: 12.w,
-                  height: 12.w,
+                  width: 10.w,
+                  height: 10.w,
                   decoration: BoxDecoration(
                     color: category['color'] as Color,
                     shape: BoxShape.circle,
                   ),
                 ),
-                SizedBox(width: 12.w),
+                SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
                     category['name'] as String,
                     style: TextStyle(
                       color: const Color(0xFF1F2937),
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -64,16 +64,16 @@ class TopCategoriesWidget extends StatelessWidget {
                   category['amount'] as String,
                   style: TextStyle(
                     color: const Color(0xFF1F2937),
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 6.w),
                 Text(
                   category['percentage'] as String,
                   style: TextStyle(
                     color: const Color(0xFF6B7280),
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

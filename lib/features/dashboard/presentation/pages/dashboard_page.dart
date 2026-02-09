@@ -68,7 +68,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
                   // Summary cards
                   _buildSummaryCards(),
-                  SizedBox(height: 16.h),
 
                   // Search bar
                   components.SearchBar(
@@ -88,7 +87,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   children: [
                     _buildTransactionSections(),
                     // Bottom padding for FAB
-                    SizedBox(height: 160.h),
+                    SizedBox(height: 140.h),
                   ],
                 ),
               ),

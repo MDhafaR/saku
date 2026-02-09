@@ -36,7 +36,7 @@ class CategoryDetailCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: SakuCard(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(14.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -44,14 +44,14 @@ class CategoryDetailCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: EdgeInsets.all(12.w),
+                  padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
                     color: color.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: color, size: 24.sp),
+                  child: Icon(icon, color: color, size: 18.sp),
                 ),
-                SizedBox(width: 16.w),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +62,7 @@ class CategoryDetailCard extends StatelessWidget {
                           Text(
                             categoryName,
                             style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
                               color: const Color(0xFF111111),
                             ),
@@ -70,21 +70,21 @@ class CategoryDetailCard extends StatelessWidget {
                           Text(
                             amount,
                             style: TextStyle(
-                              fontSize: 16.sp,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
                               color: const Color(0xFF111111),
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 4.h),
+                      SizedBox(height: 2.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             transactionCount, // "12 Transaksi"
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 11.sp,
                               color: const Color(0xFF6B7280),
                               fontWeight: FontWeight.w500,
                             ),
@@ -92,14 +92,14 @@ class CategoryDetailCard extends StatelessWidget {
                           Text(
                             percentage, // "29.4%"
                             style: TextStyle(
-                              fontSize: 13.sp,
+                              fontSize: 11.sp,
                               color: const Color(0xFF6B7280),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 8.h),
                       // Progress bar line
                       Stack(
                         children: [
@@ -134,7 +134,7 @@ class CategoryDetailCard extends StatelessWidget {
                   child: Icon(
                     Icons.keyboard_arrow_down,
                     color: Colors.grey[400],
-                    size: 24.sp,
+                    size: 20.sp,
                   ),
                 ),
               ],
@@ -185,20 +185,20 @@ class CategoryDetailCard extends StatelessWidget {
         ),
 
         if (topTransactions != null && topTransactions!.isNotEmpty) ...[
-          SizedBox(height: 20.h),
+          SizedBox(height: 12.h),
           Divider(color: Colors.grey[200], height: 1.h),
-          SizedBox(height: 20.h),
+          SizedBox(height: 12.h),
           Text(
             'Top 3 Transaksi Terbesar',
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 10.sp,
               color: const Color(0xFF9CA3AF),
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           ...topTransactions!.map((tx) => _buildTransactionItem(tx)),
-          SizedBox(height: 8.h),
+          SizedBox(height: 4.h),
           TextButton(
             onPressed: () {
               Navigator.push(
@@ -223,7 +223,7 @@ class CategoryDetailCard extends StatelessWidget {
               style: TextStyle(
                 color: const Color(0xFF111111), // Dark - matches design system
                 fontWeight: FontWeight.w600,
-                fontSize: 13.sp,
+                fontSize: 11.sp,
               ),
             ),
           ),
@@ -242,23 +242,23 @@ class CategoryDetailCard extends StatelessWidget {
 
   Widget _buildTransactionItem(Map<String, dynamic> tx) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(10.w),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12.r), // Keep it rounded
+              borderRadius: BorderRadius.circular(10.r), // Keep it rounded
               border: Border.all(color: const Color(0xFFF9FAFB)),
             ),
             child: Icon(
               tx['icon'] as IconData,
               color: const Color(0xFF9CA3AF),
-              size: 18.sp,
+              size: 14.sp,
             ),
           ),
-          SizedBox(width: 12.w),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -266,16 +266,16 @@ class CategoryDetailCard extends StatelessWidget {
                 Text(
                   tx['name'] as String,
                   style: TextStyle(
-                    fontSize: 14.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF1F2937),
                   ),
                 ),
-                SizedBox(height: 2.h),
+                SizedBox(height: 1.h),
                 Text(
                   tx['date'] as String,
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     color: const Color(0xFF9CA3AF),
                   ),
                 ),
@@ -285,7 +285,7 @@ class CategoryDetailCard extends StatelessWidget {
           Text(
             tx['amount'] as String,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w700,
               color: const Color(0xFF1F2937),
             ),

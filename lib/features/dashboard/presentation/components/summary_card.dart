@@ -24,36 +24,36 @@ class SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: SakuCard(
-        padding: EdgeInsets.all(16.w),
-        borderRadius: 24.r, // Consistent with global style
+        padding: EdgeInsets.all(12.w),
+        borderRadius: 16.r, // Consistent with global style
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 40.w,
-              height: 40.w,
+              width: 32.w,
+              height: 32.w,
               decoration: BoxDecoration(
                 color: backgroundColor,
                 borderRadius: BorderRadius.circular(
-                  16.r,
+                  12.r,
                 ), // Softer corners for icon bg
               ),
-              child: Icon(icon, color: iconColor, size: 20.sp),
+              child: Icon(icon, color: iconColor, size: 16.sp),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 8.h),
             Text(
               title,
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 11.sp,
                 color: Colors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 2.h),
             Text(
               amount,
               style: TextStyle(
-                fontSize: 20.sp,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
                 color: textColor,
               ),

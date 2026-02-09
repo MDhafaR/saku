@@ -22,8 +22,8 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200,
-      padding: const EdgeInsets.all(16),
+      height: 160,
+      padding: const EdgeInsets.all(12),
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -44,7 +44,7 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                 },
               ),
               sectionsSpace: 2,
-              centerSpaceRadius: 55,
+              centerSpaceRadius: 45,
               sections: List.generate(categories.length, (index) {
                 final isTouched = index == touchedIndex;
                 final category = categories[index];
@@ -52,7 +52,7 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                   color: category['color'] as Color,
                   value: category['value'] as double,
                   title: '',
-                  radius: isTouched ? 58 : 50,
+                  radius: isTouched ? 48 : 40,
                   borderSide: isTouched
                       ? const BorderSide(color: Colors.white, width: 3)
                       : BorderSide.none,
@@ -71,16 +71,16 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                       Text(
                         categories[touchedIndex]['name'] as String,
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF111111),
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
                       Text(
                         '${(categories[touchedIndex]['value'] as double).toStringAsFixed(1)}%',
                         style: const TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF111111),
                         ),
@@ -94,16 +94,16 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                       Text(
                         'Total',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
                           color: Color(0xFF6B7280),
                         ),
                       ),
-                      SizedBox(height: 4),
+                      SizedBox(height: 2),
                       Text(
                         '100%',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 16,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF111111),
                         ),

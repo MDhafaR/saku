@@ -79,7 +79,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         title: Text(
           'Rincian Kategori',
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 15.sp,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF111111),
           ),
@@ -98,7 +98,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -113,16 +113,16 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     Text(
                       'Total Pengeluaran',
                       style: TextStyle(
-                        fontSize: 13.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w500,
                         color: Colors.grey[600],
                       ),
                     ),
-                    SizedBox(height: 4.h),
+                    SizedBox(height: 2.h),
                     Text(
                       'Rp2.890.000',
                       style: TextStyle(
-                        fontSize: 28.sp,
+                        fontSize: 22.sp,
                         fontWeight: FontWeight.w800,
                         color: const Color(0xFF111111),
                         letterSpacing: -1,
@@ -134,27 +134,27 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                   onTap: _showMonthPicker,
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 8.h,
+                      horizontal: 10.w,
+                      vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
                       color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(20.r),
+                      borderRadius: BorderRadius.circular(16.r),
                     ),
                     child: Row(
                       children: [
                         Text(
                           selectedMonth,
                           style: TextStyle(
-                            fontSize: 13.sp,
+                            fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF111111),
                           ),
                         ),
-                        SizedBox(width: 4.w),
+                        SizedBox(width: 2.w),
                         Icon(
                           Icons.keyboard_arrow_down,
-                          size: 16.sp,
+                          size: 14.sp,
                           color: const Color(0xFF111111),
                         ),
                       ],
@@ -163,11 +163,11 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 ),
               ],
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
 
             // Comparison Chart
             const ExpenseComparisonChart(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
 
             // Category Cards with expand/collapse
             // Makan & Minum - 12 Transaksi
@@ -203,7 +203,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 10.h),
 
             // Transportasi - 8 Transaksi
             CategoryDetailCard(
@@ -238,7 +238,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 10.h),
 
             // Belanja - 5 Transaksi
             CategoryDetailCard(
@@ -273,7 +273,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            SizedBox(height: 16.h),
+            SizedBox(height: 10.h),
 
             // Tagihan - 3 Transaksi
             CategoryDetailCard(
@@ -308,7 +308,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 },
               ],
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 16.h),
           ],
         ),
       ),

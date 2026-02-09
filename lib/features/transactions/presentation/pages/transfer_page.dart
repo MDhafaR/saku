@@ -162,7 +162,7 @@ class _TransferPageState extends State<TransferPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.close, size: 24.sp),
+          icon: Icon(Icons.close, size: 20.sp),
           color: Theme.of(context).iconTheme.color,
           onPressed: () => Navigator.pop(context),
         ),
@@ -170,7 +170,7 @@ class _TransferPageState extends State<TransferPage> {
           'Pindah Buku',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 16.sp,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -181,18 +181,18 @@ class _TransferPageState extends State<TransferPage> {
           // Header Section with Balance (Restored but Styled Clean)
           Container(
             width: double.infinity,
-            padding: EdgeInsets.only(bottom: 24.h, top: 8.h),
+            padding: EdgeInsets.only(bottom: 16.h, top: 6.h),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24.r),
-                bottomRight: Radius.circular(24.r),
+                bottomLeft: Radius.circular(20.r),
+                bottomRight: Radius.circular(20.r),
               ),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
                 ),
               ],
             ),
@@ -202,15 +202,15 @@ class _TransferPageState extends State<TransferPage> {
                   'Total Aset Anda',
                   style: TextStyle(
                     color: AppTheme.lightTextSecondary,
-                    fontSize: 12.sp,
+                    fontSize: 11.sp,
                   ),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 4.h),
                 Text(
                   'Rp 158.450.000',
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: 24.sp,
+                    fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -221,7 +221,7 @@ class _TransferPageState extends State<TransferPage> {
           Expanded(
             child: SingleChildScrollView(
               controller: _scrollController,
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,
               padding: EdgeInsets.only(
                 left: 20.w,
                 right: 20.w,
@@ -234,7 +234,7 @@ class _TransferPageState extends State<TransferPage> {
                   // Source & Destination Card (Combined)
                   SakuCard(
                     padding: EdgeInsets.symmetric(
-                      vertical: 16.h,
+                      vertical: 12.h,
                     ), // Removed padding to handle styling manually
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -245,7 +245,7 @@ class _TransferPageState extends State<TransferPage> {
                           onTap: _toggleSourceDropdown,
                           behavior: HitTestBehavior.opaque,
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20.w),
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -274,18 +274,18 @@ class _TransferPageState extends State<TransferPage> {
                                 SizedBox(height: 8.h),
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
-                                  padding: EdgeInsets.all(12.w),
+                                  padding: EdgeInsets.all(10.w),
                                   decoration: BoxDecoration(
                                     color: _isSourceDropdownOpen
                                         ? Colors.grey[100]
                                         : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12.r),
+                                    borderRadius: BorderRadius.circular(10.r),
                                   ),
                                   child: Row(
                                     children: [
                                       Container(
-                                        width: 40.w,
-                                        height: 40.w,
+                                        width: 36.w,
+                                        height: 36.w,
                                         decoration: BoxDecoration(
                                           color:
                                               (sourceWallet?['color']
@@ -293,7 +293,7 @@ class _TransferPageState extends State<TransferPage> {
                                                       const Color(0xFFE8F0FE))
                                                   .withOpacity(0.15),
                                           borderRadius: BorderRadius.circular(
-                                            12.r,
+                                            10.r,
                                           ),
                                         ),
                                         alignment: Alignment.center,
@@ -304,10 +304,10 @@ class _TransferPageState extends State<TransferPage> {
                                               sourceWallet?['color']
                                                   as Color? ??
                                               const Color(0xFF1976D2),
-                                          size: 20.sp,
+                                          size: 18.sp,
                                         ),
                                       ),
-                                      SizedBox(width: 12.w),
+                                      SizedBox(width: 10.w),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
@@ -319,17 +319,17 @@ class _TransferPageState extends State<TransferPage> {
                                                   'Pilih Sumber Dana',
                                               style: TextStyle(
                                                 color: const Color(0xFF111111),
-                                                fontSize: 14.sp,
+                                                fontSize: 13.sp,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            SizedBox(height: 4.h),
+                                            SizedBox(height: 2.h),
                                             Text(
                                               'Saldo: Rp ${CurrencyFormatter.format(sourceWallet != null ? (sourceWallet!['balance'] as double).toStringAsFixed(0) : '0')}',
                                               style: TextStyle(
                                                 color:
                                                     AppTheme.lightTextSecondary,
-                                                fontSize: 12.sp,
+                                                fontSize: 11.sp,
                                               ),
                                             ),
                                           ],
@@ -348,7 +348,7 @@ class _TransferPageState extends State<TransferPage> {
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
                           height: _isSourceDropdownOpen
-                              ? 300.h
+                              ? 200.h
                               : 0, // Max height
                           child: Container(
                             decoration: const BoxDecoration(
@@ -373,8 +373,8 @@ class _TransferPageState extends State<TransferPage> {
                                     child: Container(
                                       color: Colors.white,
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 20.w,
-                                        vertical: 16.h,
+                                        horizontal: 16.w,
+                                        vertical: 12.h,
                                       ),
                                       child: Row(
                                         children: [
@@ -403,18 +403,18 @@ class _TransferPageState extends State<TransferPage> {
                                                 Text(
                                                   wallet['name'] as String,
                                                   style: TextStyle(
-                                                    fontSize: 14.sp,
+                                                    fontSize: 13.sp,
                                                     fontWeight: FontWeight.w600,
                                                     color: const Color(
                                                       0xFF1F2937,
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(height: 2.h),
+                                                SizedBox(height: 1.h),
                                                 Text(
                                                   'Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
                                                   style: TextStyle(
-                                                    fontSize: 12.sp,
+                                                    fontSize: 11.sp,
                                                     color: Colors.grey[500],
                                                   ),
                                                 ),
@@ -426,7 +426,7 @@ class _TransferPageState extends State<TransferPage> {
                                             Icon(
                                               Icons.check_circle,
                                               color: AppTheme.primaryBlue,
-                                              size: 20.sp,
+                                              size: 18.sp,
                                             ),
                                         ],
                                       ),
@@ -441,7 +441,7 @@ class _TransferPageState extends State<TransferPage> {
                         // Swap Button
                         Center(
                           child: Container(
-                            margin: EdgeInsets.symmetric(vertical: 4.h),
+                            margin: EdgeInsets.symmetric(vertical: 2.h),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
@@ -467,8 +467,8 @@ class _TransferPageState extends State<TransferPage> {
                                 },
                                 customBorder: const CircleBorder(),
                                 child: Container(
-                                  width: 40.w,
-                                  height: 40.w,
+                                  width: 36.w,
+                                  height: 36.w,
                                   alignment: Alignment.center,
                                   decoration: const BoxDecoration(
                                     color: Colors.black,
@@ -477,7 +477,7 @@ class _TransferPageState extends State<TransferPage> {
                                   child: Icon(
                                     Icons.swap_vert,
                                     color: Colors.white,
-                                    size: 20.sp,
+                                    size: 18.sp,
                                   ),
                                 ),
                               ),
@@ -491,7 +491,7 @@ class _TransferPageState extends State<TransferPage> {
                           onTap: _toggleDestinationDropdown,
                           behavior: HitTestBehavior.opaque,
                           child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20.w),
+                            padding: EdgeInsets.symmetric(horizontal: 16.w),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -520,18 +520,18 @@ class _TransferPageState extends State<TransferPage> {
                                 SizedBox(height: 8.h),
                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
-                                  padding: EdgeInsets.all(12.w),
+                                  padding: EdgeInsets.all(10.w),
                                   decoration: BoxDecoration(
                                     color: _isDestinationDropdownOpen
                                         ? Colors.grey[100]
                                         : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(12.r),
+                                    borderRadius: BorderRadius.circular(10.r),
                                   ),
                                   child: Row(
                                     children: [
                                       Container(
-                                        width: 40.w,
-                                        height: 40.w,
+                                        width: 36.w,
+                                        height: 36.w,
                                         decoration: BoxDecoration(
                                           color:
                                               (destinationWallet?['color']
@@ -539,7 +539,7 @@ class _TransferPageState extends State<TransferPage> {
                                                       const Color(0xFFE8F5E9))
                                                   .withOpacity(0.15),
                                           borderRadius: BorderRadius.circular(
-                                            12.r,
+                                            10.r,
                                           ),
                                         ),
                                         alignment: Alignment.center,
@@ -551,10 +551,10 @@ class _TransferPageState extends State<TransferPage> {
                                               destinationWallet?['color']
                                                   as Color? ??
                                               const Color(0xFF43A047),
-                                          size: 20.sp,
+                                          size: 18.sp,
                                         ),
                                       ),
-                                      SizedBox(width: 12.w),
+                                      SizedBox(width: 10.w),
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
@@ -566,11 +566,11 @@ class _TransferPageState extends State<TransferPage> {
                                                   'Pilih Penerima',
                                               style: TextStyle(
                                                 color: const Color(0xFF111111),
-                                                fontSize: 14.sp,
+                                                fontSize: 13.sp,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            SizedBox(height: 4.h),
+                                            SizedBox(height: 2.h),
                                             Text(
                                               destinationWallet != null
                                                   ? '0812-3456-7890'
@@ -578,7 +578,7 @@ class _TransferPageState extends State<TransferPage> {
                                               style: TextStyle(
                                                 color:
                                                     AppTheme.lightTextSecondary,
-                                                fontSize: 12.sp,
+                                                fontSize: 11.sp,
                                               ),
                                             ),
                                           ],
@@ -597,7 +597,7 @@ class _TransferPageState extends State<TransferPage> {
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
                           height: _isDestinationDropdownOpen
-                              ? 300.h
+                              ? 200.h
                               : 0, // Max height
                           child: Container(
                             decoration: const BoxDecoration(
@@ -623,8 +623,8 @@ class _TransferPageState extends State<TransferPage> {
                                     child: Container(
                                       color: Colors.white,
                                       padding: EdgeInsets.symmetric(
-                                        horizontal: 20.w,
-                                        vertical: 16.h,
+                                        horizontal: 16.w,
+                                        vertical: 12.h,
                                       ),
                                       child: Row(
                                         children: [
@@ -653,18 +653,18 @@ class _TransferPageState extends State<TransferPage> {
                                                 Text(
                                                   wallet['name'] as String,
                                                   style: TextStyle(
-                                                    fontSize: 14.sp,
+                                                    fontSize: 13.sp,
                                                     fontWeight: FontWeight.w600,
                                                     color: const Color(
                                                       0xFF1F2937,
                                                     ),
                                                   ),
                                                 ),
-                                                SizedBox(height: 2.h),
+                                                SizedBox(height: 1.h),
                                                 Text(
                                                   'Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
                                                   style: TextStyle(
-                                                    fontSize: 12.sp,
+                                                    fontSize: 11.sp,
                                                     color: Colors.grey[500],
                                                   ),
                                                 ),
@@ -676,7 +676,7 @@ class _TransferPageState extends State<TransferPage> {
                                             Icon(
                                               Icons.check_circle,
                                               color: AppTheme.primaryBlue,
-                                              size: 20.sp,
+                                              size: 18.sp,
                                             ),
                                         ],
                                       ),
@@ -690,11 +690,11 @@ class _TransferPageState extends State<TransferPage> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 12.h),
 
                   // Amount Input Card
                   SakuCard(
-                    padding: EdgeInsets.all(20.w),
+                    padding: EdgeInsets.all(16.w),
                     child: Column(
                       key: _amountKey,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -744,13 +744,13 @@ class _TransferPageState extends State<TransferPage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 8.h),
+                        SizedBox(height: 6.h),
                         Row(
                           children: [
                             Text(
                               'Rp ',
                               style: TextStyle(
-                                fontSize: 28.sp,
+                                fontSize: 22.sp,
                                 fontWeight: FontWeight.bold,
                                 color: const Color(0xFF111111),
                               ),
@@ -760,7 +760,7 @@ class _TransferPageState extends State<TransferPage> {
                                 controller: _amountController,
                                 focusNode: _amountFocusNode,
                                 style: TextStyle(
-                                  fontSize: 28.sp,
+                                  fontSize: 22.sp,
                                   fontWeight: FontWeight.bold,
                                   color: const Color(0xFF111111),
                                 ),
@@ -775,7 +775,7 @@ class _TransferPageState extends State<TransferPage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 12.h),
                         const Divider(),
                         SizedBox(height: 12.h),
                         GestureDetector(
@@ -793,7 +793,7 @@ class _TransferPageState extends State<TransferPage> {
                                 'Biaya Admin',
                                 style: TextStyle(
                                   color: AppTheme.lightTextSecondary,
-                                  fontSize: 13.sp,
+                                  fontSize: 12.sp,
                                 ),
                               ),
                               if (!_isCustomAdminFee)
@@ -810,7 +810,7 @@ class _TransferPageState extends State<TransferPage> {
                                     'Gratis',
                                     style: TextStyle(
                                       color: const Color(0xFF43A047),
-                                      fontSize: 12.sp,
+                                      fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -834,7 +834,7 @@ class _TransferPageState extends State<TransferPage> {
                                     Text(
                                       'Rp ',
                                       style: TextStyle(
-                                        fontSize: 20.sp,
+                                        fontSize: 16.sp,
                                         fontWeight: FontWeight.bold,
                                         color: const Color(0xFF111111),
                                       ),
@@ -844,7 +844,7 @@ class _TransferPageState extends State<TransferPage> {
                                         controller: _adminFeeController,
                                         focusNode: _adminFeeFocusNode,
                                         style: TextStyle(
-                                          fontSize: 20.sp,
+                                          fontSize: 16.sp,
                                           fontWeight: FontWeight.bold,
                                           color: const Color(0xFF111111),
                                         ),
@@ -889,7 +889,7 @@ class _TransferPageState extends State<TransferPage> {
                     ),
                   ),
 
-                  SizedBox(height: 24.h),
+                  SizedBox(height: 16.h),
 
                   // Note Input (Restored, Styled)
                   Column(
@@ -901,7 +901,7 @@ class _TransferPageState extends State<TransferPage> {
                           text: 'Catatan ',
                           style: TextStyle(
                             color: const Color(0xFF111111),
-                            fontSize: 14.sp,
+                            fontSize: 13.sp,
                             fontWeight: FontWeight.w600,
                             fontFamily: 'Inter',
                           ),
@@ -911,13 +911,13 @@ class _TransferPageState extends State<TransferPage> {
                               style: TextStyle(
                                 color: AppTheme.lightTextSecondary,
                                 fontWeight: FontWeight.w400,
-                                fontSize: 14.sp,
+                                fontSize: 13.sp,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 6.h),
                       TextField(
                         controller: _noteController,
                         focusNode: _noteFocusNode,
@@ -925,35 +925,35 @@ class _TransferPageState extends State<TransferPage> {
                           hintText: 'Contoh: Bayar makan siang',
                           hintStyle: TextStyle(
                             color: AppTheme.lightTextSecondary,
-                            fontSize: 14.sp,
+                            fontSize: 13.sp,
                           ),
                           filled: true,
                           fillColor: Colors.white,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16.r),
+                            borderRadius: BorderRadius.circular(12.r),
                             borderSide: const BorderSide(
                               color: Color(0xFFE5E7EB),
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16.r),
+                            borderRadius: BorderRadius.circular(12.r),
                             borderSide: const BorderSide(
                               color: Color(0xFFE5E7EB),
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16.r),
+                            borderRadius: BorderRadius.circular(12.r),
                             borderSide: const BorderSide(
                               color: AppTheme.primaryBlue,
                             ),
                           ),
-                          contentPadding: EdgeInsets.all(16.w),
+                          contentPadding: EdgeInsets.all(14.w),
                         ),
                       ),
                     ],
                   ),
 
-                  SizedBox(height: 100.h),
+                  SizedBox(height: 60.h),
                 ],
               ),
             ),
@@ -962,25 +962,25 @@ class _TransferPageState extends State<TransferPage> {
       ),
       bottomSheet: Container(
         color: Theme.of(context).scaffoldBackgroundColor,
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.all(16.w),
         child: SizedBox(
           width: double.infinity,
-          height: 56.h,
+          height: 48.h,
           child: ElevatedButton(
             onPressed: () {},
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-
-              side: const BorderSide(color: Color(0xFFE5E7EB)),
-              elevation: 2,
-              shadowColor: Colors.black.withOpacity(0.1),
+              backgroundColor: const Color(0xFF111111),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14.r),
+              ),
+              elevation: 0,
             ),
             child: Text(
               'Lanjut Transfer',
               style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.black, // Consistent with 'Simpan' button
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
           ),

@@ -16,39 +16,46 @@ class SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48.h,
+      height: 40.h,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border.all(color: Colors.grey[300]!),
       ),
       child: Row(
         children: [
-          SizedBox(width: 16.w),
-          Icon(Icons.search, color: Colors.grey[600], size: 20.sp),
           SizedBox(width: 12.w),
+          Icon(Icons.search, color: const Color(0xFF9CA3AF), size: 18.sp),
+          SizedBox(width: 10.w),
           Expanded(
             child: TextField(
               onChanged: onChanged,
+              style: TextStyle(fontSize: 13.sp),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: TextStyle(color: Colors.grey[500], fontSize: 14.sp),
+                hintStyle: TextStyle(
+                  color: const Color(0xFF9CA3AF),
+                  fontSize: 13.sp,
+                ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
+                contentPadding: EdgeInsets.only(
+                  bottom: 2.h,
+                ), // Align text vertically
+                isDense: true,
               ),
             ),
           ),
-          GestureDetector(
-            onTap: onFilterTap,
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              child: Icon(
-                Icons.keyboard_arrow_down,
-                color: Colors.grey[600],
-                size: 20.sp,
+          if (onFilterTap != null)
+            GestureDetector(
+              onTap: onFilterTap,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                child: Icon(
+                  Icons.keyboard_arrow_down,
+                  color: const Color(0xFF9CA3AF),
+                  size: 18.sp,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

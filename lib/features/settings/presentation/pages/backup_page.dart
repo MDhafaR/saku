@@ -55,11 +55,11 @@ class _BackupPageState extends State<BackupPage> {
               padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
                 color: const Color(0xFF1F2937),
-                borderRadius: BorderRadius.circular(24.r),
+                borderRadius: BorderRadius.circular(20.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.blue.withOpacity(0.2),
-                    blurRadius: 10.r,
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 20.r,
                     offset: Offset(0, 4.h),
                   ),
                 ],
@@ -86,7 +86,7 @@ class _BackupPageState extends State<BackupPage> {
                         child: Container(
                           padding: EdgeInsets.all(4.w),
                           decoration: const BoxDecoration(
-                            color: Colors.green,
+                            color: const Color(0xFF10B981),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
@@ -160,7 +160,7 @@ class _BackupPageState extends State<BackupPage> {
                           value: 0.01,
                           backgroundColor: Colors.grey[700],
                           valueColor: const AlwaysStoppedAnimation<Color>(
-                            Colors.blue,
+                            Color(0xFF10B981),
                           ),
                           minHeight: 6.h,
                         ),
@@ -192,13 +192,13 @@ class _BackupPageState extends State<BackupPage> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2563EB),
+                  backgroundColor: const Color(0xFF111111),
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.r),
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
                   elevation: 4,
-                  shadowColor: Colors.blue.withOpacity(0.4),
+                  shadowColor: Colors.black.withOpacity(0.05),
                 ),
               ),
             ),
@@ -224,8 +224,8 @@ class _BackupPageState extends State<BackupPage> {
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    blurRadius: 4.r,
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8.r,
                     offset: Offset(0, 2.h),
                   ),
                 ],
@@ -296,10 +296,10 @@ class _BackupPageState extends State<BackupPage> {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(8.r),
+              color: const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20.sp),
+            child: Icon(icon, color: const Color(0xFF6B7280), size: 20.sp),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -315,7 +315,10 @@ class _BackupPageState extends State<BackupPage> {
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: const Color(0xFF9CA3AF),
+                  ),
                 ),
               ],
             ),
@@ -323,7 +326,7 @@ class _BackupPageState extends State<BackupPage> {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF2563EB),
+            activeColor: const Color(0xFF10B981),
           ),
         ],
       ),
@@ -346,10 +349,10 @@ class _BackupPageState extends State<BackupPage> {
             Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(8.r),
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: Icon(icon, color: Colors.grey[600], size: 20.sp),
+              child: Icon(icon, color: const Color(0xFF6B7280), size: 20.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -367,13 +370,17 @@ class _BackupPageState extends State<BackupPage> {
                 valueText,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: const Color(0xFF2563EB), // Blue text for value
+                  color: const Color(0xFF111111), // Primary dark for value
                   fontWeight: FontWeight.w600,
                 ),
               ),
               SizedBox(width: 8.w),
             ],
-            Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey[400]),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16.sp,
+              color: const Color(0xFF9CA3AF),
+            ),
           ],
         ),
       ),

@@ -12,8 +12,8 @@ class DebtItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SakuCard(
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.all(12.w),
       onTap: () {
         Navigator.push(
           context,
@@ -24,11 +24,11 @@ class DebtItem extends StatelessWidget {
         children: [
           // Avatar
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: _getAvatarBackgroundColor(debt.name).withOpacity(0.15),
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
               child: Text(
@@ -36,12 +36,12 @@ class DebtItem extends StatelessWidget {
                 style: TextStyle(
                   color: _getAvatarBackgroundColor(debt.name),
                   fontWeight: FontWeight.w700,
-                  fontSize: 16.sp,
+                  fontSize: 13.sp,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 14.w),
+          SizedBox(width: 10.w),
           // Name and date info
           Expanded(
             child: Column(
@@ -51,22 +51,22 @@ class DebtItem extends StatelessWidget {
                   debt.name,
                   style: TextStyle(
                     color: const Color(0xFF111111),
-                    fontSize: 15.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 3.h),
                 Row(
                   children: [
                     _buildStatusBadge(debt.status),
-                    SizedBox(width: 8.w),
+                    SizedBox(width: 6.w),
                     Text(
                       debt.status == DebtStatus.paid
                           ? _formatDate(debt.paidDate!)
                           : _formatDate(debt.dueDate),
                       style: TextStyle(
                         color: const Color(0xFF9CA3AF),
-                        fontSize: 12.sp,
+                        fontSize: 10.sp,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -85,7 +85,7 @@ class DebtItem extends StatelessWidget {
                   color: debt.type == 'debt'
                       ? const Color(0xFFEF4444)
                       : const Color(0xFF10B981),
-                  fontSize: 15.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -98,16 +98,16 @@ class DebtItem extends StatelessWidget {
 
   Widget _buildStatusBadge(DebtStatus status) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       decoration: BoxDecoration(
         color: _getStatusColor(status).withOpacity(0.15),
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Text(
         status.displayName,
         style: TextStyle(
           color: _getStatusColor(status),
-          fontSize: 11.sp,
+          fontSize: 10.sp,
           fontWeight: FontWeight.w600,
         ),
       ),

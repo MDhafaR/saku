@@ -28,7 +28,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '3'),
           ],
         ),
-        SizedBox(height: 10.h),
+        SizedBox(height: 8.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -37,7 +37,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '6'),
           ],
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 8.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -46,7 +46,7 @@ class CustomNumpad extends StatelessWidget {
             _buildNumberButton(context, '9'),
           ],
         ),
-        SizedBox(height: 16.h),
+        SizedBox(height: 8.h),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -56,7 +56,7 @@ class CustomNumpad extends StatelessWidget {
                 '000',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.w600,
-                  fontSize: 24.sp,
+                  fontSize: 18.sp,
                 ),
               ),
               onTap: () => onKeyPressed('000'),
@@ -67,7 +67,7 @@ class CustomNumpad extends StatelessWidget {
               child: Icon(
                 Icons.backspace_outlined,
                 color: Theme.of(context).iconTheme.color,
-                size: 24.sp,
+                size: 18.sp,
               ),
               onTap: onDelete,
             ),
@@ -84,7 +84,7 @@ class CustomNumpad extends StatelessWidget {
         value,
         style: Theme.of(context).textTheme.headlineMedium?.copyWith(
           fontWeight: FontWeight.w600,
-          fontSize: 24.sp,
+          fontSize: 18.sp,
         ),
       ),
       onTap: () => onKeyPressed(value),
@@ -97,15 +97,15 @@ class CustomNumpad extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Container(
-      width: 64.w, // Fixed width for consistency
-      height: 48.h,
+      width: 56.w, // Fixed width for consistency
+      height: 40.h,
       alignment: Alignment.center,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24.r),
+        borderRadius: BorderRadius.circular(20.r),
         child: Container(
-          width: 64.w,
-          height: 48.h,
+          width: 56.w,
+          height: 40.h,
           alignment: Alignment.center,
           child: child,
         ),

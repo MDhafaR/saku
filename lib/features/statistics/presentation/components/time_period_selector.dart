@@ -56,10 +56,10 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
     final selectedIndex = periods.indexOf(widget.selectedPeriod);
 
     return Container(
-      padding: EdgeInsets.all(4.w),
+      padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(30.r),
+        borderRadius: BorderRadius.circular(24.r),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -78,7 +78,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(24.r),
+                    borderRadius: BorderRadius.circular(20.r),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -104,8 +104,8 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          vertical: 10.h,
-                          horizontal: 4.w,
+                          vertical: 8.h,
+                          horizontal: 3.w,
                         ),
                         child: Text(
                           period,
@@ -114,7 +114,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                             color: isSelected
                                 ? const Color(0xFF111111)
                                 : const Color(0xFF9CA3AF),
-                            fontSize: 13.sp,
+                            fontSize: 11.sp,
                             fontWeight: isSelected
                                 ? FontWeight.w600
                                 : FontWeight.w500,

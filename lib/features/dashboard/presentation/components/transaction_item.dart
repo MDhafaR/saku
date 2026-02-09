@@ -33,19 +33,19 @@ class TransactionItem extends StatelessWidget {
           builder: (context) => _buildBottomSheet(context),
         );
       },
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       child: Row(
         children: [
           Container(
-            width: 48.w,
-            height: 48.w,
+            width: 36.w,
+            height: 36.w,
             decoration: BoxDecoration(
               color: backgroundColor.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(16.r),
+              borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: iconColor, size: 24.sp),
+            child: Icon(icon, color: iconColor, size: 18.sp),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 10.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,17 +53,17 @@ class TransactionItem extends StatelessWidget {
                 Text(
                   category,
                   style: TextStyle(
-                    fontSize: 16.sp,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
                     color: const Color(0xFF111111), // Darker black
-                    letterSpacing: -0.5,
+                    letterSpacing: -0.3,
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 2.h),
                 Text(
                   paymentMethod,
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 10.sp,
                     color: Colors.grey[500],
                     fontWeight: FontWeight.w500,
                   ),
@@ -74,12 +74,12 @@ class TransactionItem extends StatelessWidget {
           Text(
             amount,
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 13.sp,
               fontWeight: FontWeight.w800,
               color: isIncome
                   ? const Color(0xFF2E7D32)
                   : const Color(0xFFD32F2F),
-              letterSpacing: -0.5,
+              letterSpacing: -0.3,
             ),
           ),
         ],
@@ -91,129 +91,158 @@ class TransactionItem extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(32.r),
-        ), // More rounded top
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
-      padding: EdgeInsets.all(12.w),
+      padding: EdgeInsets.all(16.w),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag Handle
           Center(
             child: Container(
-              width: 48.w,
-              height: 5.h,
+              width: 40.w,
+              height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey[200], // Lighter handle
+                color: Colors.grey[300],
                 borderRadius: BorderRadius.circular(100.r),
               ),
             ),
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 16.h),
 
-          // Icon
-          Container(
-            width: 88.w,
-            height: 88.w,
-            decoration: BoxDecoration(
-              color: backgroundColor.withOpacity(
-                0.15,
-              ), // Consistent soft background
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: iconColor, size: 40.sp),
-          ),
-          SizedBox(height: 12.h),
-
-          // Amount
-          Text(
-            amount,
-            style: TextStyle(
-              fontSize: 36.sp, // Larger
-              fontWeight: FontWeight.w800, // Thicker
-              color: isIncome
-                  ? const Color(0xFF2E7D32)
-                  : const Color(0xFFD32F2F),
-              letterSpacing: -1.0,
-            ),
-          ),
-          SizedBox(height: 12.h),
-
-          // Voice Input Badge (Softened)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: const Color(
-                0xFFF3F4F6,
-              ), // Very light grey instead of purple for neutrality
-              borderRadius: BorderRadius.circular(100.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.mic_none_rounded,
-                  size: 16.sp,
-                  color: Colors.grey[700],
-                ), // Line icon
-                SizedBox(width: 8.w),
-                Text(
-                  "Voice Input",
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 12.h),
-
-          // Info Row (Date & Method) - Centered and Clean
+          // Header Row - Icon left, details right
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Today, 12:30 PM",
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  color: Colors.grey[400], // Softer grey
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              // Icon
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 12.w),
-                width: 4.w,
-                height: 4.w,
+                width: 52.w,
+                height: 52.w,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  shape: BoxShape.circle,
+                  color: backgroundColor.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(16.r),
                 ),
+                child: Icon(icon, color: iconColor, size: 26.sp),
               ),
-              Text(
-                paymentMethod,
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  color: Colors.grey[800], // Darker for emphasis
-                  fontWeight: FontWeight.w600,
+              SizedBox(width: 14.w),
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category & Amount Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          category,
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF111111),
+                          ),
+                        ),
+                        Text(
+                          amount,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w800,
+                            color: isIncome
+                                ? const Color(0xFF2E7D32)
+                                : const Color(0xFFD32F2F),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6.h),
+                    // Date & Method Row
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 12.sp,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          "Today, 12:30 PM",
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey[500],
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 8.w),
+                          width: 3.w,
+                          height: 3.w,
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        Icon(
+                          Icons.account_balance_wallet_outlined,
+                          size: 12.sp,
+                          color: Colors.grey[400],
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          paymentMethod,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: Colors.grey[600],
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
+                    // Voice Input Badge
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 4.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(100.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.mic_none_rounded,
+                            size: 12.sp,
+                            color: Colors.grey[600],
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            "Voice Input",
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              color: Colors.grey[700],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 14.h),
 
-          // Description Box (Cleaner, less boxy)
+          // Description Box
           Container(
             width: double.infinity,
-            padding: EdgeInsets.all(20.w),
+            padding: EdgeInsets.all(14.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFFAFAFA), // Almost white
-              borderRadius: BorderRadius.circular(24.r),
-              border: Border.all(
-                color: const Color(0xFFF0F0F0),
-              ), // Subtle border
+              color: const Color(0xFFFAFAFA),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(color: const Color(0xFFF0F0F0)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -221,18 +250,18 @@ class TransactionItem extends StatelessWidget {
                 Text(
                   "Team lunch at Saku Diner. Discussed Q4 marketing strategy with the creative team.",
                   style: TextStyle(
-                    fontSize: 15.sp,
+                    fontSize: 13.sp,
                     color: const Color(0xFF444444),
-                    height: 1.6,
+                    height: 1.5,
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                SizedBox(height: 20.h),
-                // Mock Image (Rounded)
+                SizedBox(height: 12.h),
+                // Mock Image
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(16.r),
+                  borderRadius: BorderRadius.circular(12.r),
                   child: Container(
-                    height: 140.h,
+                    height: 100.h,
                     width: double.infinity,
                     color: Colors.grey[100],
                     child: Stack(
@@ -245,21 +274,21 @@ class TransactionItem extends StatelessWidget {
                         ),
                         Center(
                           child: Container(
-                            padding: EdgeInsets.all(12.w),
+                            padding: EdgeInsets.all(10.w),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.9),
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 10,
+                                  blurRadius: 8,
                                 ),
                               ],
                             ),
                             child: Icon(
                               Icons.remove_red_eye_rounded,
                               color: Colors.black87,
-                              size: 24.sp,
+                              size: 18.sp,
                             ),
                           ),
                         ),
@@ -272,16 +301,16 @@ class TransactionItem extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // Action Buttons (Modern Pills)
+          // Action Buttons
           Row(
             children: [
               Expanded(
                 child: TextButton(
                   onPressed: () => Navigator.pop(context),
                   style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r),
+                      borderRadius: BorderRadius.circular(14.r),
                       side: BorderSide(color: Colors.grey[200]!, width: 1.5),
                     ),
                     overlayColor: Colors.grey[100],
@@ -289,40 +318,38 @@ class TransactionItem extends StatelessWidget {
                   child: Text(
                     "Edit",
                     style: TextStyle(
-                      color: Colors.black, // Stark black
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16.sp,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(
-                      0xFF111111,
-                    ), // Black instead of Red for modern monochrome feel
+                    backgroundColor: const Color(0xFF111111),
                     elevation: 0,
-                    padding: EdgeInsets.symmetric(vertical: 20.h),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20.r),
+                      borderRadius: BorderRadius.circular(14.r),
                     ),
                   ),
                   child: Text(
                     "Delete",
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
         ],
       ),
     );

@@ -166,7 +166,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       width: 40.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: const Color(0xFF9CA3AF),
                         borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
@@ -430,11 +430,11 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFF3E8FF)
-              : Colors.transparent, // Light Purple
+              ? const Color(0xFFF3F4F6)
+              : Colors.transparent, // Light Gray
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF8B5CF6) : Colors.transparent,
+            color: isSelected ? const Color(0xFF111111) : Colors.transparent,
           ),
         ),
         child: Row(
@@ -454,13 +454,13 @@ class _SettingsPageState extends State<SettingsPage> {
             if (isSelected)
               Icon(
                 Icons.radio_button_checked,
-                color: const Color(0xFF8B5CF6),
+                color: const Color(0xFF111111),
                 size: 24.sp,
               )
             else
               Icon(
                 Icons.radio_button_unchecked,
-                color: Colors.grey,
+                color: const Color(0xFF9CA3AF),
                 size: 24.sp,
               ),
           ],
@@ -500,10 +500,10 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             // Accounts Section
             Container(
-              padding: EdgeInsets.all(20.w),
+              padding: EdgeInsets.all(14.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.1),
@@ -538,16 +538,16 @@ class _SettingsPageState extends State<SettingsPage> {
                               'Accounts',
                               style: TextStyle(
                                 color: const Color(0xFF333333),
-                                fontSize: 18.sp,
+                                fontSize: 15.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(height: 4.h),
+                            SizedBox(height: 2.h),
                             Text(
                               'Total Balance',
                               style: TextStyle(
                                 color: const Color(0xFF666666),
-                                fontSize: 14.sp,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ],
@@ -558,34 +558,34 @@ class _SettingsPageState extends State<SettingsPage> {
                               'Rp ${_formatCurrency(totalBalance)}',
                               style: TextStyle(
                                 color: const Color(0xFF333333),
-                                fontSize: 20.sp,
+                                fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(width: 8.w),
+                            SizedBox(width: 6.w),
                             Icon(
                               Icons.arrow_forward_ios,
                               color: const Color(0xFF999999),
-                              size: 16.sp,
+                              size: 12.sp,
                             ),
                           ],
                         ),
                       ],
                     ),
-                    SizedBox(height: 20.h),
+                    SizedBox(height: 12.h),
                     // Display top 3 accounts (Preview, even if hidden? User said "in data but not read in total". Usually hidden wallets are hidden from lists too, but let's keep them visible in list for management, maybe with an icon. For preview, let's just show them all for now or filter. Let's show all but maybe with dimming or icon if I had design. User just said "not read in total balance".)
                     ...accounts
                         .take(3)
                         .map((account) => AccountCard(account: account)),
                     if (accounts.length > 3) ...[
                       Padding(
-                        padding: EdgeInsets.only(top: 8.0.h),
+                        padding: EdgeInsets.only(top: 6.0.h),
                         child: Center(
                           child: Text(
                             '+ ${accounts.length - 3} More',
                             style: TextStyle(
                               color: Colors.grey[500],
-                              fontSize: 12.sp,
+                              fontSize: 10.sp,
                               fontWeight: FontWeight.w500,
                             ),
                           ),

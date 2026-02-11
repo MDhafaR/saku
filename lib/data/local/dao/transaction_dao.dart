@@ -171,4 +171,64 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
             .get();
     return expenses.fold<double>(0.0, (double sum, t) => sum + t.amount);
   }
+
+  /// Get total amount per category for a date range and type
+  Future<List<TypedResult>> getCategoryBreakdown(
+    DateTime start,
+    DateTime end,
+    String type,
+  ) {
+    final amountSum = transactions.amount.sum();
+    final query = select(transactions).join([
+      innerJoin(categories, categories.id.equalsExp(transactions.categoryId)),
+    ]);
+
+    query.where(
+      transactions.type.equals(type) &
+          transactions.transactionDate.isBiggerOrEqualValue(start) &
+          transactions.transactionDate.isSmallerOrEqualValue(end),
+    );
+
+    query.addColumns([amountSum, categories.name, categories.iconColor]);
+    query.groupBy([transactions.categoryId]);
+    query.orderBy([OrderingTerm.desc(amountSum)]);
+
+    return query.get();
+  }
+
+  /// Get daily income/expense totals for a date range
+  Future<List<TypedResult>> getDailyStats(DateTime start, DateTime end) {
+    final amountSum = transactions.amount.sum();
+    // In Drift/SQLite, we can use date function to group by day
+    final date = transactions.transactionDate.date;
+
+    final query = select(transactions).join([]);
+    query.where(
+      transactions.transactionDate.isBiggerOrEqualValue(start) &
+          transactions.transactionDate.isSmallerOrEqualValue(end),
+    );
+
+    query.addColumns([amountSum, transactions.type, date]);
+    query.groupBy([date, transactions.type]);
+
+    return query.get();
+  }
+
+  /// Get monthly income/expense totals for a date range
+  Future<List<TypedResult>> getMonthlyStats(DateTime start, DateTime end) {
+    final amountSum = transactions.amount.sum();
+    // SQLite doesn't have a direct month function, but we can use strftime
+    final monthExpr = transactions.transactionDate.strftime('%Y-%m');
+
+    final query = select(transactions).join([]);
+    query.where(
+      transactions.transactionDate.isBiggerOrEqualValue(start) &
+          transactions.transactionDate.isSmallerOrEqualValue(end),
+    );
+
+    query.addColumns([amountSum, transactions.type, monthExpr]);
+    query.groupBy([monthExpr, transactions.type]);
+
+    return query.get();
+  }
 }

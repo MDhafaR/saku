@@ -1,42 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../cubit/statistics_state.dart';
+import '../../../../core/utils/currency_formatter.dart';
 
 class TopCategoriesWidget extends StatelessWidget {
-  const TopCategoriesWidget({super.key});
+  final List<CategoryBreakdownItem> categories;
+
+  const TopCategoriesWidget({super.key, required this.categories});
 
   @override
   Widget build(BuildContext context) {
-    final categories = [
-      {
-        'name': 'Food & Dining',
-        'amount': '\$850',
-        'percentage': '29.4%',
-        'color': const Color(0xFF3B82F6),
-      },
-      {
-        'name': 'Transportation',
-        'amount': '\$620',
-        'percentage': '21.5%',
-        'color': const Color(0xFF10B981),
-      },
-      {
-        'name': 'Shopping',
-        'amount': '\$480',
-        'percentage': '18.6%',
-        'color': const Color(0xFF8B5CF6),
-      },
-      {
-        'name': 'Entertainment',
-        'amount': '\$320',
-        'percentage': '11.1%',
-        'color': const Color(0xFFF59E0B),
-      },
-    ];
+    if (categories.isEmpty) {
+      return Container(
+        height: 100.h,
+        alignment: Alignment.center,
+        child: Text(
+          'No categories recorded',
+          style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
+        ),
+      );
+    }
 
     return Container(
       padding: EdgeInsets.all(12.w),
       child: Column(
-        children: categories.map((category) {
+        children: categories.take(5).map((category) {
           return Padding(
             padding: EdgeInsets.only(bottom: 10.h),
             child: Row(
@@ -45,14 +33,14 @@ class TopCategoriesWidget extends StatelessWidget {
                   width: 10.w,
                   height: 10.w,
                   decoration: BoxDecoration(
-                    color: category['color'] as Color,
+                    color: Color(category.color),
                     shape: BoxShape.circle,
                   ),
                 ),
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    category['name'] as String,
+                    category.name,
                     style: TextStyle(
                       color: const Color(0xFF1F2937),
                       fontSize: 12.sp,
@@ -61,7 +49,9 @@ class TopCategoriesWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  category['amount'] as String,
+                  CurrencyFormatter.formatRupiah(
+                    category.amount.toStringAsFixed(0),
+                  ),
                   style: TextStyle(
                     color: const Color(0xFF1F2937),
                     fontSize: 12.sp,
@@ -70,7 +60,7 @@ class TopCategoriesWidget extends StatelessWidget {
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  category['percentage'] as String,
+                  '${category.percentage.toStringAsFixed(1)}%',
                   style: TextStyle(
                     color: const Color(0xFF6B7280),
                     fontSize: 12.sp,

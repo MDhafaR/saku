@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:saku/features/dashboard/presentation/cubit/transaction_cubit.dart';
 import 'package:saku/features/debts/presentation/cubit/debt_cubit.dart';
+import 'package:saku/features/statistics/presentation/cubit/statistics_cubit.dart';
 import '../data/local/database/app_database.dart';
 
 final GetIt locator = GetIt.instance;
@@ -16,4 +17,7 @@ Future<void> setupLocator() async {
   );
 
   locator.registerFactory<DebtCubit>(() => DebtCubit(locator<AppDatabase>()));
+  locator.registerFactory<StatisticsCubit>(
+    () => StatisticsCubit(locator<AppDatabase>()),
+  );
 }

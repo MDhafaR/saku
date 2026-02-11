@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../cubit/statistics_state.dart';
 
 class DonutChartWidget extends StatefulWidget {
-  const DonutChartWidget({super.key});
+  final List<CategoryBreakdownItem> categories;
+
+  const DonutChartWidget({super.key, required this.categories});
 
   @override
   State<DonutChartWidget> createState() => _DonutChartWidgetState();
@@ -11,16 +14,20 @@ class DonutChartWidget extends StatefulWidget {
 class _DonutChartWidgetState extends State<DonutChartWidget> {
   int touchedIndex = -1;
 
-  final List<Map<String, dynamic>> categories = [
-    {'name': 'Makanan', 'value': 29.4, 'color': const Color(0xFF3B82F6)},
-    {'name': 'Transport', 'value': 21.5, 'color': const Color(0xFF10B981)},
-    {'name': 'Belanja', 'value': 18.6, 'color': const Color(0xFF8B5CF6)},
-    {'name': 'Hiburan', 'value': 11.1, 'color': const Color(0xFFF59E0B)},
-    {'name': 'Lainnya', 'value': 19.4, 'color': const Color(0xFF6B7280)},
-  ];
-
   @override
   Widget build(BuildContext context) {
+    if (widget.categories.isEmpty) {
+      return SizedBox(
+        height: 160,
+        child: Center(
+          child: Text(
+            'No data available',
+            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+          ),
+        ),
+      );
+    }
+
     return Container(
       height: 160,
       padding: const EdgeInsets.all(12),
@@ -45,12 +52,12 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
               ),
               sectionsSpace: 2,
               centerSpaceRadius: 45,
-              sections: List.generate(categories.length, (index) {
+              sections: List.generate(widget.categories.length, (index) {
                 final isTouched = index == touchedIndex;
-                final category = categories[index];
+                final category = widget.categories[index];
                 return PieChartSectionData(
-                  color: category['color'] as Color,
-                  value: category['value'] as double,
+                  color: Color(category.color),
+                  value: category.amount,
                   title: '',
                   radius: isTouched ? 48 : 40,
                   borderSide: isTouched
@@ -63,13 +70,13 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
           // Center text showing selected category
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
-            child: touchedIndex != -1
+            child: touchedIndex != -1 && touchedIndex < widget.categories.length
                 ? Column(
                     mainAxisSize: MainAxisSize.min,
                     key: ValueKey(touchedIndex),
                     children: [
                       Text(
-                        categories[touchedIndex]['name'] as String,
+                        widget.categories[touchedIndex].name,
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -78,7 +85,7 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        '${(categories[touchedIndex]['value'] as double).toStringAsFixed(1)}%',
+                        '${widget.categories[touchedIndex].percentage.toStringAsFixed(1)}%',
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -99,7 +106,7 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                           color: Color(0xFF6B7280),
                         ),
                       ),
-                      SizedBox(height: 2),
+                      const SizedBox(height: 2),
                       Text(
                         '100%',
                         style: TextStyle(

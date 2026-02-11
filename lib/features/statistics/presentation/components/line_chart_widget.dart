@@ -1,12 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import '../cubit/statistics_state.dart';
 
 class LineChartWidget extends StatelessWidget {
-  const LineChartWidget({super.key});
+  final List<ChartDataPoint> data;
+
+  const LineChartWidget({super.key, required this.data});
 
   @override
   Widget build(BuildContext context) {
+    if (data.isEmpty) {
+      return SizedBox(
+        height: 200.h,
+        child: const Center(child: Text('No data available')),
+      );
+    }
+
+    double maxVal = 0;
+    for (var point in data) {
+      if (point.income > maxVal) maxVal = point.income;
+      if (point.expense > maxVal) maxVal = point.expense;
+    }
+    // Add 20% buffer
+    maxVal = maxVal == 0 ? 10 : maxVal * 1.2;
+
     return Container(
       height: 200.h,
       padding: EdgeInsets.all(16.w),
@@ -17,25 +36,15 @@ class LineChartWidget extends StatelessWidget {
             leftTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 30.w,
+                reservedSize: 35.w,
                 getTitlesWidget: (value, meta) {
+                  if (value == 0) return const Text('');
                   final style = TextStyle(
                     color: const Color(0xFF6B7280),
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
                   );
-                  switch (value.toInt()) {
-                    case 2:
-                      return Text('2k', style: style);
-                    case 3:
-                      return Text('3k', style: style);
-                    case 4:
-                      return Text('4k', style: style);
-                    case 5:
-                      return Text('5k', style: style);
-                    default:
-                      return const Text('');
-                  }
+                  return Text(_formatValue(value), style: style);
                 },
               ),
             ),
@@ -50,27 +59,30 @@ class LineChartWidget extends StatelessWidget {
                 showTitles: true,
                 reservedSize: 30.h,
                 getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index < 0 || index >= data.length) return const Text('');
+
+                  // Show only 5-6 labels to avoid crowding
+                  final interval = (data.length / 5).ceil();
+                  if (index % interval != 0 && index != data.length - 1) {
+                    return const Text('');
+                  }
+
                   final style = TextStyle(
                     color: const Color(0xFF6B7280),
-                    fontSize: 12.sp,
+                    fontSize: 10.sp,
                     fontWeight: FontWeight.w500,
                   );
-                  switch (value.toInt()) {
-                    case 0:
-                      return Text('Jan', style: style);
-                    case 1:
-                      return Text('Feb', style: style);
-                    case 2:
-                      return Text('Mar', style: style);
-                    case 3:
-                      return Text('Apr', style: style);
-                    case 4:
-                      return Text('May', style: style);
-                    case 5:
-                      return Text('Jun', style: style);
-                    default:
-                      return const Text('');
+
+                  final date = data[index].date;
+                  String label;
+                  if (data.length <= 12) {
+                    label = DateFormat('MMM').format(date);
+                  } else {
+                    label = DateFormat('dd').format(date);
                   }
+
+                  return Text(label, style: style);
                 },
               ),
             ),
@@ -78,14 +90,11 @@ class LineChartWidget extends StatelessWidget {
           borderData: FlBorderData(show: false),
           lineBarsData: [
             LineChartBarData(
-              spots: const [
-                FlSpot(0, 3.1),
-                FlSpot(1, 3.3),
-                FlSpot(2, 3.8),
-                FlSpot(3, 4.0),
-                FlSpot(4, 4.2),
-                FlSpot(5, 4.5),
-              ],
+              spots: data
+                  .asMap()
+                  .entries
+                  .map((e) => FlSpot(e.key.toDouble(), e.value.income))
+                  .toList(),
               isCurved: true,
               color: const Color(0xFF10B981),
               barWidth: 3.w,
@@ -97,14 +106,11 @@ class LineChartWidget extends StatelessWidget {
               ),
             ),
             LineChartBarData(
-              spots: const [
-                FlSpot(0, 2.7),
-                FlSpot(1, 2.9),
-                FlSpot(2, 2.8),
-                FlSpot(3, 3.0),
-                FlSpot(4, 2.9),
-                FlSpot(5, 3.2),
-              ],
+              spots: data
+                  .asMap()
+                  .entries
+                  .map((e) => FlSpot(e.key.toDouble(), e.value.expense))
+                  .toList(),
               isCurved: true,
               color: const Color(0xFFEF4444),
               barWidth: 3.w,
@@ -116,8 +122,19 @@ class LineChartWidget extends StatelessWidget {
               ),
             ),
           ],
+          minY: 0,
+          maxY: maxVal,
         ),
       ),
     );
+  }
+
+  String _formatValue(double value) {
+    if (value >= 1000000) {
+      return '${(value / 1000000).toStringAsFixed(1)}M';
+    } else if (value >= 1000) {
+      return '${(value / 1000).toStringAsFixed(0)}k';
+    }
+    return value.toStringAsFixed(0);
   }
 }

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme_service.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/presentation/components/financial_summary_card.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/injection.dart';
 import '../components/time_period_selector.dart';
 import '../components/line_chart_widget.dart';
 import '../components/bar_chart_widget.dart';
 import '../components/donut_chart_widget.dart';
 import '../components/top_categories_widget.dart';
+import '../cubit/statistics_cubit.dart';
+import '../cubit/statistics_state.dart' as state;
 import 'category_detail_page.dart';
 
 class StatisticsPage extends StatefulWidget {
@@ -18,251 +23,304 @@ class StatisticsPage extends StatefulWidget {
 }
 
 class _StatisticsPageState extends State<StatisticsPage> {
-  String selectedPeriod = 'Daily';
   bool isLineChart = true; // true = line chart, false = bar chart
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA), // Global "Clean & Airy" bg
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(
-            20.w,
-            20.h,
-            20.w,
-            140.h,
-          ), // Extra bottom padding for navigation bar
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Statistics',
-                    style: TextStyle(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.w800, // Thicker
-                      color: const Color(0xFF111111), // Darker Black
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () async {
-                      await ThemeService.toggleTheme();
-                      if (mounted) {
-                        setState(() {});
-                      }
-                    },
-                    icon: Icon(
-                      ThemeService.isLightMode ? Icons.dark_mode : Icons.sunny,
-                      color: const Color(0xFFF59E0B),
-                      size: 20.sp,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16.h),
-
-              // Time Period Selector
-              TimePeriodSelector(
-                selectedPeriod: selectedPeriod,
-                onPeriodChanged: (period) {
-                  setState(() {
-                    selectedPeriod = period;
-                  });
-                },
-              ),
-              SizedBox(height: 16.h),
-
-              // Summary Cards
-              Row(
-                children: [
-                  Expanded(
-                    child: FinancialSummaryCard(
-                      title: 'Income',
-                      amount: '\$4,250',
-                      percentage: '+12.5%',
-                      icon: Icons.trending_up,
-                      iconColor: const Color(0xFF10B981),
-                      backgroundColor: const Color(0xFF10B981),
-                      percentageColor: const Color(0xFF10B981),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: FinancialSummaryCard(
-                      title: 'Expense',
-                      amount: '\$2,890',
-                      percentage: '-8.2%',
-                      icon: Icons.trending_down,
-                      iconColor: const Color(0xFFEF4444),
-                      backgroundColor: const Color(0xFFEF4444),
-                      percentageColor: const Color(0xFFEF4444),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: FinancialSummaryCard(
-                      title: 'Total',
-                      amount: '\$1,360',
-                      percentage: '+4.3%',
-                      icon: Icons.account_balance_wallet,
-                      iconColor: const Color(0xFF6366F1),
-                      backgroundColor: const Color(0xFF6366F1),
-                      percentageColor: const Color(0xFF6366F1),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-
-              // Income vs Expense Chart
-              SakuCard(
+    return BlocProvider(
+      create: (context) => locator<StatisticsCubit>()..loadStatistics('Daily'),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFAFAFA),
+        body: SafeArea(
+          child: BlocBuilder<StatisticsCubit, state.StatisticsState>(
+            builder: (context, s) {
+              return SingleChildScrollView(
+                padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 140.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Header
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Income vs Expense',
+                          'Statistics',
                           style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w800,
                             color: const Color(0xFF111111),
                             letterSpacing: -0.5,
                           ),
                         ),
-                        Row(
+                        IconButton(
+                          onPressed: () async {
+                            await ThemeService.toggleTheme();
+                            if (mounted) {
+                              setState(() {});
+                            }
+                          },
+                          icon: Icon(
+                            ThemeService.isLightMode
+                                ? Icons.dark_mode
+                                : Icons.sunny,
+                            color: const Color(0xFFF59E0B),
+                            size: 20.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // Time Period Selector
+                    TimePeriodSelector(
+                      selectedPeriod: s is state.StatisticsLoaded
+                          ? s.period
+                          : 'Daily',
+                      onPeriodChanged: (period) {
+                        context.read<StatisticsCubit>().loadStatistics(period);
+                      },
+                      onCustomDateSelected: (range) {
+                        context.read<StatisticsCubit>().loadStatistics(
+                          'Custom',
+                          customRange: state.AppDateTimeRange(
+                            start: range.start,
+                            end: range.end,
+                          ),
+                        );
+                      },
+                    ),
+                    SizedBox(height: 16.h),
+
+                    if (s is state.StatisticsLoading)
+                      SizedBox(
+                        height: 400.h,
+                        child: const Center(child: CircularProgressIndicator()),
+                      )
+                    else if (s is state.StatisticsError)
+                      SizedBox(
+                        height: 400.h,
+                        child: Center(child: Text(s.message)),
+                      )
+                    else if (s is state.StatisticsLoaded) ...[
+                      // Summary Cards
+                      Row(
+                        children: [
+                          Expanded(
+                            child: FinancialSummaryCard(
+                              title: 'Income',
+                              amount: CurrencyFormatter.formatRupiah(
+                                s.totalIncome.toStringAsFixed(0),
+                              ),
+                              percentage: _formatPercentage(s.incomePercentage),
+                              icon: Icons.trending_up,
+                              iconColor: const Color(0xFF10B981),
+                              backgroundColor: const Color(0xFF10B981),
+                              percentageColor: s.incomePercentage >= 0
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: FinancialSummaryCard(
+                              title: 'Expense',
+                              amount: CurrencyFormatter.formatRupiah(
+                                s.totalExpense.toStringAsFixed(0),
+                              ),
+                              percentage: _formatPercentage(
+                                s.expensePercentage,
+                              ),
+                              icon: Icons.trending_down,
+                              iconColor: const Color(0xFFEF4444),
+                              backgroundColor: const Color(0xFFEF4444),
+                              percentageColor: s.expensePercentage <= 0
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: FinancialSummaryCard(
+                              title: 'Total',
+                              amount: CurrencyFormatter.formatRupiah(
+                                s.totalBalance.toStringAsFixed(0),
+                              ),
+                              percentage: _formatPercentage(s.totalPercentage),
+                              icon: Icons.account_balance_wallet,
+                              iconColor: const Color(0xFF6366F1),
+                              backgroundColor: const Color(0xFF6366F1),
+                              percentageColor: s.totalPercentage >= 0
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFFEF4444),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 12.h),
+
+                      // Income vs Expense Chart
+                      SakuCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            GestureDetector(
-                              onTap: () => setState(() => isLineChart = true),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: EdgeInsets.all(6.w),
-                                decoration: BoxDecoration(
-                                  color: isLineChart
-                                      ? const Color(0xFF111111)
-                                      : const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(8.r),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Income vs Expense',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF111111),
+                                    letterSpacing: -0.5,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.show_chart,
-                                  color: isLineChart
-                                      ? Colors.white
-                                      : const Color(0xFF6B7280),
-                                  size: 14.sp,
+                                Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () =>
+                                          setState(() => isLineChart = true),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        padding: EdgeInsets.all(6.w),
+                                        decoration: BoxDecoration(
+                                          color: isLineChart
+                                              ? const Color(0xFF111111)
+                                              : const Color(0xFFF3F4F6),
+                                          borderRadius: BorderRadius.circular(
+                                            8.r,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.show_chart,
+                                          color: isLineChart
+                                              ? Colors.white
+                                              : const Color(0xFF6B7280),
+                                          size: 14.sp,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          setState(() => isLineChart = false),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 200,
+                                        ),
+                                        padding: EdgeInsets.all(6.w),
+                                        decoration: BoxDecoration(
+                                          color: !isLineChart
+                                              ? const Color(0xFF111111)
+                                              : const Color(0xFFF3F4F6),
+                                          borderRadius: BorderRadius.circular(
+                                            6.r,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.bar_chart,
+                                          color: !isLineChart
+                                              ? Colors.white
+                                              : const Color(0xFF6B7280),
+                                          size: 14.sp,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                            isLineChart
+                                ? LineChartWidget(data: s.chartData)
+                                : BarChartWidget(data: s.chartData),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+
+                      // Category Breakdown
+                      SakuCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Category Breakdown',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF111111),
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const CategoryDetailPage(),
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                    'View Details',
+                                    style: TextStyle(
+                                      fontSize: 12.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF111111),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12.h),
+                            DonutChartWidget(categories: s.categoryBreakdown),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+
+                      // Top Categories
+                      SakuCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Top Categories',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF111111),
+                                letterSpacing: -0.5,
                               ),
                             ),
-                            SizedBox(width: 6.w),
-                            GestureDetector(
-                              onTap: () => setState(() => isLineChart = false),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: EdgeInsets.all(6.w),
-                                decoration: BoxDecoration(
-                                  color: !isLineChart
-                                      ? const Color(0xFF111111)
-                                      : const Color(0xFFF3F4F6),
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                                child: Icon(
-                                  Icons.bar_chart,
-                                  color: !isLineChart
-                                      ? Colors.white
-                                      : const Color(0xFF6B7280),
-                                  size: 14.sp,
-                                ),
-                              ),
+                            SizedBox(height: 12.h),
+                            TopCategoriesWidget(
+                              categories: s.categoryBreakdown,
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    isLineChart
-                        ? const LineChartWidget()
-                        : const BarChartWidget(),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12.h),
-
-              // Category Breakdown
-              // Category Breakdown
-              SakuCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Category Breakdown',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111111),
-                            letterSpacing: -0.5,
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const CategoryDetailPage(),
-                              ),
-                            );
-                          },
-                          child: Text(
-                            'View Details',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(
-                                0xFF111111,
-                              ), // Dark to match design system
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    const DonutChartWidget(),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12.h),
-
-              // Top Categories
-              SakuCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Top Categories',
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xFF111111),
-                        letterSpacing: -0.5,
                       ),
-                    ),
-                    SizedBox(height: 12.h),
-                    const TopCategoriesWidget(),
+                    ],
                   ],
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
     );
+  }
+
+  String _formatPercentage(double percentage) {
+    if (percentage == 0) return '0%';
+    final sign = percentage > 0 ? '+' : '';
+    return '$sign${percentage.toStringAsFixed(1)}%';
   }
 }

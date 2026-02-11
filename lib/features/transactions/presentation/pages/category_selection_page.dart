@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/injection.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../data/local/database/app_database.dart';
 
 class CategorySelectionPage extends StatefulWidget {
   final bool isExpense;
@@ -12,69 +14,52 @@ class CategorySelectionPage extends StatefulWidget {
 }
 
 class _CategorySelectionPageState extends State<CategorySelectionPage> {
-  final List<Map<String, dynamic>> _expenseCategories = [
-    {
-      'name': 'Makanan & Minuman',
-      'icon': Icons.fastfood,
-      'color': const Color(0xFFF87171),
-    },
-    {
-      'name': 'Transportasi',
-      'icon': Icons.directions_bus,
-      'color': const Color(0xFF34D399),
-    },
-    {
-      'name': 'Belanja Bulanan',
-      'icon': Icons.shopping_bag,
-      'color': const Color(0xFFFBBF24),
-    },
-    {
-      'name': 'Hiburan & Hobi',
-      'icon': Icons.movie,
-      'color': const Color(0xFF818CF8),
-    },
-    {
-      'name': 'Tagihan Rumah',
-      'icon': Icons.home,
-      'color': const Color(0xFFFB923C),
-    },
-    {
-      'name': 'Kesehatan',
-      'icon': Icons.medical_services,
-      'color': const Color(0xFFF87171),
-    },
-    {
-      'name': 'Pendidikan',
-      'icon': Icons.school,
-      'color': const Color(0xFF3B82F6),
-    },
-  ];
+  List<Category> _categories = [];
+  bool _isLoading = true;
 
-  final List<Map<String, dynamic>> _incomeCategories = [
-    {
-      'name': 'Gaji',
-      'icon': Icons.attach_money,
-      'color': const Color(0xFF10B981),
-    },
-    {
-      'name': 'Hadiah',
-      'icon': Icons.card_giftcard,
-      'color': const Color(0xFFF472B6),
-    },
-    {
-      'name': 'Investasi',
-      'icon': Icons.trending_up,
-      'color': const Color(0xFF3B82F6),
-    },
-    {'name': 'Bonus', 'icon': Icons.stars, 'color': const Color(0xFFFBBF24)},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final db = locator<AppDatabase>();
+    final type = widget.isExpense ? 'expense' : 'income';
+    final categories = await db.categoryDao.getCategoriesByType(type);
+    setState(() {
+      _categories = categories;
+      _isLoading = false;
+    });
+  }
+
+  IconData _iconFromName(String name) {
+    const iconMap = {
+      'restaurant': Icons.restaurant,
+      'directions_car': Icons.directions_car,
+      'shopping_cart': Icons.shopping_cart,
+      'receipt': Icons.receipt,
+      'movie': Icons.movie,
+      'medical_services': Icons.medical_services,
+      'school': Icons.school,
+      'flight': Icons.flight,
+      'payments': Icons.payments,
+      'business': Icons.business,
+      'card_giftcard': Icons.card_giftcard,
+      'trending_up': Icons.trending_up,
+      'category': Icons.category,
+      'fastfood': Icons.fastfood,
+      'directions_bus': Icons.directions_bus,
+      'shopping_bag': Icons.shopping_bag,
+      'home': Icons.home,
+      'attach_money': Icons.attach_money,
+      'stars': Icons.stars,
+    };
+    return iconMap[name] ?? Icons.category;
+  }
 
   @override
   Widget build(BuildContext context) {
-    final categories = widget.isExpense
-        ? _expenseCategories
-        : _incomeCategories;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
@@ -105,81 +90,86 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
 
           // Category List
           Expanded(
-            child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 0),
-              itemCount: categories.length,
-              separatorBuilder: (context, index) => SizedBox(height: 12.h),
-              itemBuilder: (context, index) {
-                final category = categories[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.pop(context, {
-                      'name': category['name'],
-                      'icon': category['icon'],
-                      'color': category['color'],
-                      'isExpense': widget.isExpense,
-                    });
-                  },
-                  child: Container(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.separated(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 16.h,
+                      horizontal: 20.w,
+                      vertical: 0,
                     ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.05),
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                      border: Border.all(color: Colors.grey[100]!),
-                    ),
-                    child: Row(
-                      children: [
-                        // Icon
-                        Container(
-                          width: 44.w,
-                          height: 44.w,
+                    itemCount: _categories.length,
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 12.h),
+                    itemBuilder: (context, index) {
+                      final category = _categories[index];
+                      final color = Color(category.iconColor);
+                      final icon = _iconFromName(category.icon);
+
+                      return GestureDetector(
+                        onTap: () {
+                          // Return the category data
+                          Navigator.pop(context, {
+                            'id': category.id,
+                            'name': category.name,
+                            'icon': icon,
+                            'color': color,
+                            'isExpense': widget.isExpense,
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                            vertical: 16.h,
+                          ),
                           decoration: BoxDecoration(
-                            color: (category['color'] as Color).withOpacity(
-                              0.2,
-                            ),
-                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.05),
+                                spreadRadius: 1,
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                            border: Border.all(color: Colors.grey[100]!),
                           ),
-                          child: Icon(
-                            category['icon'] as IconData,
-                            color: category['color'] as Color,
-                            size: 22.sp,
+                          child: Row(
+                            children: [
+                              // Icon
+                              Container(
+                                width: 44.w,
+                                height: 44.w,
+                                decoration: BoxDecoration(
+                                  color: color.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(icon, color: color, size: 22.sp),
+                              ),
+                              SizedBox(width: 16.w),
+                              // Name
+                              Expanded(
+                                child: Text(
+                                  category.name,
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: const Color(0xFF1F2937),
+                                  ),
+                                ),
+                              ),
+                              // Arrow
+                              Icon(
+                                Icons.chevron_right,
+                                color: Colors.grey[400],
+                                size: 24.sp,
+                              ),
+                            ],
                           ),
                         ),
-                        SizedBox(width: 16.w),
-                        // Name
-                        Expanded(
-                          child: Text(
-                            category['name'] as String,
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF1F2937),
-                            ),
-                          ),
-                        ),
-                        // Arrow
-                        Icon(
-                          Icons.chevron_right,
-                          color: Colors.grey[400],
-                          size: 24.sp,
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),

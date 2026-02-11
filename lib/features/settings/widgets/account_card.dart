@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../domain/entities/account.dart';
+import '../../../data/local/database/app_database.dart';
 
 class AccountCard extends StatelessWidget {
-  final Account account;
+  final Wallet wallet;
 
-  const AccountCard({super.key, required this.account});
+  const AccountCard({super.key, required this.wallet});
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +31,11 @@ class AccountCard extends StatelessWidget {
             width: 32.w,
             height: 32.w,
             decoration: BoxDecoration(
-              color: account.iconColor,
+              color: Color(wallet.iconColor),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
-              _getIconData(account.iconPath),
+              _getIconData(wallet.icon),
               color: Colors.white,
               size: 16.sp,
             ),
@@ -47,7 +47,7 @@ class AccountCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  account.name,
+                  wallet.name,
                   style: TextStyle(
                     color: const Color(0xFF333333),
                     fontSize: 13.sp,
@@ -55,7 +55,7 @@ class AccountCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp ${_formatCurrency(account.balance)}',
+                  'Rp ${_formatCurrency(wallet.currentBalance)}',
                   style: TextStyle(
                     color: const Color(0xFF666666),
                     fontSize: 11.sp,
@@ -81,9 +81,9 @@ class AccountCard extends StatelessWidget {
         return Icons.account_balance_wallet;
       case 'bank':
         return Icons.account_balance;
-      case 'ovo':
+      case 'payment':
         return Icons.payment;
-      case 'dana':
+      case 'mobile':
         return Icons.mobile_friendly;
       default:
         return Icons.account_balance_wallet;

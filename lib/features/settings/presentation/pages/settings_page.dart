@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/injection.dart';
+import '../../../../data/local/database/app_database.dart';
 import '../../../../domain/entities/account.dart';
 
 import '../../widgets/settings_item.dart';
@@ -21,41 +23,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  // Sample data untuk accounts
-  List<Account> accounts = [
-    Account(
-      id: '1',
-      name: 'Cash Wallet',
-      type: 'cash',
-      balance: 1200000,
-      iconPath: 'wallet',
-      iconColor: const Color(0xFF10B981),
-    ),
-    Account(
-      id: '2',
-      name: 'BCA Bank',
-      type: 'bank',
-      balance: 3500000,
-      iconPath: 'bank',
-      iconColor: const Color(0xFF3B82F6),
-    ),
-    Account(
-      id: '3',
-      name: 'OVO',
-      type: 'ewallet',
-      balance: 520000,
-      iconPath: 'ovo',
-      iconColor: const Color(0xFF8A2BE2),
-    ),
-    Account(
-      id: '4',
-      name: 'DANA',
-      type: 'ewallet',
-      balance: 200000,
-      iconPath: 'dana',
-      iconColor: const Color(0xFFF59E0B),
-    ),
-  ];
+  late final Stream<List<Wallet>> _walletsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _walletsStream = locator<AppDatabase>().walletDao.watchAllWallets();
+  }
 
   // Sample data untuk settings items
   final List<SettingsItem> settingsItems = [
@@ -133,15 +107,6 @@ class _SettingsPageState extends State<SettingsPage> {
       iconColor: const Color(0xFF9CA3AF),
     ),
   ];
-
-  void _updateAccount(Account updatedAccount) {
-    setState(() {
-      final index = accounts.indexWhere((a) => a.id == updatedAccount.id);
-      if (index != -1) {
-        accounts[index] = updatedAccount;
-      }
-    });
-  }
 
   String _selectedLanguage = 'English'; // Default
 
@@ -471,11 +436,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate total balance excluding hidden accounts
-    final totalBalance = accounts
-        .where((a) => !a.isHidden)
-        .fold<double>(0, (sum, account) => sum + account.balance);
-
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -498,103 +458,113 @@ class _SettingsPageState extends State<SettingsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Accounts Section
-            Container(
-              padding: EdgeInsets.all(14.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    spreadRadius: 1,
-                    blurRadius: 8,
-                    offset: Offset(0, 4.h),
+            // Accounts Section - loaded from database
+            StreamBuilder<List<Wallet>>(
+              stream: _walletsStream,
+              builder: (context, snapshot) {
+                final wallets = snapshot.data ?? [];
+                final totalBalance = wallets
+                    .where((w) => !w.isHidden)
+                    .fold<double>(0, (sum, w) => sum + w.currentBalance);
+
+                return Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 12.h,
                   ),
-                ],
-              ),
-              child: InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WalletListPage(
-                        accounts: accounts,
-                        onAccountUpdate: _updateAccount,
-                      ),
-                    ),
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Accounts',
-                              style: TextStyle(
-                                color: const Color(0xFF333333),
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              'Total Balance',
-                              style: TextStyle(
-                                color: const Color(0xFF666666),
-                                fontSize: 11.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              'Rp ${_formatCurrency(totalBalance)}',
-                              style: TextStyle(
-                                color: const Color(0xFF333333),
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 6.w),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: const Color(0xFF999999),
-                              size: 12.sp,
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12.h),
-                    // Display top 3 accounts (Preview, even if hidden? User said "in data but not read in total". Usually hidden wallets are hidden from lists too, but let's keep them visible in list for management, maybe with an icon. For preview, let's just show them all for now or filter. Let's show all but maybe with dimming or icon if I had design. User just said "not read in total balance".)
-                    ...accounts
-                        .take(3)
-                        .map((account) => AccountCard(account: account)),
-                    if (accounts.length > 3) ...[
-                      Padding(
-                        padding: EdgeInsets.only(top: 6.0.h),
-                        child: Center(
-                          child: Text(
-                            '+ ${accounts.length - 3} More',
-                            style: TextStyle(
-                              color: Colors.grey[500],
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12.r),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 8,
+                        offset: Offset(0, 4.h),
                       ),
                     ],
-                  ],
-                ),
-              ),
+                  ),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const WalletListPage(),
+                        ),
+                      );
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Wallet',
+                                  style: TextStyle(
+                                    color: const Color(0xFF333333),
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  'Total Balance',
+                                  style: TextStyle(
+                                    color: const Color(0xFF666666),
+                                    fontSize: 11.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Rp ${_formatCurrency(totalBalance)}',
+                                  style: TextStyle(
+                                    color: const Color(0xFF333333),
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(width: 6.w),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: const Color(0xFF999999),
+                                  size: 12.sp,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                        // Display top 3 wallets preview
+                        ...wallets
+                            .take(3)
+                            .map((wallet) => AccountCard(wallet: wallet)),
+                        if (wallets.length > 3) ...[
+                          Padding(
+                            padding: EdgeInsets.only(top: 6.0.h),
+                            child: Center(
+                              child: Text(
+                                '+ ${wallets.length - 3} More',
+                                style: TextStyle(
+                                  color: Colors.grey[500],
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
             SizedBox(height: 24.h),
 

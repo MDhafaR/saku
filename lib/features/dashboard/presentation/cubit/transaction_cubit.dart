@@ -1,26 +1,21 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../domain/entities/transaction.dart';
-import '../../../../domain/usecases/get_transactions.dart';
-import '../../../../domain/usecases/upsert_transaction.dart';
-import '../../../../core/injection.dart';
+import '../../../../data/local/database/app_database.dart';
 import 'transaction_state.dart';
 
 class TransactionCubit extends Cubit<TransactionState> {
-  final GetTransactions _getTransactions;
-  final UpsertTransaction _upsertTransaction;
+  final AppDatabase _db;
   StreamSubscription<List<Transaction>>? _subscription;
 
-  TransactionCubit()
-      : _getTransactions = locator<GetTransactions>(),
-        _upsertTransaction = locator<UpsertTransaction>(),
-        super(const TransactionInitial());
+  TransactionCubit(this._db) : super(const TransactionInitial());
 
+  /// Start listening to transactions from database
   void start() {
     emit(const TransactionLoading());
     _subscription?.cancel();
-    _subscription = _getTransactions().listen(
+    _subscription = _db.transactionDao.watchAllTransactions().listen(
       (transactions) {
         emit(TransactionLoaded(transactions));
       },
@@ -30,8 +25,46 @@ class TransactionCubit extends Cubit<TransactionState> {
     );
   }
 
-  Future<void> addTransaction(Transaction transaction) async {
-    await _upsertTransaction(transaction);
+  /// Create a new transaction
+  Future<int> addTransaction({
+    required int walletId,
+    required int categoryId,
+    required double amount,
+    required String type,
+    required DateTime transactionDate,
+    String description = '',
+    String? note,
+  }) async {
+    final entry = TransactionsCompanion.insert(
+      walletId: walletId,
+      categoryId: categoryId,
+      amount: amount,
+      type: type,
+      transactionDate: transactionDate,
+      description: Value(description),
+      note: Value(note),
+    );
+    return _db.transactionDao.createTransaction(entry);
+  }
+
+  /// Update an existing transaction
+  Future<bool> updateTransaction(Transaction transaction) async {
+    return _db.transactionDao.updateTransaction(transaction);
+  }
+
+  /// Delete a transaction
+  Future<int> deleteTransaction(int id) async {
+    return _db.transactionDao.deleteTransaction(id);
+  }
+
+  /// Get all categories by type
+  Future<List<Category>> getCategories(String type) {
+    return _db.categoryDao.getCategoriesByType(type);
+  }
+
+  /// Get all wallets
+  Future<List<Wallet>> getWallets() {
+    return _db.walletDao.getAllWallets();
   }
 
   @override

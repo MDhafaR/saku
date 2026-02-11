@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../domain/entities/account.dart';
+import '../../../../core/injection.dart';
+import '../../../../data/local/database/app_database.dart';
 import '../../widgets/account_card.dart';
+import 'add_edit_wallet_page.dart';
 import 'wallet_detail_page.dart';
 
-class WalletListPage extends StatelessWidget {
-  final List<Account> accounts;
-  final Function(Account) onAccountUpdate;
+class WalletListPage extends StatefulWidget {
+  const WalletListPage({super.key});
 
-  const WalletListPage({
-    super.key,
-    required this.accounts,
-    required this.onAccountUpdate,
-  });
+  @override
+  State<WalletListPage> createState() => _WalletListPageState();
+}
+
+class _WalletListPageState extends State<WalletListPage> {
+  late final Stream<List<Wallet>> _walletsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _walletsStream = locator<AppDatabase>().walletDao.watchAllWallets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,31 +47,87 @@ class WalletListPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          children: accounts
-              .map(
-                (account) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => WalletDetailPage(
-                          account: account,
-                          onUpdate: onAccountUpdate,
-                        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddEditWalletPage()),
+          );
+        },
+        backgroundColor: const Color(0xFF111111),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+      body: StreamBuilder<List<Wallet>>(
+        stream: _walletsStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final wallets = snapshot.data ?? [];
+
+          if (wallets.isEmpty) {
+            return _buildEmptyState();
+          }
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(20.w),
+            child: Column(
+              children: wallets
+                  .map(
+                    (wallet) => GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WalletDetailPage(wallet: wallet),
+                          ),
+                        );
+                      },
+                      child: Opacity(
+                        opacity: wallet.isHidden ? 0.6 : 1.0,
+                        child: AccountCard(wallet: wallet),
                       ),
-                    );
-                  },
-                  child: Opacity(
-                    opacity: account.isHidden ? 0.6 : 1.0,
-                    child: AccountCard(account: account),
-                  ),
-                ),
-              )
-              .toList(),
-        ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 72.sp,
+            color: Colors.grey[300],
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            'Belum ada wallet',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey[500],
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40.w),
+            child: Text(
+              'Tambahkan wallet pertamamu dengan menekan tombol + di bawah',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
+            ),
+          ),
+        ],
       ),
     );
   }

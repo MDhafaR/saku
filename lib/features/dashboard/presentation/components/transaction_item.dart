@@ -1,26 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../data/local/database/app_database.dart';
+import '../../../transactions/presentation/pages/add_transaction_page.dart';
 
 class TransactionItem extends StatelessWidget {
-  final String category;
-  final String paymentMethod;
-  final String amount;
-  final IconData icon;
-  final Color iconColor;
-  final Color backgroundColor;
-  final bool isIncome;
+  final Transaction transaction;
+  final Category? category;
+  final Wallet? wallet;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
   const TransactionItem({
     super.key,
-    required this.category,
-    required this.paymentMethod,
-    required this.amount,
-    required this.icon,
-    required this.iconColor,
-    required this.backgroundColor,
-    this.isIncome = false,
+    required this.transaction,
+    this.category,
+    this.wallet,
+    this.onDelete,
+    this.onEdit,
   });
+
+  bool get isIncome => transaction.type == 'income';
+
+  String get _formattedAmount {
+    final formatted = CurrencyFormatter.format(
+      transaction.amount.toStringAsFixed(0),
+    );
+    return isIncome ? '+Rp $formatted' : '-Rp $formatted';
+  }
+
+  IconData get _icon {
+    // Map category icon name to IconData
+    final iconName = category?.icon ?? 'category';
+    return _iconFromName(iconName);
+  }
+
+  Color get _iconColor {
+    return Color(category?.iconColor ?? 0xFF2196F3);
+  }
+
+  Color get _backgroundColor {
+    return _iconColor.withOpacity(0.15);
+  }
+
+  static IconData _iconFromName(String name) {
+    const iconMap = {
+      'restaurant': Icons.restaurant,
+      'directions_car': Icons.directions_car,
+      'shopping_cart': Icons.shopping_cart,
+      'receipt': Icons.receipt,
+      'movie': Icons.movie,
+      'medical_services': Icons.medical_services,
+      'school': Icons.school,
+      'flight': Icons.flight,
+      'payments': Icons.payments,
+      'business': Icons.business,
+      'card_giftcard': Icons.card_giftcard,
+      'trending_up': Icons.trending_up,
+      'category': Icons.category,
+    };
+    return iconMap[name] ?? Icons.category;
+  }
+
+  String _formatDateTime() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+    final transactionDay = DateTime(
+      transaction.transactionDate.year,
+      transaction.transactionDate.month,
+      transaction.transactionDate.day,
+    );
+
+    String dateLabel;
+    if (transactionDay == today) {
+      dateLabel = 'Hari ini';
+    } else if (transactionDay == yesterday) {
+      dateLabel = 'Kemarin';
+    } else {
+      dateLabel = DateFormat(
+        'dd MMM yyyy',
+        'id',
+      ).format(transaction.transactionDate);
+    }
+
+    final timeLabel = DateFormat('HH:mm').format(transaction.transactionDate);
+    return '$dateLabel, $timeLabel';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +108,10 @@ class TransactionItem extends StatelessWidget {
             width: 36.w,
             height: 36.w,
             decoration: BoxDecoration(
-              color: backgroundColor.withOpacity(0.15),
+              color: _backgroundColor,
               borderRadius: BorderRadius.circular(10.r),
             ),
-            child: Icon(icon, color: iconColor, size: 18.sp),
+            child: Icon(_icon, color: _iconColor, size: 18.sp),
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -51,17 +119,17 @@ class TransactionItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  category,
+                  category?.name ?? 'Uncategorized',
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111111), // Darker black
+                    color: const Color(0xFF111111),
                     letterSpacing: -0.3,
                   ),
                 ),
                 SizedBox(height: 2.h),
                 Text(
-                  paymentMethod,
+                  wallet?.name ?? 'Unknown Wallet',
                   style: TextStyle(
                     fontSize: 10.sp,
                     color: Colors.grey[500],
@@ -72,7 +140,7 @@ class TransactionItem extends StatelessWidget {
             ),
           ),
           Text(
-            amount,
+            _formattedAmount,
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w800,
@@ -119,10 +187,10 @@ class TransactionItem extends StatelessWidget {
                 width: 52.w,
                 height: 52.w,
                 decoration: BoxDecoration(
-                  color: backgroundColor.withOpacity(0.15),
+                  color: _backgroundColor,
                   borderRadius: BorderRadius.circular(16.r),
                 ),
-                child: Icon(icon, color: iconColor, size: 26.sp),
+                child: Icon(_icon, color: _iconColor, size: 26.sp),
               ),
               SizedBox(width: 14.w),
               // Details
@@ -135,7 +203,7 @@ class TransactionItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          category,
+                          category?.name ?? 'Uncategorized',
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
@@ -143,7 +211,7 @@ class TransactionItem extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          amount,
+                          _formattedAmount,
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w800,
@@ -165,7 +233,7 @@ class TransactionItem extends StatelessWidget {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          "Today, 12:30 PM",
+                          _formatDateTime(),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: Colors.grey[500],
@@ -188,7 +256,7 @@ class TransactionItem extends StatelessWidget {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          paymentMethod,
+                          wallet?.name ?? 'Unknown',
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: Colors.grey[600],
@@ -197,37 +265,6 @@ class TransactionItem extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8.h),
-                    // Voice Input Badge
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 4.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF3F4F6),
-                        borderRadius: BorderRadius.circular(100.r),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.mic_none_rounded,
-                            size: 12.sp,
-                            color: Colors.grey[600],
-                          ),
-                          SizedBox(width: 4.w),
-                          Text(
-                            "Voice Input",
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -235,78 +272,48 @@ class TransactionItem extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
 
-          // Description Box
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(14.w),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFAFAFA),
-              borderRadius: BorderRadius.circular(16.r),
-              border: Border.all(color: const Color(0xFFF0F0F0)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Team lunch at Saku Diner. Discussed Q4 marketing strategy with the creative team.",
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: const Color(0xFF444444),
-                    height: 1.5,
-                    fontWeight: FontWeight.w400,
-                  ),
+          // Description Box (if has note or description)
+          if (transaction.description.isNotEmpty ||
+              (transaction.note?.isNotEmpty ?? false))
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(14.w),
+              margin: EdgeInsets.only(bottom: 12.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFAFAFA),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(color: const Color(0xFFF0F0F0)),
+              ),
+              child: Text(
+                transaction.note ?? transaction.description,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF444444),
+                  height: 1.5,
+                  fontWeight: FontWeight.w400,
                 ),
-                SizedBox(height: 12.h),
-                // Mock Image
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12.r),
-                  child: Container(
-                    height: 100.h,
-                    width: double.infinity,
-                    color: Colors.grey[100],
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: Image.network(
-                            "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&auto=format&fit=crop&q=60",
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Center(
-                          child: Container(
-                            padding: EdgeInsets.all(10.w),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8,
-                                ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.remove_red_eye_rounded,
-                              color: Colors.black87,
-                              size: 18.sp,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          SizedBox(height: 12.h),
 
           // Action Buttons
           Row(
             children: [
               Expanded(
                 child: TextButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Navigate to edit page
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddTransactionPage(
+                          existingTransaction: transaction,
+                          existingCategory: category,
+                          existingWallet: wallet,
+                        ),
+                      ),
+                    );
+                  },
                   style: TextButton.styleFrom(
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
@@ -328,7 +335,11 @@ class TransactionItem extends StatelessWidget {
               SizedBox(width: 12.w),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    // Show delete confirmation
+                    _showDeleteConfirmation(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF111111),
                     elevation: 0,
@@ -350,6 +361,50 @@ class TransactionItem extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Hapus Transaksi',
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus transaksi ini?',
+          style: TextStyle(fontSize: 14.sp),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'Batal',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              onDelete?.call();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFD32F2F),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+          ),
         ],
       ),
     );

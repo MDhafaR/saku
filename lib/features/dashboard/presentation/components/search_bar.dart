@@ -41,6 +41,8 @@ class SearchBar extends StatelessWidget {
                   bottom: 2.h,
                 ), // Align text vertically
                 isDense: true,
+                filled: true,
+                fillColor: Colors.transparent,
               ),
             ),
           ),

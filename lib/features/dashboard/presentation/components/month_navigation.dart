@@ -5,12 +5,14 @@ class MonthNavigation extends StatelessWidget {
   final String currentMonth;
   final VoidCallback? onPreviousMonth;
   final VoidCallback? onNextMonth;
+  final VoidCallback? onMonthTap;
 
   const MonthNavigation({
     super.key,
     required this.currentMonth,
     this.onPreviousMonth,
     this.onNextMonth,
+    this.onMonthTap,
   });
 
   @override
@@ -35,12 +37,32 @@ class MonthNavigation extends StatelessWidget {
               ),
             ),
           ),
-          Text(
-            currentMonth,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
+          GestureDetector(
+            onTap: onMonthTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.r),
+                color: Colors.transparent,
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    currentMonth,
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(width: 4.w),
+                  Icon(
+                    Icons.arrow_drop_down,
+                    color: Colors.black87,
+                    size: 20.sp,
+                  ),
+                ],
+              ),
             ),
           ),
           GestureDetector(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/theme/theme_service.dart';
 import '../../../../core/presentation/components/saku_card.dart';
-import '../components/statistics_summary_card.dart';
+import '../../../../core/presentation/components/financial_summary_card.dart';
 import '../components/time_period_selector.dart';
 import '../components/line_chart_widget.dart';
 import '../components/bar_chart_widget.dart';
@@ -81,7 +81,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               Row(
                 children: [
                   Expanded(
-                    child: StatisticsSummaryCard(
+                    child: FinancialSummaryCard(
                       title: 'Income',
                       amount: '\$4,250',
                       percentage: '+12.5%',
@@ -93,7 +93,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: StatisticsSummaryCard(
+                    child: FinancialSummaryCard(
                       title: 'Expense',
                       amount: '\$2,890',
                       percentage: '-8.2%',
@@ -105,7 +105,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                   ),
                   SizedBox(width: 12.w),
                   Expanded(
-                    child: StatisticsSummaryCard(
+                    child: FinancialSummaryCard(
                       title: 'Total',
                       amount: '\$1,360',
                       percentage: '+4.3%',

@@ -101,15 +101,45 @@ class StatisticsCubit extends Cubit<StatisticsState> {
             sum + (item.read<double>(_db.transactions.amount.sum()) ?? 0),
       );
 
-      final categoryItems = breakdown.map((row) {
+      final List<CategoryBreakdownItem> categoryItems = [];
+      for (final row in breakdown) {
+        final id = row.read<int>(_db.categories.id)!;
+        final name = row.read<String>(_db.categories.name) ?? 'Unknown';
         final amount = row.read<double>(_db.transactions.amount.sum()) ?? 0;
-        return CategoryBreakdownItem(
-          name: row.read<String>(_db.categories.name) ?? 'Unknown',
-          amount: amount,
-          color: row.read<int>(_db.categories.iconColor) ?? 0xFF2196F3,
-          percentage: totalExp > 0 ? (amount / totalExp) * 100 : 0,
+        final color = row.read<int>(_db.categories.iconColor) ?? 0xFF2196F3;
+        final icon = row.read<String>(_db.categories.icon) ?? 'category';
+        final count = row.read<int>(_db.transactions.id.count()) ?? 0;
+
+        // Fetch previous total for trend
+        final prevTotal = await _db.transactionDao.getTotalByCategory(
+          id,
+          prevStart,
+          prevEnd,
         );
-      }).toList();
+        final trendVal = _calculatePercentage(amount, prevTotal);
+
+        // Fetch top transactions
+        final topTxs = await _db.transactionDao.getTopTransactionsByCategory(
+          id,
+          start,
+          end,
+        );
+
+        categoryItems.add(
+          CategoryBreakdownItem(
+            id: id,
+            name: name,
+            amount: amount,
+            color: color,
+            icon: icon,
+            percentage: totalExp > 0 ? (amount / totalExp) * 100 : 0,
+            transactionCount: count,
+            trendValue: "${trendVal.abs().toStringAsFixed(1)}%",
+            isTrendUp: trendVal > 0,
+            topTransactions: topTxs,
+          ),
+        );
+      }
 
       emit(
         StatisticsLoaded(

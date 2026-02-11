@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../data/local/database/app_database.dart';
 
 abstract class StatisticsState extends Equatable {
   const StatisticsState();
@@ -16,16 +17,28 @@ class StatisticsLoading extends StatisticsState {
 }
 
 class CategoryBreakdownItem {
+  final int id;
   final String name;
   final double amount;
   final int color;
+  final String icon;
   final double percentage;
+  final int transactionCount;
+  final String trendValue;
+  final bool isTrendUp;
+  final List<Transaction> topTransactions;
 
   const CategoryBreakdownItem({
+    required this.id,
     required this.name,
     required this.amount,
     required this.color,
+    required this.icon,
     required this.percentage,
+    required this.transactionCount,
+    required this.trendValue,
+    required this.isTrendUp,
+    required this.topTransactions,
   });
 }
 

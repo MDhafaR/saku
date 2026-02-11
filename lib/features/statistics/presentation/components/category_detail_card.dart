@@ -1,38 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../data/local/database/app_database.dart';
+import '../cubit/statistics_state.dart';
 import '../pages/category_transactions_page.dart';
 
 class CategoryDetailCard extends StatelessWidget {
-  final String categoryName;
-  final String transactionCount;
-  final String amount;
-  final String percentage;
-  final IconData icon;
-  final Color color;
-  final bool isTrendUp;
-  final String trendValue;
-  final List<Map<String, dynamic>>? topTransactions;
+  final CategoryBreakdownItem item;
   final bool isExpanded;
   final VoidCallback? onTap;
 
   const CategoryDetailCard({
     super.key,
-    required this.categoryName,
-    required this.transactionCount,
-    required this.amount,
-    required this.percentage,
-    required this.icon,
-    required this.color,
-    required this.isTrendUp,
-    required this.trendValue,
-    this.topTransactions,
+    required this.item,
     this.isExpanded = true,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = Color(item.color);
+    // In a real app, we'd have a mapping from icon name to IconData
+    // For now, let's use a simple helper or just fallback
+    final iconData = _getIconData(item.icon);
+
     return GestureDetector(
       onTap: onTap,
       child: SakuCard(
@@ -46,10 +38,10 @@ class CategoryDetailCard extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(8.w),
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.15),
+                    color: color.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: color, size: 18.sp),
+                  child: Icon(iconData, color: color, size: 18.sp),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -60,7 +52,7 @@ class CategoryDetailCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            categoryName,
+                            item.name,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
@@ -68,7 +60,7 @@ class CategoryDetailCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            amount,
+                            CurrencyFormatter.formatRupiah(item.amount),
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
@@ -82,7 +74,7 @@ class CategoryDetailCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            transactionCount, // "12 Transaksi"
+                            '${item.transactionCount} Transaksi',
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: const Color(0xFF6B7280),
@@ -90,7 +82,7 @@ class CategoryDetailCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            percentage, // "29.4%"
+                            '${item.percentage.toStringAsFixed(1)}%',
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: const Color(0xFF6B7280),
@@ -112,7 +104,10 @@ class CategoryDetailCard extends StatelessWidget {
                             ),
                           ),
                           FractionallySizedBox(
-                            widthFactor: _parsePercentage(percentage),
+                            widthFactor: (item.percentage / 100).clamp(
+                              0.0,
+                              1.0,
+                            ),
                             child: Container(
                               height: 4.h,
                               decoration: BoxDecoration(
@@ -146,7 +141,7 @@ class CategoryDetailCard extends StatelessWidget {
               curve: Curves.easeInOut,
               alignment: Alignment.topCenter,
               child: isExpanded
-                  ? _buildExpandedContent(context)
+                  ? _buildExpandedContent(context, color, iconData)
                   : const SizedBox.shrink(),
             ),
           ],
@@ -155,7 +150,11 @@ class CategoryDetailCard extends StatelessWidget {
     );
   }
 
-  Widget _buildExpandedContent(BuildContext context) {
+  Widget _buildExpandedContent(
+    BuildContext context,
+    Color color,
+    IconData iconData,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -166,17 +165,17 @@ class CategoryDetailCard extends StatelessWidget {
             margin: EdgeInsets.only(top: 8.h),
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: isTrendUp
-                  ? const Color(0xFFFEE2E2) // Red bg
-                  : const Color(0xFFDCFCE7), // Green bg
+              color: item.isTrendUp
+                  ? const Color(0xFFFEE2E2) // Red bg (increase in expense)
+                  : const Color(0xFFDCFCE7), // Green bg (decrease)
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Text(
-              isTrendUp ? '↑ $trendValue' : '↓ $trendValue',
+              item.isTrendUp ? '↑ ${item.trendValue}' : '↓ ${item.trendValue}',
               style: TextStyle(
                 fontSize: 11.sp,
                 fontWeight: FontWeight.w700,
-                color: isTrendUp
+                color: item.isTrendUp
                     ? const Color(0xFFEF4444)
                     : const Color(0xFF10B981),
               ),
@@ -184,7 +183,7 @@ class CategoryDetailCard extends StatelessWidget {
           ),
         ),
 
-        if (topTransactions != null && topTransactions!.isNotEmpty) ...[
+        if (item.topTransactions.isNotEmpty) ...[
           SizedBox(height: 12.h),
           Divider(color: Colors.grey[200], height: 1.h),
           SizedBox(height: 12.h),
@@ -197,7 +196,9 @@ class CategoryDetailCard extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10.h),
-          ...topTransactions!.map((tx) => _buildTransactionItem(tx)),
+          ...item.topTransactions.map(
+            (tx) => _buildTransactionItem(tx, color, iconData),
+          ),
           SizedBox(height: 4.h),
           TextButton(
             onPressed: () {
@@ -205,10 +206,11 @@ class CategoryDetailCard extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => CategoryTransactionsPage(
-                    categoryName: categoryName,
-                    icon: icon,
+                    categoryName: item.name,
+                    icon: iconData,
                     color: color,
-                    transactions: topTransactions ?? [],
+                    transactions: item.topTransactions,
+                    totalAmount: CurrencyFormatter.formatRupiah(item.amount),
                   ),
                 ),
               );
@@ -221,7 +223,7 @@ class CategoryDetailCard extends StatelessWidget {
             child: Text(
               'Lihat Semua',
               style: TextStyle(
-                color: const Color(0xFF111111), // Dark - matches design system
+                color: const Color(0xFF111111),
                 fontWeight: FontWeight.w600,
                 fontSize: 11.sp,
               ),
@@ -232,15 +234,7 @@ class CategoryDetailCard extends StatelessWidget {
     );
   }
 
-  double _parsePercentage(String percentage) {
-    try {
-      return double.parse(percentage.replaceAll('%', '')) / 100;
-    } catch (e) {
-      return 0.5;
-    }
-  }
-
-  Widget _buildTransactionItem(Map<String, dynamic> tx) {
+  Widget _buildTransactionItem(Transaction tx, Color color, IconData iconData) {
     return Padding(
       padding: EdgeInsets.only(bottom: 10.h),
       child: Row(
@@ -249,14 +243,10 @@ class CategoryDetailCard extends StatelessWidget {
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(10.r), // Keep it rounded
+              borderRadius: BorderRadius.circular(10.r),
               border: Border.all(color: const Color(0xFFF9FAFB)),
             ),
-            child: Icon(
-              tx['icon'] as IconData,
-              color: const Color(0xFF9CA3AF),
-              size: 14.sp,
-            ),
+            child: Icon(iconData, color: const Color(0xFF9CA3AF), size: 14.sp),
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -264,7 +254,9 @@ class CategoryDetailCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  tx['name'] as String,
+                  tx.description,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -273,7 +265,7 @@ class CategoryDetailCard extends StatelessWidget {
                 ),
                 SizedBox(height: 1.h),
                 Text(
-                  tx['date'] as String,
+                  tx.transactionDate.toString().split(' ')[0], // Simple date
                   style: TextStyle(
                     fontSize: 10.sp,
                     color: const Color(0xFF9CA3AF),
@@ -283,7 +275,7 @@ class CategoryDetailCard extends StatelessWidget {
             ),
           ),
           Text(
-            tx['amount'] as String,
+            '-${CurrencyFormatter.formatRupiah(tx.amount)}',
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w700,
@@ -293,5 +285,43 @@ class CategoryDetailCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _getIconData(String iconName) {
+    // This should ideally use the same registry as the rest of the app
+    switch (iconName) {
+      case 'restaurant':
+        return Icons.restaurant;
+      case 'directions_car':
+        return Icons.directions_car;
+      case 'shopping_bag':
+        return Icons.shopping_bag;
+      case 'receipt_long':
+        return Icons.receipt_long;
+      case 'coffee':
+        return Icons.coffee;
+      case 'shopping_basket':
+        return Icons.shopping_basket;
+      case 'set_meal':
+        return Icons.set_meal;
+      case 'local_gas_station':
+        return Icons.local_gas_station;
+      case 'two_wheeler':
+        return Icons.two_wheeler;
+      case 'checkroom':
+        return Icons.checkroom;
+      case 'phone_android':
+        return Icons.phone_android;
+      case 'home':
+        return Icons.home;
+      case 'bolt':
+        return Icons.bolt;
+      case 'wifi':
+        return Icons.wifi;
+      case 'water_drop':
+        return Icons.water_drop;
+      default:
+        return Icons.category;
+    }
   }
 }

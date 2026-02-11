@@ -5,18 +5,27 @@ class CurrencyFormatter {
   static final NumberFormat _formatter = NumberFormat('#,###', 'id_ID');
 
   /// Format number with thousand separators (e.g., 1000000 -> 1.000.000)
-  static String format(String amount) {
-    if (amount.isEmpty || amount == '0') {
+  static String format(dynamic amount) {
+    if (amount == null) return '0';
+
+    final String amountStr = amount.toString();
+    if (amountStr.isEmpty || amountStr == '0') {
       return '0';
     }
 
-    // Remove any existing separators
-    final cleanAmount = amount.replaceAll('.', '').replaceAll(',', '');
+    // Remove any existing separators and handle decimals
+    final cleanAmount = amountStr.replaceAll('.', '').replaceAll(',', '');
+
+    // For numbers with decimals, use only the integer part for simple formatting
+    // or we can handle it properly. Here, let's just use the number if it's dynamic
+    if (amount is num) {
+      return _formatter.format(amount.round());
+    }
 
     // Parse to integer
     final number = int.tryParse(cleanAmount);
     if (number == null) {
-      return amount;
+      return amountStr;
     }
 
     // Format with thousand separators
@@ -24,7 +33,7 @@ class CurrencyFormatter {
   }
 
   /// Format number to Rupiah string (e.g., 1000000 -> Rp 1.000.000)
-  static String formatRupiah(String amount) {
+  static String formatRupiah(dynamic amount) {
     return 'Rp ${format(amount)}';
   }
 

@@ -179,6 +179,7 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     String type,
   ) {
     final amountSum = transactions.amount.sum();
+    final count = transactions.id.count();
     final query = select(transactions).join([
       innerJoin(categories, categories.id.equalsExp(transactions.categoryId)),
     ]);
@@ -189,11 +190,56 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
           transactions.transactionDate.isSmallerOrEqualValue(end),
     );
 
-    query.addColumns([amountSum, categories.name, categories.iconColor]);
+    query.addColumns([
+      amountSum,
+      count,
+      categories.id,
+      categories.name,
+      categories.iconColor,
+      categories.icon,
+    ]);
     query.groupBy([transactions.categoryId]);
     query.orderBy([OrderingTerm.desc(amountSum)]);
 
     return query.get();
+  }
+
+  /// Get top transactions for a specific category within a date range
+  Future<List<Transaction>> getTopTransactionsByCategory(
+    int categoryId,
+    DateTime start,
+    DateTime end, {
+    int limit = 3,
+  }) {
+    return (select(transactions)
+          ..where(
+            (tbl) =>
+                tbl.categoryId.equals(categoryId) &
+                tbl.transactionDate.isBiggerOrEqualValue(start) &
+                tbl.transactionDate.isSmallerOrEqualValue(end),
+          )
+          ..orderBy([(t) => OrderingTerm.desc(t.amount)])
+          ..limit(limit))
+        .get();
+  }
+
+  /// Get total amount for a specific category within a date range
+  Future<double> getTotalByCategory(
+    int categoryId,
+    DateTime start,
+    DateTime end,
+  ) async {
+    final query = selectOnly(transactions);
+    final amountSum = transactions.amount.sum();
+    query.addColumns([amountSum]);
+    query.where(
+      transactions.categoryId.equals(categoryId) &
+          transactions.transactionDate.isBiggerOrEqualValue(start) &
+          transactions.transactionDate.isSmallerOrEqualValue(end),
+    );
+
+    final row = await query.getSingle();
+    return row.read(amountSum) ?? 0.0;
   }
 
   /// Get daily income/expense totals for a date range

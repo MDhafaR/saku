@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../data/local/database/app_database.dart';
 
 class CategoryTransactionsPage extends StatelessWidget {
   final String categoryName;
   final IconData icon;
   final Color color;
-  final List<Map<String, dynamic>> transactions;
+  final List<Transaction> transactions;
   final String? totalAmount;
 
   const CategoryTransactionsPage({
@@ -21,21 +23,12 @@ class CategoryTransactionsPage extends StatelessWidget {
   String _calculateTotal() {
     if (totalAmount != null) return totalAmount!;
 
-    // Calculate from transactions if not provided
-    int total = 0;
+    double total = 0;
     for (final tx in transactions) {
-      final amountStr = tx['amount'] as String? ?? '0';
-      // Parse amount like "-Rp85.000" -> 85000
-      final cleanAmount = amountStr.replaceAll(RegExp(r'[^\d]'), '');
-      total += int.tryParse(cleanAmount) ?? 0;
+      total += tx.amount;
     }
 
-    // Format to Rupiah
-    final formatted = total.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (match) => '${match[1]}.',
-    );
-    return 'Rp$formatted';
+    return CurrencyFormatter.formatRupiah(total);
   }
 
   @override
@@ -96,7 +89,7 @@ class CategoryTransactionsPage extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(14.w),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
+                  color: color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 28.sp),
@@ -171,7 +164,7 @@ class CategoryTransactionsPage extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, size: 48.sp, color: color),
@@ -198,14 +191,9 @@ class CategoryTransactionsPage extends StatelessWidget {
 
   Widget _buildTransactionItem(
     BuildContext context,
-    Map<String, dynamic> tx,
+    Transaction tx,
     bool isLast,
   ) {
-    final txIcon = tx['icon'] as IconData? ?? icon;
-    final txName = tx['name'] as String? ?? 'Transaksi';
-    final txDate = tx['date'] as String? ?? '';
-    final txAmount = tx['amount'] as String? ?? '';
-
     return Padding(
       padding: EdgeInsets.only(bottom: isLast ? 0 : 8.h),
       child: SakuCard(
@@ -216,10 +204,10 @@ class CategoryTransactionsPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(10.w),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(txIcon, color: color, size: 18.sp),
+              child: Icon(icon, color: color, size: 18.sp),
             ),
             SizedBox(width: 12.w),
             Expanded(
@@ -227,7 +215,7 @@ class CategoryTransactionsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    txName,
+                    tx.description,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -236,7 +224,7 @@ class CategoryTransactionsPage extends StatelessWidget {
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    txDate,
+                    tx.transactionDate.toString().split(' ')[0],
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: const Color(0xFF9CA3AF),
@@ -246,7 +234,7 @@ class CategoryTransactionsPage extends StatelessWidget {
               ),
             ),
             Text(
-              txAmount,
+              '-${CurrencyFormatter.formatRupiah(tx.amount)}',
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
@@ -259,15 +247,7 @@ class CategoryTransactionsPage extends StatelessWidget {
     );
   }
 
-  void _showTransactionBottomSheet(
-    BuildContext context,
-    Map<String, dynamic> tx,
-  ) {
-    final txIcon = tx['icon'] as IconData? ?? icon;
-    final txName = tx['name'] as String? ?? 'Transaksi';
-    final txDate = tx['date'] as String? ?? '';
-    final txAmount = tx['amount'] as String? ?? '';
-
+  void _showTransactionBottomSheet(BuildContext context, Transaction tx) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -299,16 +279,16 @@ class CategoryTransactionsPage extends StatelessWidget {
               width: 88.w,
               height: 88.w,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.15),
+                color: color.withValues(alpha: 0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(txIcon, color: color, size: 40.sp),
+              child: Icon(icon, color: color, size: 40.sp),
             ),
             SizedBox(height: 16.h),
 
-            // Transaction Name
+            // Transaction Description
             Text(
-              txName,
+              tx.description,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -319,7 +299,7 @@ class CategoryTransactionsPage extends StatelessWidget {
 
             // Amount
             Text(
-              txAmount,
+              '-${CurrencyFormatter.formatRupiah(tx.amount)}',
               style: TextStyle(
                 fontSize: 36.sp,
                 fontWeight: FontWeight.w800,
@@ -334,7 +314,7 @@ class CategoryTransactionsPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  txDate,
+                  tx.transactionDate.toString().split(' ')[0],
                   style: TextStyle(
                     fontSize: 15.sp,
                     color: Colors.grey[400],
@@ -379,7 +359,7 @@ class CategoryTransactionsPage extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
-                          color: color.withOpacity(0.1),
+                          color: color.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Icon(icon, color: color, size: 16.sp),
@@ -413,7 +393,7 @@ class CategoryTransactionsPage extends StatelessWidget {
                   Divider(color: Colors.grey[200], height: 1.h),
                   SizedBox(height: 16.h),
                   Text(
-                    'Transaksi $txName pada tanggal $txDate untuk kategori $categoryName.',
+                    'Transaksi ${tx.description} pada tanggal ${tx.transactionDate.toString().split(' ')[0]} untuk kategori $categoryName.',
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: const Color(0xFF6B7280),

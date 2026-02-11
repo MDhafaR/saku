@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../cubit/statistics_state.dart';
 
 class ExpenseComparisonChart extends StatelessWidget {
-  const ExpenseComparisonChart({super.key});
+  final List<CategoryBreakdownItem> categories;
+
+  const ExpenseComparisonChart({super.key, required this.categories});
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +24,23 @@ class ExpenseComparisonChart extends StatelessWidget {
             ),
           ),
           SizedBox(height: 16.h),
-          _buildComparisonRow('Makan', 850, 0.7, const Color(0xFFF59E0B)),
-          SizedBox(height: 12.h),
-          _buildComparisonRow('Transport', 620, 0.5, const Color(0xFF2563EB)),
-          SizedBox(height: 12.h),
-          _buildComparisonRow('Belanja', 450, 0.35, const Color(0xFFE91E63)),
-          SizedBox(height: 12.h),
-          _buildComparisonRow('Lainnya', 200, 0.15, const Color(0xFF9CA3AF)),
+          if (categories.isEmpty)
+            SizedBox(
+              height: 100.h,
+              child: const Center(child: Text('Tidak ada data komparasi')),
+            )
+          else
+            ...categories.map(
+              (item) => Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: _buildComparisonRow(
+                  item.name,
+                  item.amount,
+                  item.percentage / 100, // percentage is 0-100
+                  Color(item.color),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -34,16 +48,18 @@ class ExpenseComparisonChart extends StatelessWidget {
 
   Widget _buildComparisonRow(
     String label,
-    int amount,
+    double amount,
     double percentage,
     Color color,
   ) {
     return Row(
       children: [
         SizedBox(
-          width: 70.w,
+          width: 80.w,
           child: Text(
             label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 13.sp,
               color: const Color(0xFF4B5563),
@@ -63,7 +79,7 @@ class ExpenseComparisonChart extends StatelessWidget {
                 ),
               ),
               FractionallySizedBox(
-                widthFactor: percentage,
+                widthFactor: percentage.clamp(0.0, 1.0),
                 child: Container(
                   height: 8.h,
                   decoration: BoxDecoration(
@@ -76,16 +92,12 @@ class ExpenseComparisonChart extends StatelessWidget {
           ),
         ),
         SizedBox(width: 12.w),
-        SizedBox(
-          width: 40.w,
-          child: Text(
-            '\$$amount',
-            textAlign: TextAlign.end,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w600,
-              color: const Color(0xFF111111),
-            ),
+        Text(
+          CurrencyFormatter.format(amount),
+          style: TextStyle(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w600,
+            color: const Color(0xFF111111),
           ),
         ),
       ],

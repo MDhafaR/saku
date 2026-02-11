@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../../../settings/presentation/pages/add_edit_wallet_page.dart';
 
 class WalletSelectionPage extends StatefulWidget {
   const WalletSelectionPage({super.key});
@@ -64,14 +64,14 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
           'Pilih Wallet',
           style: TextStyle(
-            color: const Color(0xFF333333),
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+            color: const Color(0xFF111111),
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
@@ -81,7 +81,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: const Color(0xFF111111),
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -131,13 +131,11 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                             borderRadius: BorderRadius.circular(16.r),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.05),
-                                spreadRadius: 1,
-                                blurRadius: 4,
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
                             ],
-                            border: Border.all(color: Colors.grey[100]!),
                           ),
                           child: Row(
                             children: [
@@ -160,9 +158,9 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                                     Text(
                                       wallet.name,
                                       style: TextStyle(
-                                        fontSize: 15.sp,
+                                        fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF1F2937),
+                                        color: const Color(0xFF111111),
                                       ),
                                     ),
                                     SizedBox(height: 2.h),
@@ -170,7 +168,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                                       'Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
                                       style: TextStyle(
                                         fontSize: 13.sp,
-                                        color: Colors.grey[500],
+                                        color: const Color(0xFF6B7280),
                                       ),
                                     ),
                                   ],
@@ -179,8 +177,8 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                               // Arrow
                               Icon(
                                 Icons.chevron_right,
-                                color: Colors.grey[400],
-                                size: 24.sp,
+                                color: const Color(0xFF9CA3AF),
+                                size: 22.sp,
                               ),
                             ],
                           ),
@@ -192,10 +190,14 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add wallet page
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddEditWalletPage()),
+          );
+          _loadWallets();
         },
-        backgroundColor: AppTheme.primaryBlue,
+        backgroundColor: const Color(0xFF111111),
         child: Icon(Icons.add, color: Colors.white, size: 24.sp),
       ),
     );
@@ -209,7 +211,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
           Icon(
             Icons.account_balance_wallet_outlined,
             size: 64.sp,
-            color: Colors.grey[300],
+            color: const Color(0xFF9CA3AF),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -217,13 +219,13 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[500],
+              color: const Color(0xFF6B7280),
             ),
           ),
           SizedBox(height: 8.h),
           Text(
             'Tap tombol + untuk menambah wallet',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
+            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF9CA3AF)),
           ),
         ],
       ),

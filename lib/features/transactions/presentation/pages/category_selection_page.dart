@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../../../settings/presentation/pages/add_edit_category_page.dart';
 
 class CategorySelectionPage extends StatefulWidget {
   final bool isExpense;
@@ -61,14 +61,14 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
         title: Text(
           widget.isExpense ? 'Kategori Pengeluaran' : 'Kategori Pemasukan',
           style: TextStyle(
-            color: const Color(0xFF333333),
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
+            color: const Color(0xFF111111),
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
@@ -78,7 +78,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: const Color(0xFF111111),
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -86,7 +86,6 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
       ),
       body: Column(
         children: [
-
           // Category List
           Expanded(
             child: _isLoading
@@ -127,13 +126,11 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                             borderRadius: BorderRadius.circular(16.r),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.05),
-                                spreadRadius: 1,
-                                blurRadius: 4,
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
                             ],
-                            border: Border.all(color: Colors.grey[100]!),
                           ),
                           child: Row(
                             children: [
@@ -153,17 +150,17 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                 child: Text(
                                   category.name,
                                   style: TextStyle(
-                                    fontSize: 15.sp,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1F2937),
+                                    color: const Color(0xFF111111),
                                   ),
                                 ),
                               ),
                               // Arrow
                               Icon(
                                 Icons.chevron_right,
-                                color: Colors.grey[400],
-                                size: 24.sp,
+                                color: const Color(0xFF9CA3AF),
+                                size: 22.sp,
                               ),
                             ],
                           ),
@@ -175,10 +172,18 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to add category page
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEditCategoryPage(
+                type: widget.isExpense ? 'expense' : 'income',
+              ),
+            ),
+          );
+          _loadCategories();
         },
-        backgroundColor: AppTheme.primaryBlue,
+        backgroundColor: const Color(0xFF111111),
         child: Icon(Icons.add, color: Colors.white, size: 24.sp),
       ),
     );

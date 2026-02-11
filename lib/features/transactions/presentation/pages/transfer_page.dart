@@ -1,54 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:drift/drift.dart' hide Column;
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../data/local/database/app_database.dart';
+import '../../../../core/injection.dart';
 
 class TransferPage extends StatefulWidget {
-  static final List<Map<String, dynamic>> mockWallets = [
-    {
-      'id': '1',
-      'name': 'BCA',
-      'balance': 15000000.0,
-      'icon': Icons.account_balance,
-      'color': const Color(0xFF1976D2),
-    },
-    {
-      'id': '2',
-      'name': 'Gopay',
-      'balance': 250000.0,
-      'icon': Icons.account_balance_wallet,
-      'color': const Color(0xFF00AED6),
-    },
-    {
-      'id': '3',
-      'name': 'OVO',
-      'balance': 750000.0,
-      'icon': Icons.monetization_on,
-      'color': const Color(0xFF4B2C82),
-    },
-    {
-      'id': '4',
-      'name': 'Dana',
-      'balance': 1250000.0,
-      'icon': Icons.mobile_friendly,
-      'color': const Color(0xFF06B6D4),
-    },
-  ];
+  final List<Wallet> wallets;
 
-  const TransferPage({super.key});
+  const TransferPage({super.key, required this.wallets});
 
   @override
   State<TransferPage> createState() => _TransferPageState();
 }
 
 class _TransferPageState extends State<TransferPage> {
-  final TextEditingController _amountController = TextEditingController(
-    text: '150.000',
-  );
+  final TextEditingController _amountController = TextEditingController();
   final TextEditingController _adminFeeController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
   bool _isCustomAdminFee = false;
+  bool _isSubmitting = false;
 
   final ScrollController _scrollController = ScrollController();
   final FocusNode _amountFocusNode = FocusNode();
@@ -60,17 +33,21 @@ class _TransferPageState extends State<TransferPage> {
   final GlobalKey _noteKey = GlobalKey();
 
   // Selected Wallets
-  Map<String, dynamic>? sourceWallet;
-  Map<String, dynamic>? destinationWallet;
+  Wallet? sourceWallet;
+  Wallet? destinationWallet;
+
+  late final AppDatabase _db;
 
   @override
   void initState() {
     super.initState();
-    if (TransferPage.mockWallets.isNotEmpty) {
-      sourceWallet = TransferPage.mockWallets[0];
+    _db = locator<AppDatabase>();
+
+    if (widget.wallets.isNotEmpty) {
+      sourceWallet = widget.wallets[0];
     }
-    if (TransferPage.mockWallets.length > 1) {
-      destinationWallet = TransferPage.mockWallets[1];
+    if (widget.wallets.length > 1) {
+      destinationWallet = widget.wallets[1];
     }
 
     _amountFocusNode.addListener(() {
@@ -105,7 +82,6 @@ class _TransferPageState extends State<TransferPage> {
   }
 
   void _scrollToField(GlobalKey key) {
-    // Wait longer for keyboard to fully appear before scrolling
     Future.delayed(const Duration(milliseconds: 500), () {
       if (key.currentContext != null) {
         Scrollable.ensureVisible(
@@ -114,7 +90,6 @@ class _TransferPageState extends State<TransferPage> {
           curve: Curves.easeInOut,
           alignment: 0,
         ).then((_) {
-          // Add extra scroll to push field higher above keyboard
           Future.delayed(const Duration(milliseconds: 100), () {
             if (_scrollController.hasClients) {
               final currentOffset = _scrollController.offset;
@@ -130,6 +105,123 @@ class _TransferPageState extends State<TransferPage> {
         });
       }
     });
+  }
+
+  IconData _getIconData(String iconPath) {
+    switch (iconPath) {
+      case 'wallet':
+        return Icons.account_balance_wallet;
+      case 'bank':
+        return Icons.account_balance;
+      case 'payment':
+        return Icons.payment;
+      case 'mobile':
+        return Icons.mobile_friendly;
+      case 'credit_card':
+        return Icons.credit_card;
+      case 'savings':
+        return Icons.savings;
+      case 'money':
+        return Icons.monetization_on;
+      case 'store':
+        return Icons.store;
+      default:
+        return Icons.account_balance_wallet;
+    }
+  }
+
+  double get _totalAssets {
+    return widget.wallets.fold<double>(
+      0.0,
+      (sum, wallet) => sum + wallet.currentBalance,
+    );
+  }
+
+  Future<void> _submitTransfer() async {
+    if (_isSubmitting) return;
+
+    // Validate wallets selected
+    if (sourceWallet == null || destinationWallet == null) {
+      _showError('Pilih sumber dana dan penerima terlebih dahulu.');
+      return;
+    }
+
+    // Validate not same wallet
+    if (sourceWallet!.id == destinationWallet!.id) {
+      _showError('Sumber dana dan penerima tidak boleh sama.');
+      return;
+    }
+
+    // Parse amount
+    final amountStr = CurrencyFormatter.parse(_amountController.text);
+    final amount = double.tryParse(amountStr) ?? 0;
+    if (amount <= 0) {
+      _showError('Masukkan nominal transfer yang valid.');
+      return;
+    }
+
+    // Parse fee
+    double fee = 0;
+    if (_isCustomAdminFee && _adminFeeController.text.isNotEmpty) {
+      final feeStr = CurrencyFormatter.parse(_adminFeeController.text);
+      fee = double.tryParse(feeStr) ?? 0;
+    }
+
+    // Validate sufficient balance (amount + fee)
+    final totalDeduction = amount + fee;
+    if (totalDeduction > sourceWallet!.currentBalance) {
+      _showError(
+        'Saldo tidak cukup. Saldo tersedia: Rp ${CurrencyFormatter.format(sourceWallet!.currentBalance.toStringAsFixed(0))}',
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      await _db.transferDao.createTransfer(
+        TransfersCompanion(
+          fromWalletId: Value(sourceWallet!.id),
+          toWalletId: Value(destinationWallet!.id),
+          amount: Value(amount),
+          fee: Value(fee),
+          description: Value(_noteController.text),
+          transferDate: Value(DateTime.now()),
+        ),
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Transfer Rp ${CurrencyFormatter.format(amount.toStringAsFixed(0))} berhasil!',
+            ),
+            backgroundColor: const Color(0xFF43A047),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+          ),
+        );
+        Navigator.pop(context, true); // return true to indicate success
+      }
+    } catch (e) {
+      if (mounted) {
+        _showError('Gagal melakukan transfer: $e');
+        setState(() => _isSubmitting = false);
+      }
+    }
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppTheme.semanticRed,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 
   bool _isSourceDropdownOpen = false;
@@ -151,6 +243,130 @@ class _TransferPageState extends State<TransferPage> {
         _isSourceDropdownOpen = false;
       }
     });
+  }
+
+  Widget _buildWalletRow(Wallet wallet) {
+    return Row(
+      children: [
+        Container(
+          width: 36.w,
+          height: 36.w,
+          decoration: BoxDecoration(
+            color: Color(wallet.iconColor).withOpacity(0.15),
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          alignment: Alignment.center,
+          child: Icon(
+            _getIconData(wallet.icon),
+            color: Color(wallet.iconColor),
+            size: 18.sp,
+          ),
+        ),
+        SizedBox(width: 10.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                wallet.name,
+                style: TextStyle(
+                  color: const Color(0xFF111111),
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'Saldo: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
+                style: TextStyle(
+                  color: AppTheme.lightTextSecondary,
+                  fontSize: 11.sp,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWalletDropdownList({
+    required Wallet? selectedWallet,
+    required bool isOpen,
+    required ValueChanged<Wallet> onSelect,
+  }) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+      height: isOpen ? (widget.wallets.length * 60.0.h).clamp(0, 200.h) : 0,
+      child: Container(
+        decoration: const BoxDecoration(color: Colors.white),
+        child: SingleChildScrollView(
+          child: Column(
+            children: widget.wallets.map((wallet) {
+              return InkWell(
+                onTap: () => onSelect(wallet),
+                child: Container(
+                  color: Colors.white,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36.w,
+                        height: 36.w,
+                        decoration: BoxDecoration(
+                          color: Color(wallet.iconColor).withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Icon(
+                          _getIconData(wallet.icon),
+                          color: Color(wallet.iconColor),
+                          size: 18.sp,
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              wallet.name,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF1F2937),
+                              ),
+                            ),
+                            SizedBox(height: 1.h),
+                            Text(
+                              'Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: Colors.grey[500],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (selectedWallet?.id == wallet.id)
+                        Icon(
+                          Icons.check_circle,
+                          color: AppTheme.primaryBlue,
+                          size: 18.sp,
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -178,7 +394,7 @@ class _TransferPageState extends State<TransferPage> {
       ),
       body: Column(
         children: [
-          // Header Section with Balance (Restored but Styled Clean)
+          // Header Section with Balance
           Container(
             width: double.infinity,
             padding: EdgeInsets.only(bottom: 16.h, top: 6.h),
@@ -207,7 +423,7 @@ class _TransferPageState extends State<TransferPage> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Rp 158.450.000',
+                  'Rp ${CurrencyFormatter.format(_totalAssets.toStringAsFixed(0))}',
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 20.sp,
@@ -233,13 +449,10 @@ class _TransferPageState extends State<TransferPage> {
                 children: [
                   // Source & Destination Card (Combined)
                   SakuCard(
-                    padding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                    ), // Removed padding to handle styling manually
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Source (Interactive with Dropdown)
                         // Source (Interactive with Inline Expansion)
                         GestureDetector(
                           onTap: _toggleSourceDropdown,
@@ -281,62 +494,37 @@ class _TransferPageState extends State<TransferPage> {
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 36.w,
-                                        height: 36.w,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              (sourceWallet?['color']
-                                                          as Color? ??
-                                                      const Color(0xFFE8F0FE))
-                                                  .withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(
-                                            10.r,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Icon(
-                                          sourceWallet?['icon'] as IconData? ??
-                                              Icons.account_balance_wallet,
-                                          color:
-                                              sourceWallet?['color']
-                                                  as Color? ??
-                                              const Color(0xFF1976D2),
-                                          size: 18.sp,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10.w),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                  child: sourceWallet != null
+                                      ? _buildWalletRow(sourceWallet!)
+                                      : Row(
                                           children: [
+                                            Container(
+                                              width: 36.w,
+                                              height: 36.w,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE8F0FE),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.r),
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: Icon(
+                                                Icons.account_balance_wallet,
+                                                color: const Color(0xFF1976D2),
+                                                size: 18.sp,
+                                              ),
+                                            ),
+                                            SizedBox(width: 10.w),
                                             Text(
-                                              sourceWallet?['name']
-                                                      as String? ??
-                                                  'Pilih Sumber Dana',
+                                              'Pilih Sumber Dana',
                                               style: TextStyle(
-                                                color: const Color(0xFF111111),
+                                                color:
+                                                    AppTheme.lightTextSecondary,
                                                 fontSize: 13.sp,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            SizedBox(height: 2.h),
-                                            Text(
-                                              'Saldo: Rp ${CurrencyFormatter.format(sourceWallet != null ? (sourceWallet!['balance'] as double).toStringAsFixed(0) : '0')}',
-                                              style: TextStyle(
-                                                color:
-                                                    AppTheme.lightTextSecondary,
-                                                fontSize: 11.sp,
-                                              ),
-                                            ),
                                           ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ],
                             ),
@@ -344,98 +532,18 @@ class _TransferPageState extends State<TransferPage> {
                         ),
 
                         // Inline Expandable List
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          height: _isSourceDropdownOpen
-                              ? 200.h
-                              : 0, // Max height
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                            ),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: TransferPage.mockWallets.map((
-                                  wallet,
-                                ) {
-                                  return InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        if (destinationWallet?['id'] ==
-                                            wallet['id']) {
-                                          destinationWallet = sourceWallet;
-                                        }
-                                        sourceWallet = wallet;
-                                        _isSourceDropdownOpen = false;
-                                      });
-                                    },
-                                    child: Container(
-                                      color: Colors.white,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16.w,
-                                        vertical: 12.h,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 36.w,
-                                            height: 36.w,
-                                            decoration: BoxDecoration(
-                                              color: (wallet['color'] as Color)
-                                                  .withOpacity(0.15),
-                                              borderRadius:
-                                                  BorderRadius.circular(10.r),
-                                            ),
-                                            child: Icon(
-                                              wallet['icon'] as IconData,
-                                              color: wallet['color'] as Color,
-                                              size: 18.sp,
-                                            ),
-                                          ),
-                                          SizedBox(width: 12.w),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  wallet['name'] as String,
-                                                  style: TextStyle(
-                                                    fontSize: 13.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: const Color(
-                                                      0xFF1F2937,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(height: 1.h),
-                                                Text(
-                                                  'Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
-                                                  style: TextStyle(
-                                                    fontSize: 11.sp,
-                                                    color: Colors.grey[500],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          if (sourceWallet?['id'] ==
-                                              wallet['id'])
-                                            Icon(
-                                              Icons.check_circle,
-                                              color: AppTheme.primaryBlue,
-                                              size: 18.sp,
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
+                        _buildWalletDropdownList(
+                          selectedWallet: sourceWallet,
+                          isOpen: _isSourceDropdownOpen,
+                          onSelect: (wallet) {
+                            setState(() {
+                              if (destinationWallet?.id == wallet.id) {
+                                destinationWallet = sourceWallet;
+                              }
+                              sourceWallet = wallet;
+                              _isSourceDropdownOpen = false;
+                            });
+                          },
                         ),
 
                         // Swap Button
@@ -486,7 +594,6 @@ class _TransferPageState extends State<TransferPage> {
                         ),
 
                         // Destination
-                        // Destination (Interactive with Inline Expansion)
                         GestureDetector(
                           onTap: _toggleDestinationDropdown,
                           behavior: HitTestBehavior.opaque,
@@ -527,65 +634,37 @@ class _TransferPageState extends State<TransferPage> {
                                         : Colors.transparent,
                                     borderRadius: BorderRadius.circular(10.r),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 36.w,
-                                        height: 36.w,
-                                        decoration: BoxDecoration(
-                                          color:
-                                              (destinationWallet?['color']
-                                                          as Color? ??
-                                                      const Color(0xFFE8F5E9))
-                                                  .withOpacity(0.15),
-                                          borderRadius: BorderRadius.circular(
-                                            10.r,
-                                          ),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Icon(
-                                          destinationWallet?['icon']
-                                                  as IconData? ??
-                                              Icons.wallet,
-                                          color:
-                                              destinationWallet?['color']
-                                                  as Color? ??
-                                              const Color(0xFF43A047),
-                                          size: 18.sp,
-                                        ),
-                                      ),
-                                      SizedBox(width: 10.w),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                  child: destinationWallet != null
+                                      ? _buildWalletRow(destinationWallet!)
+                                      : Row(
                                           children: [
+                                            Container(
+                                              width: 36.w,
+                                              height: 36.w,
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFE8F5E9),
+                                                borderRadius:
+                                                    BorderRadius.circular(10.r),
+                                              ),
+                                              alignment: Alignment.center,
+                                              child: Icon(
+                                                Icons.wallet,
+                                                color: const Color(0xFF43A047),
+                                                size: 18.sp,
+                                              ),
+                                            ),
+                                            SizedBox(width: 10.w),
                                             Text(
-                                              destinationWallet?['name']
-                                                      as String? ??
-                                                  'Pilih Penerima',
+                                              'Pilih Penerima',
                                               style: TextStyle(
-                                                color: const Color(0xFF111111),
+                                                color:
+                                                    AppTheme.lightTextSecondary,
                                                 fontSize: 13.sp,
                                                 fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                            SizedBox(height: 2.h),
-                                            Text(
-                                              destinationWallet != null
-                                                  ? '0812-3456-7890'
-                                                  : '-',
-                                              style: TextStyle(
-                                                color:
-                                                    AppTheme.lightTextSecondary,
-                                                fontSize: 11.sp,
-                                              ),
-                                            ),
                                           ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
                                 ),
                               ],
                             ),
@@ -593,99 +672,18 @@ class _TransferPageState extends State<TransferPage> {
                         ),
 
                         // Inline Expandable List for Destination
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          height: _isDestinationDropdownOpen
-                              ? 200.h
-                              : 0, // Max height
-                          child: Container(
-                            decoration: const BoxDecoration(
-                              color: Colors.white,
-                            ),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                children: TransferPage.mockWallets.map((
-                                  wallet,
-                                ) {
-                                  // Filter out selected source wallet if needed, or allow transfer to same wallet type (usually blocked but simplifying here)
-                                  return InkWell(
-                                    onTap: () {
-                                      setState(() {
-                                        if (sourceWallet?['id'] ==
-                                            wallet['id']) {
-                                          sourceWallet = destinationWallet;
-                                        }
-                                        destinationWallet = wallet;
-                                        _isDestinationDropdownOpen = false;
-                                      });
-                                    },
-                                    child: Container(
-                                      color: Colors.white,
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 16.w,
-                                        vertical: 12.h,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 36.w,
-                                            height: 36.w,
-                                            decoration: BoxDecoration(
-                                              color: (wallet['color'] as Color)
-                                                  .withOpacity(0.15),
-                                              borderRadius:
-                                                  BorderRadius.circular(10.r),
-                                            ),
-                                            child: Icon(
-                                              wallet['icon'] as IconData,
-                                              color: wallet['color'] as Color,
-                                              size: 18.sp,
-                                            ),
-                                          ),
-                                          SizedBox(width: 12.w),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Text(
-                                                  wallet['name'] as String,
-                                                  style: TextStyle(
-                                                    fontSize: 13.sp,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: const Color(
-                                                      0xFF1F2937,
-                                                    ),
-                                                  ),
-                                                ),
-                                                SizedBox(height: 1.h),
-                                                Text(
-                                                  'Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
-                                                  style: TextStyle(
-                                                    fontSize: 11.sp,
-                                                    color: Colors.grey[500],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                          if (destinationWallet?['id'] ==
-                                              wallet['id'])
-                                            Icon(
-                                              Icons.check_circle,
-                                              color: AppTheme.primaryBlue,
-                                              size: 18.sp,
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                          ),
+                        _buildWalletDropdownList(
+                          selectedWallet: destinationWallet,
+                          isOpen: _isDestinationDropdownOpen,
+                          onSelect: (wallet) {
+                            setState(() {
+                              if (sourceWallet?.id == wallet.id) {
+                                sourceWallet = destinationWallet;
+                              }
+                              destinationWallet = wallet;
+                              _isDestinationDropdownOpen = false;
+                            });
+                          },
                         ),
                       ],
                     ),
@@ -713,8 +711,7 @@ class _TransferPageState extends State<TransferPage> {
                             GestureDetector(
                               onTap: () {
                                 if (sourceWallet != null) {
-                                  final balance =
-                                      sourceWallet!['balance'] as double;
+                                  final balance = sourceWallet!.currentBalance;
                                   _amountController.text =
                                       CurrencyFormatter.format(
                                         balance.toStringAsFixed(0),
@@ -727,9 +724,7 @@ class _TransferPageState extends State<TransferPage> {
                                   vertical: 4.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFFFFF0F0,
-                                  ), // Keep subtle red tint for MAX
+                                  color: const Color(0xFFFFF0F0),
                                   borderRadius: BorderRadius.circular(4.r),
                                 ),
                                 child: Text(
@@ -769,8 +764,27 @@ class _TransferPageState extends State<TransferPage> {
                                   enabledBorder: InputBorder.none,
                                   focusedBorder: InputBorder.none,
                                   contentPadding: EdgeInsets.zero,
+                                  hintText: '0',
                                 ),
                                 keyboardType: TextInputType.number,
+                                onChanged: (value) {
+                                  // Auto-format while typing
+                                  final raw = CurrencyFormatter.parse(value);
+                                  if (raw.isNotEmpty && raw != '0') {
+                                    final formatted = CurrencyFormatter.format(
+                                      raw,
+                                    );
+                                    if (formatted != value) {
+                                      _amountController.value =
+                                          TextEditingValue(
+                                            text: formatted,
+                                            selection: TextSelection.collapsed(
+                                              offset: formatted.length,
+                                            ),
+                                          );
+                                    }
+                                  }
+                                },
                               ),
                             ),
                           ],
@@ -822,9 +836,7 @@ class _TransferPageState extends State<TransferPage> {
                           key: _adminFeeKey,
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOut,
-                          height: _isCustomAdminFee
-                              ? 60.h
-                              : 0, // Adjust height as needed
+                          height: _isCustomAdminFee ? 60.h : 0,
                           child: SingleChildScrollView(
                             child: Column(
                               children: [
@@ -891,7 +903,7 @@ class _TransferPageState extends State<TransferPage> {
 
                   SizedBox(height: 16.h),
 
-                  // Note Input (Restored, Styled)
+                  // Note Input
                   Column(
                     key: _noteKey,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -967,22 +979,32 @@ class _TransferPageState extends State<TransferPage> {
           width: double.infinity,
           height: 48.h,
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: _isSubmitting ? null : _submitTransfer,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF111111),
+              disabledBackgroundColor: Colors.grey[400],
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14.r),
               ),
               elevation: 0,
             ),
-            child: Text(
-              'Lanjut Transfer',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
+            child: _isSubmitting
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: const CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Text(
+                    'Lanjut Transfer',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
           ),
         ),
       ),

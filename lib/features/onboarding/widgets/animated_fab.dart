@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/injection.dart';
+import '../../../../data/local/database/app_database.dart';
 import '../../debts/presentation/pages/add_loan_page.dart';
 import '../../transactions/presentation/pages/transfer_page.dart';
+import '../../settings/presentation/pages/add_edit_wallet_page.dart';
 
 class AnimatedFab extends StatefulWidget {
   final VoidCallback onPressed;
@@ -192,9 +195,12 @@ class _AnimatedFabState extends State<AnimatedFab> {
             child: _buildExpandedButton(
               icon: Icons.swap_horiz,
               label: 'Transfer',
-              onTap: () {
+              onTap: () async {
                 _toggleFabExpansion();
-                if (TransferPage.mockWallets.length < 2) {
+                final db = locator<AppDatabase>();
+                final wallets = await db.walletDao.getAllWallets();
+                if (!context.mounted) return;
+                if (wallets.length < 2) {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
@@ -205,7 +211,31 @@ class _AnimatedFabState extends State<AnimatedFab> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('OK'),
+                          child: Text(
+                            'Nanti',
+                            style: TextStyle(
+                              color: const Color(0xFF9CA3AF),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const AddEditWalletPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Tambah Wallet',
+                            style: TextStyle(
+                              color: const Color(0xFF111111),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -214,7 +244,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const TransferPage(),
+                      builder: (context) => TransferPage(wallets: wallets),
                     ),
                   );
                 }

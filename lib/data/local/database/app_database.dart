@@ -15,6 +15,7 @@ import 'tables/debt_payment_table.dart';
 import '../dao/transaction_dao.dart';
 import '../dao/category_dao.dart';
 import '../dao/wallet_dao.dart';
+import '../dao/transfer_dao.dart';
 
 part 'app_database.g.dart';
 
@@ -64,6 +65,7 @@ class AppDatabase extends _$AppDatabase {
   TransactionDao get transactionDao => TransactionDao(this);
   CategoryDao get categoryDao => CategoryDao(this);
   WalletDao get walletDao => WalletDao(this);
+  TransferDao get transferDao => TransferDao(this);
 
   /// Seeds the database with default expense and income categories
   Future<void> _seedDefaultCategories() async {

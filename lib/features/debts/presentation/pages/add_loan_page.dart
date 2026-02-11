@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../transactions/presentation/components/custom_numpad.dart';
+import '../../../../data/local/database/app_database.dart';
+import '../cubit/debt_cubit.dart';
 
 class AddLoanPage extends StatefulWidget {
   const AddLoanPage({super.key});
@@ -14,37 +17,10 @@ class AddLoanPage extends StatefulWidget {
 }
 
 class _AddLoanPageState extends State<AddLoanPage> {
-  // Mock wallet data
-  static final List<Map<String, dynamic>> _mockWallets = [
-    {
-      'id': '1',
-      'name': 'BCA',
-      'balance': 15000000.0,
-      'icon': Icons.account_balance,
-      'color': const Color(0xFF1976D2),
-    },
-    {
-      'id': '2',
-      'name': 'Gopay',
-      'balance': 250000.0,
-      'icon': Icons.account_balance_wallet,
-      'color': const Color(0xFF00AED6),
-    },
-    {
-      'id': '3',
-      'name': 'OVO',
-      'balance': 750000.0,
-      'icon': Icons.monetization_on,
-      'color': const Color(0xFF4B2C82),
-    },
-    {
-      'id': '4',
-      'name': 'Dana',
-      'balance': 1250000.0,
-      'icon': Icons.mobile_friendly,
-      'color': const Color(0xFF06B6D4),
-    },
-  ];
+  final DebtCubit _cubit = locator<DebtCubit>();
+  List<Wallet> _wallets = [];
+  Wallet? _selectedWallet;
+  bool _isWalletDropdownOpen = false;
 
   bool isDebt = true; // "Saya Hutang" = true, "Pinjamkan" = false
   String _amount = '0';
@@ -54,16 +30,20 @@ class _AddLoanPageState extends State<AddLoanPage> {
   DateTime _dueDate = DateTime.now().add(const Duration(days: 30));
   bool _hasDueDate = true;
 
-  // Wallet selection
-  Map<String, dynamic>? _selectedWallet;
-  bool _isWalletDropdownOpen = false;
-
   @override
   void initState() {
     super.initState();
-    if (_mockWallets.isNotEmpty) {
-      _selectedWallet = _mockWallets[0];
-    }
+    _loadWallets();
+  }
+
+  Future<void> _loadWallets() async {
+    final wallets = await _cubit.getWallets();
+    setState(() {
+      _wallets = wallets;
+      if (wallets.isNotEmpty) {
+        _selectedWallet = wallets.first;
+      }
+    });
   }
 
   @override
@@ -141,6 +121,31 @@ class _AddLoanPageState extends State<AddLoanPage> {
     );
     if (picked != null) {
       setState(() => _dueDate = picked);
+    }
+  }
+
+  Future<void> _saveDebt() async {
+    if (_amount == '0' || _contactController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Mohon lengkapi data')));
+      return;
+    }
+
+    final amount = double.parse(_amount);
+
+    await _cubit.addDebt(
+      contactName: _contactController.text,
+      totalAmount: amount,
+      type: isDebt ? 'debt' : 'loan',
+      transactionDate: _transactionDate,
+      dueDate: _hasDueDate ? _dueDate : null,
+      description: _noteController.text,
+      walletId: _selectedWallet?.id,
+    );
+
+    if (mounted) {
+      Navigator.pop(context);
     }
   }
 
@@ -261,13 +266,6 @@ class _AddLoanPageState extends State<AddLoanPage> {
             },
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz),
-            color: Theme.of(context).iconTheme.color,
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -387,7 +385,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                 CustomNumpad(
                   onKeyPressed: _onKeyPressed,
                   onDelete: _onDelete,
-                  onSubmit: () => Navigator.pop(context),
+                  onSubmit: _saveDebt,
                   submitColor: feedbackColor,
                 ),
                 SizedBox(height: 12.h),
@@ -396,7 +394,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                   width: double.infinity,
                   height: 48.h,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: _saveDebt,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF111111),
                       shape: RoundedRectangleBorder(
@@ -665,19 +663,15 @@ class _AddLoanPageState extends State<AddLoanPage> {
                     width: 32.w,
                     height: 32.w,
                     decoration: BoxDecoration(
-                      color:
-                          (_selectedWallet?['color'] as Color? ??
-                                  const Color(0xFFE8F0FE))
-                              .withOpacity(0.15),
+                      color: (Color(
+                        _selectedWallet?.iconColor ?? 0xFFE8F0FE,
+                      )).withOpacity(0.15),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     alignment: Alignment.center,
                     child: Icon(
-                      _selectedWallet?['icon'] as IconData? ??
-                          Icons.account_balance_wallet,
-                      color:
-                          _selectedWallet?['color'] as Color? ??
-                          const Color(0xFF1976D2),
+                      _getIconData(_selectedWallet?.icon ?? 'wallet'),
+                      color: Color(_selectedWallet?.iconColor ?? 0xFF1976D2),
                       size: 16.sp,
                     ),
                   ),
@@ -695,7 +689,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                         ),
                         SizedBox(height: 1.h),
                         Text(
-                          _selectedWallet?['name'] as String? ?? 'Pilih Wallet',
+                          _selectedWallet?.name ?? 'Pilih Wallet',
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
@@ -728,7 +722,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
             height: _isWalletDropdownOpen
-                ? (_mockWallets.length * 52.0).clamp(0.0, 208.0)
+                ? (_wallets.length * 52.0).clamp(0.0, 208.0)
                 : 0,
             child: ClipRRect(
               borderRadius: BorderRadius.only(
@@ -738,8 +732,8 @@ class _AddLoanPageState extends State<AddLoanPage> {
               child: SingleChildScrollView(
                 physics: const NeverScrollableScrollPhysics(),
                 child: Column(
-                  children: _mockWallets.map((wallet) {
-                    final isSelected = _selectedWallet?['id'] == wallet['id'];
+                  children: _wallets.map((wallet) {
+                    final isSelected = _selectedWallet?.id == wallet.id;
                     return InkWell(
                       onTap: () {
                         setState(() {
@@ -763,15 +757,15 @@ class _AddLoanPageState extends State<AddLoanPage> {
                               width: 32.w,
                               height: 32.w,
                               decoration: BoxDecoration(
-                                color: (wallet['color'] as Color).withOpacity(
-                                  0.15,
-                                ),
+                                color: Color(
+                                  wallet.iconColor,
+                                ).withOpacity(0.15),
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
                               alignment: Alignment.center,
                               child: Icon(
-                                wallet['icon'] as IconData,
-                                color: wallet['color'] as Color,
+                                _getIconData(wallet.icon),
+                                color: Color(wallet.iconColor),
                                 size: 16.sp,
                               ),
                             ),
@@ -781,7 +775,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    wallet['name'] as String,
+                                    wallet.name,
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.w600,
@@ -790,7 +784,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                   ),
                                   SizedBox(height: 1.h),
                                   Text(
-                                    'Saldo: Rp ${CurrencyFormatter.format((wallet['balance'] as double).toStringAsFixed(0))}',
+                                    'Saldo: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       color: AppTheme.lightTextSecondary,
@@ -799,12 +793,6 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                 ],
                               ),
                             ),
-                            if (isSelected)
-                              Icon(
-                                Icons.check_circle,
-                                color: AppTheme.primaryBlue,
-                                size: 18.sp,
-                              ),
                           ],
                         ),
                       ),
@@ -817,5 +805,20 @@ class _AddLoanPageState extends State<AddLoanPage> {
         ],
       ),
     );
+  }
+
+  IconData _getIconData(String iconName) {
+    switch (iconName) {
+      case 'wallet':
+        return Icons.account_balance_wallet;
+      case 'bank':
+        return Icons.account_balance;
+      case 'payment':
+        return Icons.payment;
+      case 'mobile':
+        return Icons.mobile_friendly;
+      default:
+        return Icons.account_balance_wallet;
+    }
   }
 }

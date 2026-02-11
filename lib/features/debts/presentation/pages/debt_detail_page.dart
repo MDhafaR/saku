@@ -1,18 +1,215 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart' as intl;
+import '../../../../core/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/presentation/components/saku_card.dart';
-import '../../../../domain/entities/debt.dart';
+import '../../../../core/utils/currency_formatter.dart';
+import '../../../../data/local/database/app_database.dart';
+import '../cubit/debt_cubit.dart';
 
-class DebtDetailPage extends StatelessWidget {
+class DebtDetailPage extends StatefulWidget {
   final Debt debt;
+  final String personName;
 
-  const DebtDetailPage({super.key, required this.debt});
+  const DebtDetailPage({
+    super.key,
+    required this.debt,
+    required this.personName,
+  });
+
+  @override
+  State<DebtDetailPage> createState() => _DebtDetailPageState();
+}
+
+class _DebtDetailPageState extends State<DebtDetailPage> {
+  final DebtCubit _cubit = locator<DebtCubit>();
+  List<DebtPayment> _payments = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final payments = await _cubit.getPayments(widget.debt.id);
+    if (mounted) {
+      setState(() {
+        _payments = payments;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleDelete() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Data?'),
+        content: const Text(
+          'Data yang dihapus tidak dapat dikembalikan. Lanjutkan?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: AppTheme.semanticRed),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await _cubit.deleteDebt(widget.debt.id);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  Future<void> _showPaymentDialog() async {
+    final wallets = await _cubit.getWallets();
+    if (wallets.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Belum ada wallet')));
+      }
+      return;
+    }
+
+    if (!mounted) return;
+
+    Wallet selectedWallet = wallets.first;
+    final amountController = TextEditingController();
+    final noteController = TextEditingController();
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+      ),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            20.w,
+            20.h,
+            20.w,
+            MediaQuery.of(context).viewInsets.bottom + 20.h,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Catat Pembayaran',
+                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20.h),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Jumlah',
+                  border: OutlineInputBorder(),
+                  prefixText: 'Rp ',
+                ),
+              ),
+              SizedBox(height: 12.h),
+              DropdownButtonFormField<Wallet>(
+                value: selectedWallet,
+                decoration: const InputDecoration(
+                  labelText: 'Wallet / Akun',
+                  border: OutlineInputBorder(),
+                ),
+                items: wallets.map((w) {
+                  return DropdownMenuItem(value: w, child: Text(w.name));
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setModalState(() => selectedWallet = val);
+                  }
+                },
+              ),
+              SizedBox(height: 12.h),
+              TextField(
+                controller: noteController,
+                decoration: const InputDecoration(
+                  labelText: 'Catatan (Opsional)',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              ElevatedButton(
+                onPressed: () async {
+                  final amount = double.tryParse(amountController.text);
+                  if (amount == null || amount <= 0) return;
+
+                  await _cubit.addPayment(
+                    debtId: widget.debt.id,
+                    walletId: selectedWallet.id,
+                    amount: amount,
+                    paymentDate: DateTime.now(),
+                    note: noteController.text,
+                  );
+
+                  if (context.mounted) Navigator.pop(context);
+                  _loadData(); // Refresh history
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primaryBlue,
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                ),
+                child: const Text(
+                  'Simpan',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Mock data for UI matching
-    final totalAmount = debt.amount * 1.5; // Simulate total original loan
-    const percentPaid = 0.68;
+    final remaining = widget.debt.totalAmount - widget.debt.paidAmount;
+    final percentPaid = widget.debt.totalAmount > 0
+        ? (widget.debt.paidAmount / widget.debt.totalAmount).clamp(0.0, 1.0)
+        : 0.0;
+
+    // Status text logic
+    String statusText = 'Pending';
+    Color statusColor = AppTheme.primaryBlue;
+    Color statusBg = const Color(0xFFEFF6FF);
+
+    if (widget.debt.status == 'paid') {
+      statusText = 'Lunas';
+      statusColor = AppTheme.semanticGreen;
+      statusBg = const Color(0xFFECFDF5);
+    } else if (widget.debt.dueDate != null) {
+      final now = DateTime.now();
+      final diff = widget.debt.dueDate!.difference(now).inDays;
+      if (diff < 0) {
+        statusText = 'Terlambat ${diff.abs()} Hari';
+        statusColor = AppTheme.semanticRed;
+        statusBg = const Color(0xFFFFF0F0);
+      } else if (diff <= 7) {
+        statusText =
+            'Jatuh Tempo ${diff == 0 ? "Hari Ini" : "$diff Hari Lagi"}';
+        statusColor = const Color(0xFFF59E0B);
+        statusBg = const Color(0xFFFFFBEB);
+      }
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
@@ -29,21 +226,15 @@ class DebtDetailPage extends StatelessWidget {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Detail Hutang',
-          style: TextStyle(
+        title: Text(
+          widget.debt.type == 'debt' ? 'Detail Utang' : 'Detail Piutang',
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: Colors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -58,40 +249,49 @@ class DebtDetailPage extends StatelessWidget {
                   child: Column(
                     children: [
                       Container(
-                        width: 120,
-                        height: 160,
+                        width: 80,
+                        height: 80,
                         decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(16),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                              'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&q=80&w=300&h=400',
+                          color: _getAvatarBackgroundColor(
+                            widget.personName,
+                          ).withOpacity(0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(widget.personName),
+                            style: TextStyle(
+                              color: _getAvatarBackgroundColor(
+                                widget.personName,
+                              ),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 24,
                             ),
-                            fit: BoxFit.cover,
                           ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
                         ),
                       ),
                       const SizedBox(height: 16),
+                      Text(
+                        widget.personName,
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFFF0F0), // Light red bg
+                          color: statusBg,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: const Text(
-                          'Terlambat 5 Hari',
+                        child: Text(
+                          statusText,
                           style: TextStyle(
-                            color: AppTheme.semanticRed,
+                            color: statusColor,
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
@@ -99,7 +299,7 @@ class DebtDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Rp ${_formatPrice(debt.amount)}',
+                        'Rp ${_formatPrice(remaining)}',
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
@@ -108,7 +308,7 @@ class DebtDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'dari total pinjaman Rp ${_formatPrice(totalAmount)}',
+                        'dari total Rp ${_formatPrice(widget.debt.totalAmount)}',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Color(0xFF9CA3AF),
@@ -149,18 +349,18 @@ class DebtDetailPage extends StatelessWidget {
                       const SizedBox(height: 12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
+                        children: [
                           Text(
-                            '68% Terbayar',
-                            style: TextStyle(
+                            '${(percentPaid * 100).toInt()}% Terbayar',
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.semanticGreen,
                             ),
                           ),
                           Text(
-                            'Sisa 32%',
-                            style: TextStyle(
+                            'Sisa ${(100 - (percentPaid * 100)).toInt()}%',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF9CA3AF),
                             ),
@@ -182,21 +382,14 @@ class DebtDetailPage extends StatelessWidget {
                       color: AppTheme.semanticGreen,
                       label: 'Hubungi',
                       bgColor: const Color(0xFFECFDF5),
-                      onTap: () {},
-                    ),
-                    _buildActionButton(
-                      icon: Icons.edit,
-                      color: AppTheme.primaryBlue,
-                      label: 'Edit',
-                      bgColor: const Color(0xFFEFF6FF),
-                      onTap: () {},
+                      onTap: () {}, // TODO: Implement call/whatsapp
                     ),
                     _buildActionButton(
                       icon: Icons.delete,
                       color: AppTheme.semanticRed,
                       label: 'Hapus',
                       bgColor: const Color(0xFFFFF0F0),
-                      onTap: () {},
+                      onTap: _handleDelete,
                     ),
                   ],
                 ),
@@ -217,60 +410,64 @@ class DebtDetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                _buildHistoryItem(
-                  title: 'Cicilan Ke-3',
-                  date: '15 Jan 2024 • Transfer Bank',
-                  amount: '+Rp 200.000',
-                  isSuccess: true,
-                ),
-                _buildHistoryItem(
-                  title: 'Cicilan Ke-2',
-                  date: '10 Jan 2024 • Tunai',
-                  amount: '+Rp 200.000',
-                  isSecondary: true,
-                ),
-                _buildHistoryItem(
-                  title: 'Cicilan Ke-1',
-                  date: '01 Jan 2024 • Tunai',
-                  amount: '+Rp 180.000',
-                  isSecondary: true,
-                ),
+                if (_isLoading)
+                  const Center(child: CircularProgressIndicator())
+                else if (_payments.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Text(
+                      'Belum ada pembayaran',
+                      style: TextStyle(color: Colors.grey[500]),
+                    ),
+                  )
+                else
+                  ..._payments.map(
+                    (payment) => _buildHistoryItem(
+                      title: payment.note ?? 'Pembayaran',
+                      date: intl.DateFormat(
+                        'dd MMM yyyy',
+                      ).format(payment.paymentDate),
+                      amount: '+Rp ${_formatPrice(payment.amount)}',
+                      isSuccess: true,
+                    ),
+                  ),
               ],
             ),
           ),
 
-          // Bottom Button
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              color: const Color(0xFFFAFAFA),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF111111),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
+          // Bottom Button (Only show if not fully paid)
+          if (widget.debt.status != 'paid')
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                color: const Color(0xFFFAFAFA),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _showPaymentDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF111111),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: const Text(
-                    'Catat Pembayaran',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                    child: const Text(
+                      'Catat Pembayaran',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -312,7 +509,6 @@ class DebtDetailPage extends StatelessWidget {
     required String date,
     required String amount,
     bool isSuccess = false,
-    bool isSecondary = false,
   }) {
     return SakuCard(
       margin: const EdgeInsets.only(bottom: 12),
@@ -374,12 +570,25 @@ class DebtDetailPage extends StatelessWidget {
   }
 
   String _formatPrice(double price) {
-    if (price == 0) return '0';
-    return price
-        .toStringAsFixed(0)
-        .replaceAllMapped(
-          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-          (Match m) => '${m[1]}.',
-        );
+    return CurrencyFormatter.format(price.toStringAsFixed(0));
+  }
+
+  String _getInitials(String name) {
+    final parts = name.split(' ');
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    }
+    return parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+  }
+
+  Color _getAvatarBackgroundColor(String name) {
+    final colors = [
+      const Color(0xFF6366F1), // Purple
+      const Color(0xFF3B82F6), // Blue
+      const Color(0xFF10B981), // Green
+      const Color(0xFFF59E0B), // Orange
+      const Color(0xFFEC4899), // Pink
+    ];
+    return colors[name.hashCode.abs() % colors.length];
   }
 }

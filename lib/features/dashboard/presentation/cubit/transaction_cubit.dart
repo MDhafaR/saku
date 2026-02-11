@@ -13,7 +13,7 @@ class TransactionCubit extends Cubit<TransactionState> {
 
   /// Start listening to transactions from database
   void start() {
-    emit(const TransactionLoading());
+    // emit(const TransactionLoading());
     _subscription?.cancel();
     _subscription = _db.transactionDao.watchAllTransactions().listen(
       (transactions) {

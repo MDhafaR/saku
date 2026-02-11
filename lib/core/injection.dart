@@ -2,6 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:saku/features/dashboard/presentation/cubit/transaction_cubit.dart';
 import 'package:saku/features/debts/presentation/cubit/debt_cubit.dart';
 import 'package:saku/features/statistics/presentation/cubit/statistics_cubit.dart';
+import 'package:saku/features/settings/presentation/cubit/security_cubit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/local/database/app_database.dart';
 
 final GetIt locator = GetIt.instance;
@@ -11,7 +13,11 @@ Future<void> setupLocator() async {
   // Database - using new AppDatabase with full schema
   locator.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
-  // Cubit - injected with database
+  // SharedPreferences
+  final prefs = await SharedPreferences.getInstance();
+  locator.registerSingleton<SharedPreferences>(prefs);
+
+  // Cubit - injected with database or prefs
   locator.registerFactory<TransactionCubit>(
     () => TransactionCubit(locator<AppDatabase>()),
   );
@@ -19,5 +25,9 @@ Future<void> setupLocator() async {
   locator.registerFactory<DebtCubit>(() => DebtCubit(locator<AppDatabase>()));
   locator.registerFactory<StatisticsCubit>(
     () => StatisticsCubit(locator<AppDatabase>()),
+  );
+
+  locator.registerLazySingleton<SecurityCubit>(
+    () => SecurityCubit(locator<SharedPreferences>()),
   );
 }

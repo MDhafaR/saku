@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/injection.dart';
+import '../cubit/security_cubit.dart';
+import '../cubit/security_state.dart';
+import 'package:saku/features/settings/presentation/pages/pin_page.dart';
+import 'package:local_auth/local_auth.dart';
 
 class SecuritySettingsPage extends StatefulWidget {
   const SecuritySettingsPage({super.key});
@@ -9,145 +15,249 @@ class SecuritySettingsPage extends StatefulWidget {
 }
 
 class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
-  // State variables for toggles
-  bool _isAppLockEnabled = true;
-  bool _isBiometricEnabled = true;
-  bool _isSecureScreenEnabled = false;
-  bool _isBalanceSensorEnabled = true;
+  final LocalAuthentication auth = LocalAuthentication();
+
+  Future<void> _checkBiometrics(SecurityCubit cubit, bool value) async {
+    if (value) {
+      try {
+        final bool canAuthenticateWithBiometrics =
+            await auth.canCheckBiometrics;
+        final bool canAuthenticate =
+            canAuthenticateWithBiometrics || await auth.isDeviceSupported();
+
+        if (canAuthenticate) {
+          final bool didAuthenticate = await auth.authenticate(
+            localizedReason: 'Verifikasi biometrik untuk mengaktifkan',
+            biometricOnly: true,
+          );
+
+          if (didAuthenticate) {
+            cubit.toggleBiometric(true);
+          }
+        } else {
+          // Handle not supported or no biometrics enrolled
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Perangkat tidak mendukung biometrik atau tidak ada sidik jari yang terdaftar.',
+              ),
+            ),
+          );
+        }
+      } catch (e) {
+        debugPrint('Biometric Error: $e');
+        if (!mounted) return;
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } else {
+      cubit.toggleBiometric(false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA), // Light background
-      appBar: AppBar(
-        title: Text(
-          'Pengaturan Keamanan',
-          style: TextStyle(
-            color: const Color(0xFF111111),
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            color: Colors.black,
-            size: 20.sp,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.help_outline, color: Colors.black, size: 24.sp),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionHeader('AKSES APLIKASI'),
-            SizedBox(height: 12.h),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    spreadRadius: 1,
-                    blurRadius: 4.r,
-                    offset: Offset(0, 2.h),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  _buildToggleItem(
-                    icon: Icons.lock_outline,
-                    title: 'Kunci Aplikasi',
-                    value: _isAppLockEnabled,
-                    onChanged: (val) => setState(() => _isAppLockEnabled = val),
-                  ),
-                  _buildDivider(),
-                  _buildToggleItem(
-                    icon: Icons.fingerprint,
-                    title: 'ID Biometrik',
-                    value: _isBiometricEnabled,
-                    onChanged: (val) =>
-                        setState(() => _isBiometricEnabled = val),
-                  ),
-                  _buildDivider(),
-                  _buildNavItem(
-                    icon: Icons.dialpad,
-                    title: 'Ganti PIN',
-                    onTap: () {},
-                  ),
-                  _buildDivider(),
-                  _buildNavItem(
-                    icon: Icons.timer_outlined,
-                    title: 'Waktu Kunci Otomatis',
-                    valueText: 'Segera',
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
+    return BlocProvider.value(
+      value: locator<SecurityCubit>(),
+      child: BlocBuilder<SecurityCubit, SecurityState>(
+        builder: (context, state) {
+          final cubit = context.read<SecurityCubit>();
 
-            SizedBox(height: 24.h),
-            _buildSectionHeader('PRIVASI VISUAL'),
-            SizedBox(height: 12.h),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    spreadRadius: 1,
-                    blurRadius: 4.r,
-                    offset: Offset(0, 2.h),
-                  ),
-                ],
+          return Scaffold(
+            backgroundColor: const Color(0xFFFAFAFA),
+            appBar: AppBar(
+              title: Text(
+                'Pengaturan Keamanan',
+                style: TextStyle(
+                  color: const Color(0xFF111111),
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
+              centerTitle: true,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.black,
+                  size: 20.sp,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            body: SingleChildScrollView(
+              padding: EdgeInsets.all(20.w),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildToggleItem(
-                    icon: Icons.security_update_good, // Shield icon
-                    title: 'Layar Aman',
-                    subtitle:
-                        'Cegah screenshot & sembunyikan preview aplikasi.',
-                    value: _isSecureScreenEnabled,
-                    onChanged: (val) =>
-                        setState(() => _isSecureScreenEnabled = val),
+                  _buildSectionHeader('AKSES APLIKASI'),
+                  SizedBox(height: 12.h),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.05),
+                          spreadRadius: 1,
+                          blurRadius: 4.r,
+                          offset: Offset(0, 2.h),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _buildToggleItem(
+                          icon: Icons.lock_outline,
+                          title: 'Kunci Aplikasi',
+                          value: state.isAppLockEnabled,
+                          onChanged: (val) async {
+                            if (val) {
+                              if (state.hashedPin != null) {
+                                // Verify existing PIN to enable
+                                final bool? verified =
+                                    await Navigator.push<bool>(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const PinPage(mode: PinMode.verify),
+                                      ),
+                                    );
+
+                                if (verified == true) {
+                                  cubit.toggleAppLock(true);
+                                }
+                              } else {
+                                // Setup new PIN to enable (if not set)
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PinPage(
+                                      mode: PinMode.setup,
+                                      onVerified: () {
+                                        cubit.toggleAppLock(true);
+                                      },
+                                    ),
+                                  ),
+                                );
+                              }
+                            } else {
+                              cubit.toggleAppLock(false);
+                            }
+                          },
+                        ),
+                        _buildDivider(),
+                        _buildToggleItem(
+                          icon: Icons.fingerprint,
+                          title: 'ID Biometrik',
+                          value: state.isBiometricEnabled,
+                          onChanged: (val) => _checkBiometrics(cubit, val),
+                        ),
+
+                        _buildDivider(),
+                        _buildNavItem(
+                          icon: Icons.dialpad,
+                          title: state.hashedPin == null
+                              ? 'Set PIN'
+                              : 'Ganti PIN',
+                          onTap: () async {
+                            if (state.hashedPin == null) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const PinPage(mode: PinMode.setup),
+                                ),
+                              );
+                            } else {
+                              final bool? verified = await Navigator.push<bool>(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const PinPage(
+                                    mode: PinMode.verifyForChange,
+                                  ),
+                                ),
+                              );
+
+                              if (verified == true && context.mounted) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PinPage(mode: PinMode.setup),
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                        _buildDivider(),
+                        _buildNavItem(
+                          icon: Icons.timer_outlined,
+                          title: 'Waktu Kunci Otomatis',
+                          valueText: 'Segera',
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
                   ),
-                  _buildDivider(),
-                  _buildToggleItem(
-                    icon: Icons.account_balance_wallet_outlined,
-                    title: 'Sensor Saldo',
-                    subtitle: 'Samarkan saldo di dashboard utama.',
-                    value: _isBalanceSensorEnabled,
-                    onChanged: (val) =>
-                        setState(() => _isBalanceSensorEnabled = val),
+
+                  SizedBox(height: 24.h),
+                  _buildSectionHeader('PRIVASI VISUAL'),
+                  SizedBox(height: 12.h),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.05),
+                          spreadRadius: 1,
+                          blurRadius: 4.r,
+                          offset: Offset(0, 2.h),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        _buildToggleItem(
+                          icon: Icons.security_update_good,
+                          title: 'Layar Aman',
+                          subtitle:
+                              'Cegah screenshot & sembunyikan preview aplikasi.',
+                          value: state.isSecureScreenEnabled,
+                          onChanged: (val) => cubit.toggleSecureScreen(val),
+                        ),
+                        _buildDivider(),
+                        _buildToggleItem(
+                          icon: Icons.account_balance_wallet_outlined,
+                          title: 'Sensor Saldo',
+                          subtitle: 'Samarkan saldo di dashboard utama.',
+                          value: state.isBalanceSensorEnabled,
+                          onChanged: (val) => cubit.toggleBalanceSensor(val),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  SizedBox(height: 32.h),
+                  Center(
+                    child: Text(
+                      'Versi Keamanan 2.4.0 • Terlindungi Enkripsi AES-256',
+                      style: TextStyle(
+                        color: Colors.grey[400],
+                        fontSize: 12.sp,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
-
-            SizedBox(height: 32.h),
-            Center(
-              child: Text(
-                'Versi Keamanan 2.4.0 • Terlindungi Enkripsi AES-256',
-                style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -206,7 +316,12 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               ],
             ),
           ),
-          Switch(value: value, onChanged: onChanged, activeColor: Colors.black),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeTrackColor: Colors.black,
+            activeThumbColor: Colors.white,
+          ),
         ],
       ),
     );

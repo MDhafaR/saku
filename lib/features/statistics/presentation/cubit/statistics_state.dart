@@ -61,6 +61,9 @@ class StatisticsLoaded extends StatisticsState {
   final double incomePercentage;
   final double expensePercentage;
   final double totalPercentage;
+  final double prevIncome;
+  final double prevExpense;
+  final double prevTotal;
   final List<ChartDataPoint> chartData;
   final List<CategoryBreakdownItem> categoryBreakdown;
   final String period;
@@ -73,6 +76,9 @@ class StatisticsLoaded extends StatisticsState {
     required this.incomePercentage,
     required this.expensePercentage,
     required this.totalPercentage,
+    required this.prevIncome,
+    required this.prevExpense,
+    required this.prevTotal,
     required this.chartData,
     required this.categoryBreakdown,
     required this.period,
@@ -87,6 +93,9 @@ class StatisticsLoaded extends StatisticsState {
     incomePercentage,
     expensePercentage,
     totalPercentage,
+    prevIncome,
+    prevExpense,
+    prevTotal,
     chartData,
     categoryBreakdown,
     period,

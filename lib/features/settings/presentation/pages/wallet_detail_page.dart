@@ -7,6 +7,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../dashboard/presentation/components/transaction_section.dart';
 import '../../../dashboard/presentation/cubit/transaction_cubit.dart';
+import '../../../../features/transactions/presentation/pages/wallet_history_page.dart';
 import 'add_edit_wallet_page.dart';
 
 class WalletDetailPage extends StatefulWidget {
@@ -278,8 +279,19 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _buildActionButton(Icons.arrow_outward, 'Transfer'),
-              _buildActionButton(Icons.tune, 'Atur Saldo'),
-              _buildActionButton(Icons.history, 'Riwayat'),
+              _buildActionButton(
+                Icons.history,
+                'Riwayat',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          WalletHistoryPage(wallet: widget.wallet),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ],
@@ -462,7 +474,11 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     );
   }
 
-  Widget _buildActionButton(IconData icon, String label) {
+  Widget _buildActionButton(
+    IconData icon,
+    String label, {
+    VoidCallback? onTap,
+  }) {
     return Column(
       children: [
         Container(
@@ -472,7 +488,11 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
             color: Color(0xFFF3F4F6),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: const Color(0xFF111111), size: 18.sp),
+          child: InkWell(
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Icon(icon, color: const Color(0xFF111111), size: 18.sp),
+          ),
         ),
         SizedBox(height: 6.h),
         Text(

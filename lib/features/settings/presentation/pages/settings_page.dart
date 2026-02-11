@@ -540,7 +540,6 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                           ],
                         ),
-                        SizedBox(height: 12.h),
                         // Display top 3 wallets preview
                         ...wallets
                             .take(3)

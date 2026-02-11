@@ -8,7 +8,6 @@ import 'core/theme/theme_service.dart';
 import 'features/onboarding/presentation/pages/onboarding_wrapper.dart';
 
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:month_year_picker/month_year_picker.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,7 +34,6 @@ class SakuApp extends StatelessWidget {
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
-          MonthYearPickerLocalizations.delegate,
         ],
         home: const OnboardingWrapper(),
       ),

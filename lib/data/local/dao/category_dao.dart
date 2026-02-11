@@ -11,11 +11,16 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   CategoryDao(super.db);
 
   /// Get all categories
-  Future<List<Category>> getAllCategories() => select(categories).get();
+  Future<List<Category>> getAllCategories() => (select(
+    categories,
+  )..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).get();
 
   /// Get categories by type (income/expense)
   Future<List<Category>> getCategoriesByType(String type) =>
-      (select(categories)..where((tbl) => tbl.type.equals(type))).get();
+      (select(categories)
+            ..where((tbl) => tbl.type.equals(type))
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .get();
 
   /// Get expense categories
   Future<List<Category>> getExpenseCategories() =>
@@ -29,9 +34,11 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
       (select(categories)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
 
   /// Get parent categories (no parent)
-  Future<List<Category>> getParentCategories(String type) => (select(
-    categories,
-  )..where((tbl) => tbl.type.equals(type) & tbl.parentId.isNull())).get();
+  Future<List<Category>> getParentCategories(String type) =>
+      (select(categories)
+            ..where((tbl) => tbl.type.equals(type) & tbl.parentId.isNull())
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .get();
 
   /// Get sub-categories by parent ID
   Future<List<Category>> getSubCategories(int parentId) =>
@@ -39,7 +46,10 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
 
   /// Watch categories by type for real-time updates
   Stream<List<Category>> watchCategoriesByType(String type) =>
-      (select(categories)..where((tbl) => tbl.type.equals(type))).watch();
+      (select(categories)
+            ..where((tbl) => tbl.type.equals(type))
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .watch();
 
   /// Create a new category
   Future<int> createCategory(CategoriesCompanion entry) =>
@@ -48,6 +58,20 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   /// Update existing category
   Future<bool> updateCategory(Category entry) =>
       update(categories).replace(entry);
+
+  /// Update order of categories
+  Future<void> updateCategoryOrder(List<Category> entries) async {
+    await batch((batch) {
+      for (var i = 0; i < entries.length; i++) {
+        final entry = entries[i];
+        batch.update(
+          categories,
+          CategoriesCompanion(sortOrder: Value(i)),
+          where: (tbl) => tbl.id.equals(entry.id),
+        );
+      }
+    });
+  }
 
   /// Delete category (only user-created)
   Future<int> deleteCategory(int id) => (delete(

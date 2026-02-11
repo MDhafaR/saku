@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/injection.dart';
+import '../../../../data/local/database/app_database.dart';
+import 'add_edit_category_page.dart';
 
 class CategoryListPage extends StatefulWidget {
   const CategoryListPage({super.key});
@@ -10,68 +13,75 @@ class CategoryListPage extends StatefulWidget {
 
 class _CategoryListPageState extends State<CategoryListPage> {
   int _selectedTab = 0; // 0 = Pengeluaran, 1 = Pemasukan
+  late final AppDatabase _db;
 
-  final List<Map<String, dynamic>> _expenseCategories = [
-    {
-      'name': 'Makanan & Minuman',
-      'icon': Icons.fastfood,
-      'color': const Color(0xFFF87171),
-    },
-    {
-      'name': 'Transportasi',
-      'icon': Icons.directions_bus,
-      'color': const Color(0xFF34D399),
-    },
-    {
-      'name': 'Belanja Bulanan',
-      'icon': Icons.shopping_bag,
-      'color': const Color(0xFFFBBF24),
-    },
-    {
-      'name': 'Hiburan & Hobi',
-      'icon': Icons.movie,
-      'color': const Color(0xFF818CF8),
-    },
-    {
-      'name': 'Tagihan Rumah',
-      'icon': Icons.home,
-      'color': const Color(0xFFFB923C),
-    },
-    {
-      'name': 'Kesehatan',
-      'icon': Icons.medical_services,
-      'color': const Color(0xFFF87171),
-    },
-    {
-      'name': 'Pendidikan',
-      'icon': Icons.school,
-      'color': const Color(0xFF3B82F6),
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _db = locator<AppDatabase>();
+  }
 
-  final List<Map<String, dynamic>> _incomeCategories = [
-    {
-      'name': 'Gaji',
-      'icon': Icons.attach_money,
-      'color': const Color(0xFF10B981),
-    },
-    {
-      'name': 'Hadiah',
-      'icon': Icons.card_giftcard,
-      'color': const Color(0xFFF472B6),
-    },
-    {
-      'name': 'Investasi',
-      'icon': Icons.trending_up,
-      'color': const Color(0xFF3B82F6),
-    },
-  ];
+  IconData _getIconData(String name) {
+    switch (name) {
+      case 'restaurant':
+        return Icons.restaurant;
+      case 'directions_car':
+        return Icons.directions_car;
+      case 'shopping_cart':
+        return Icons.shopping_cart;
+      case 'receipt':
+        return Icons.receipt;
+      case 'movie':
+        return Icons.movie;
+      case 'medical_services':
+        return Icons.medical_services;
+      case 'school':
+        return Icons.school;
+      case 'flight':
+        return Icons.flight;
+      case 'payments':
+        return Icons.payments;
+      case 'business':
+        return Icons.business;
+      case 'card_giftcard':
+        return Icons.card_giftcard;
+      case 'trending_up':
+        return Icons.trending_up;
+      case 'home':
+        return Icons.home;
+      case 'pets':
+        return Icons.pets;
+      case 'fitness_center':
+        return Icons.fitness_center;
+      case 'work':
+        return Icons.work;
+      case 'child_care':
+        return Icons.child_care;
+      case 'sports_esports':
+        return Icons.sports_esports;
+      case 'local_cafe':
+        return Icons.local_cafe;
+      case 'local_bar':
+        return Icons.local_bar;
+      default:
+        return Icons.category;
+    }
+  }
+
+  void _onReorder(List<Category> categories, int oldIndex, int newIndex) async {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final item = categories.removeAt(oldIndex);
+    categories.insert(newIndex, item);
+
+    // Update database
+    await _db.categoryDao.updateCategoryOrder(categories);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final categories = _selectedTab == 0
-        ? _expenseCategories
-        : _incomeCategories;
+    final type = _selectedTab == 0 ? 'expense' : 'income';
 
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
@@ -112,7 +122,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
       body: Column(
         children: [
           SizedBox(height: 8.h),
-          // Tab Selector - Sliding Pill style (matching design system)
+          // Tab Selector
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Container(
@@ -235,96 +245,157 @@ class _CategoryListPageState extends State<CategoryListPage> {
 
           // Category List
           Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 200),
-              child: ListView.separated(
-                key: ValueKey(_selectedTab),
-                padding: EdgeInsets.only(
-                  left: 20.w,
-                  right: 20.w,
-                  top: 0,
-                  bottom: 86.h,
-                ),
-                itemCount: categories.length,
-                separatorBuilder: (context, index) => SizedBox(height: 12.h),
-                itemBuilder: (context, index) {
-                  final category = categories[index];
-                  return Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 12.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16.r),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 8.r,
-                          offset: Offset(0, 2.h),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        // Icon
-                        Container(
-                          width: 40.w,
-                          height: 40.w,
-                          decoration: BoxDecoration(
-                            color: (category['color'] as Color).withOpacity(
-                              0.15,
+            child: StreamBuilder<List<Category>>(
+              stream: _db.categoryDao.watchCategoriesByType(type),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final categories = snapshot.data!;
+
+                // ReorderableListView requires a unique key for each item
+                return ReorderableListView.builder(
+                  padding: EdgeInsets.only(
+                    left: 20.w,
+                    right: 20.w,
+                    top: 0,
+                    bottom: 86.h,
+                  ),
+                  itemCount: categories.length,
+                  onReorder: (oldIndex, newIndex) =>
+                      _onReorder(categories, oldIndex, newIndex),
+                  proxyDecorator: (child, index, animation) {
+                    return AnimatedBuilder(
+                      animation: animation,
+                      builder: (BuildContext context, Widget? child) {
+                        final double animValue = Curves.easeInOut.transform(
+                          animation.value,
+                        );
+                        final double elevation = lerpDouble(0, 6, animValue)!;
+                        return Material(
+                          elevation: elevation,
+                          borderRadius: BorderRadius.circular(16.r),
+                          color: Colors.white,
+                          child: child,
+                        );
+                      },
+                      child: child,
+                    );
+                  },
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    return Container(
+                      key: ValueKey(category.id),
+                      margin: EdgeInsets.only(
+                        bottom: 12.h,
+                      ), // ReorderableListView doesn't have separatorBuilder
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 12.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 8.r,
+                            offset: Offset(0, 2.h),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Icon
+                          Container(
+                            width: 40.w,
+                            height: 40.w,
+                            decoration: BoxDecoration(
+                              color: Color(
+                                category.iconColor,
+                              ).withOpacity(0.15),
+                              shape: BoxShape.circle,
                             ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            category['icon'] as IconData,
-                            color: category['color'] as Color,
-                            size: 20.sp,
-                          ),
-                        ),
-                        SizedBox(width: 16.w),
-                        // Name
-                        Expanded(
-                          child: Text(
-                            category['name'] as String,
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF111111),
+                            child: Icon(
+                              _getIconData(category.icon),
+                              color: Color(category.iconColor),
+                              size: 20.sp,
                             ),
                           ),
-                        ),
-                        // Edit Button
-                        IconButton(
-                          icon: Icon(
-                            Icons.edit_outlined,
-                            size: 20.sp,
-                            color: Colors.grey[400],
+                          SizedBox(width: 16.w),
+                          // Name
+                          Expanded(
+                            child: Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF111111),
+                              ),
+                            ),
                           ),
-                          onPressed: () {},
-                        ),
-                        // Drag Handle
-                        Icon(
-                          Icons.drag_handle,
-                          color: Colors.grey[400],
-                          size: 24.sp,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                          // Edit Button
+                          IconButton(
+                            icon: Icon(
+                              Icons.edit_outlined,
+                              size: 20.sp,
+                              color: Colors.grey[400],
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AddEditCategoryPage(
+                                    type: type,
+                                    category: category,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          // Drag Handle
+                          ReorderableDragStartListener(
+                            index: index,
+                            child: Icon(
+                              Icons.drag_handle,
+                              color: Colors.grey[400],
+                              size: 24.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddEditCategoryPage(type: type),
+            ),
+          );
+        },
         backgroundColor: const Color(0xFF111111),
         shape: const CircleBorder(),
         child: Icon(Icons.add, color: Colors.white, size: 24.sp),
       ),
     );
+  }
+
+  double? lerpDouble(num? a, num? b, double t) {
+    if (a == null && b == null) return null;
+    a ??= 0.0;
+    b ??= 0.0;
+    return a + (b - a) * t;
   }
 }

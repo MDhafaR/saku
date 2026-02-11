@@ -86,16 +86,17 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
       ),
       body: Column(
         children: [
-          SizedBox(height: 20.h),
 
           // Category List
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.separated(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 20.w,
-                      vertical: 0,
+                    padding: EdgeInsets.only(
+                      left: 20.w,
+                      right: 20.w,
+                      top: 20.h,
+                      bottom: 76.h,
                     ),
                     itemCount: _categories.length,
                     separatorBuilder: (context, index) =>

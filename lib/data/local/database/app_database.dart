@@ -36,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -52,6 +52,9 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(wallets, wallets.accountNumber);
           await m.addColumn(wallets, wallets.isMain);
           await m.addColumn(wallets, wallets.isNumberMasked);
+        }
+        if (from < 4) {
+          await m.addColumn(categories, categories.sortOrder);
         }
       },
     );
@@ -71,6 +74,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('restaurant'),
         iconColor: const Value(0xFFFF5722),
         isDefault: const Value(true),
+        sortOrder: const Value(0),
       ),
       CategoriesCompanion.insert(
         name: 'Transportation',
@@ -78,6 +82,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('directions_car'),
         iconColor: const Value(0xFF2196F3),
         isDefault: const Value(true),
+        sortOrder: const Value(1),
       ),
       CategoriesCompanion.insert(
         name: 'Shopping',
@@ -85,6 +90,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('shopping_cart'),
         iconColor: const Value(0xFF9C27B0),
         isDefault: const Value(true),
+        sortOrder: const Value(2),
       ),
       CategoriesCompanion.insert(
         name: 'Bills & Utilities',
@@ -92,6 +98,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('receipt'),
         iconColor: const Value(0xFF607D8B),
         isDefault: const Value(true),
+        sortOrder: const Value(3),
       ),
       CategoriesCompanion.insert(
         name: 'Entertainment',
@@ -99,6 +106,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('movie'),
         iconColor: const Value(0xFFE91E63),
         isDefault: const Value(true),
+        sortOrder: const Value(4),
       ),
       CategoriesCompanion.insert(
         name: 'Health',
@@ -106,6 +114,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('medical_services'),
         iconColor: const Value(0xFFE53935),
         isDefault: const Value(true),
+        sortOrder: const Value(5),
       ),
       CategoriesCompanion.insert(
         name: 'Education',
@@ -113,6 +122,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('school'),
         iconColor: const Value(0xFF3F51B5),
         isDefault: const Value(true),
+        sortOrder: const Value(6),
       ),
       CategoriesCompanion.insert(
         name: 'Travel',
@@ -120,6 +130,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('flight'),
         iconColor: const Value(0xFF00BCD4),
         isDefault: const Value(true),
+        sortOrder: const Value(7),
       ),
     ];
 
@@ -130,6 +141,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('payments'),
         iconColor: const Value(0xFF4CAF50),
         isDefault: const Value(true),
+        sortOrder: const Value(0),
       ),
       CategoriesCompanion.insert(
         name: 'Business',
@@ -137,6 +149,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('business'),
         iconColor: const Value(0xFF8BC34A),
         isDefault: const Value(true),
+        sortOrder: const Value(1),
       ),
       CategoriesCompanion.insert(
         name: 'Gift',
@@ -144,6 +157,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('card_giftcard'),
         iconColor: const Value(0xFFFF9800),
         isDefault: const Value(true),
+        sortOrder: const Value(2),
       ),
       CategoriesCompanion.insert(
         name: 'Investment',
@@ -151,6 +165,7 @@ class AppDatabase extends _$AppDatabase {
         icon: const Value('trending_up'),
         iconColor: const Value(0xFF009688),
         isDefault: const Value(true),
+        sortOrder: const Value(3),
       ),
     ];
 

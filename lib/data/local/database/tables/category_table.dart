@@ -11,5 +11,6 @@ class Categories extends Table {
       integer().withDefault(const Constant(0xFF2196F3))();
   IntColumn get parentId => integer().nullable().references(Categories, #id)();
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }

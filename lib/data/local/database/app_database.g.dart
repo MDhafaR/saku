@@ -905,6 +905,18 @@ class $CategoriesTable extends Categories
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -926,6 +938,7 @@ class $CategoriesTable extends Categories
     iconColor,
     parentId,
     isDefault,
+    sortOrder,
     createdAt,
   ];
   @override
@@ -983,6 +996,12 @@ class $CategoriesTable extends Categories
         isDefault.isAcceptableOrUnknown(data['is_default']!, _isDefaultMeta),
       );
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
     if (data.containsKey('created_at')) {
       context.handle(
         _createdAtMeta,
@@ -1026,6 +1045,10 @@ class $CategoriesTable extends Categories
         DriftSqlType.bool,
         data['${effectivePrefix}is_default'],
       )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
       createdAt: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}created_at'],
@@ -1047,6 +1070,7 @@ class Category extends DataClass implements Insertable<Category> {
   final int iconColor;
   final int? parentId;
   final bool isDefault;
+  final int sortOrder;
   final DateTime createdAt;
   const Category({
     required this.id,
@@ -1056,6 +1080,7 @@ class Category extends DataClass implements Insertable<Category> {
     required this.iconColor,
     this.parentId,
     required this.isDefault,
+    required this.sortOrder,
     required this.createdAt,
   });
   @override
@@ -1070,6 +1095,7 @@ class Category extends DataClass implements Insertable<Category> {
       map['parent_id'] = Variable<int>(parentId);
     }
     map['is_default'] = Variable<bool>(isDefault);
+    map['sort_order'] = Variable<int>(sortOrder);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -1085,6 +1111,7 @@ class Category extends DataClass implements Insertable<Category> {
           ? const Value.absent()
           : Value(parentId),
       isDefault: Value(isDefault),
+      sortOrder: Value(sortOrder),
       createdAt: Value(createdAt),
     );
   }
@@ -1102,6 +1129,7 @@ class Category extends DataClass implements Insertable<Category> {
       iconColor: serializer.fromJson<int>(json['iconColor']),
       parentId: serializer.fromJson<int?>(json['parentId']),
       isDefault: serializer.fromJson<bool>(json['isDefault']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1116,6 +1144,7 @@ class Category extends DataClass implements Insertable<Category> {
       'iconColor': serializer.toJson<int>(iconColor),
       'parentId': serializer.toJson<int?>(parentId),
       'isDefault': serializer.toJson<bool>(isDefault),
+      'sortOrder': serializer.toJson<int>(sortOrder),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -1128,6 +1157,7 @@ class Category extends DataClass implements Insertable<Category> {
     int? iconColor,
     Value<int?> parentId = const Value.absent(),
     bool? isDefault,
+    int? sortOrder,
     DateTime? createdAt,
   }) => Category(
     id: id ?? this.id,
@@ -1137,6 +1167,7 @@ class Category extends DataClass implements Insertable<Category> {
     iconColor: iconColor ?? this.iconColor,
     parentId: parentId.present ? parentId.value : this.parentId,
     isDefault: isDefault ?? this.isDefault,
+    sortOrder: sortOrder ?? this.sortOrder,
     createdAt: createdAt ?? this.createdAt,
   );
   Category copyWithCompanion(CategoriesCompanion data) {
@@ -1148,6 +1179,7 @@ class Category extends DataClass implements Insertable<Category> {
       iconColor: data.iconColor.present ? data.iconColor.value : this.iconColor,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       isDefault: data.isDefault.present ? data.isDefault.value : this.isDefault,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
@@ -1162,6 +1194,7 @@ class Category extends DataClass implements Insertable<Category> {
           ..write('iconColor: $iconColor, ')
           ..write('parentId: $parentId, ')
           ..write('isDefault: $isDefault, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -1176,6 +1209,7 @@ class Category extends DataClass implements Insertable<Category> {
     iconColor,
     parentId,
     isDefault,
+    sortOrder,
     createdAt,
   );
   @override
@@ -1189,6 +1223,7 @@ class Category extends DataClass implements Insertable<Category> {
           other.iconColor == this.iconColor &&
           other.parentId == this.parentId &&
           other.isDefault == this.isDefault &&
+          other.sortOrder == this.sortOrder &&
           other.createdAt == this.createdAt);
 }
 
@@ -1200,6 +1235,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
   final Value<int> iconColor;
   final Value<int?> parentId;
   final Value<bool> isDefault;
+  final Value<int> sortOrder;
   final Value<DateTime> createdAt;
   const CategoriesCompanion({
     this.id = const Value.absent(),
@@ -1209,6 +1245,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.iconColor = const Value.absent(),
     this.parentId = const Value.absent(),
     this.isDefault = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
   });
   CategoriesCompanion.insert({
@@ -1219,6 +1256,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     this.iconColor = const Value.absent(),
     this.parentId = const Value.absent(),
     this.isDefault = const Value.absent(),
+    this.sortOrder = const Value.absent(),
     this.createdAt = const Value.absent(),
   }) : name = Value(name),
        type = Value(type);
@@ -1230,6 +1268,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Expression<int>? iconColor,
     Expression<int>? parentId,
     Expression<bool>? isDefault,
+    Expression<int>? sortOrder,
     Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
@@ -1240,6 +1279,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       if (iconColor != null) 'icon_color': iconColor,
       if (parentId != null) 'parent_id': parentId,
       if (isDefault != null) 'is_default': isDefault,
+      if (sortOrder != null) 'sort_order': sortOrder,
       if (createdAt != null) 'created_at': createdAt,
     });
   }
@@ -1252,6 +1292,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     Value<int>? iconColor,
     Value<int?>? parentId,
     Value<bool>? isDefault,
+    Value<int>? sortOrder,
     Value<DateTime>? createdAt,
   }) {
     return CategoriesCompanion(
@@ -1262,6 +1303,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
       iconColor: iconColor ?? this.iconColor,
       parentId: parentId ?? this.parentId,
       isDefault: isDefault ?? this.isDefault,
+      sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
     );
   }
@@ -1290,6 +1332,9 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
     if (isDefault.present) {
       map['is_default'] = Variable<bool>(isDefault.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1306,6 +1351,7 @@ class CategoriesCompanion extends UpdateCompanion<Category> {
           ..write('iconColor: $iconColor, ')
           ..write('parentId: $parentId, ')
           ..write('isDefault: $isDefault, ')
+          ..write('sortOrder: $sortOrder, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
@@ -4697,6 +4743,7 @@ typedef $$CategoriesTableCreateCompanionBuilder =
       Value<int> iconColor,
       Value<int?> parentId,
       Value<bool> isDefault,
+      Value<int> sortOrder,
       Value<DateTime> createdAt,
     });
 typedef $$CategoriesTableUpdateCompanionBuilder =
@@ -4708,6 +4755,7 @@ typedef $$CategoriesTableUpdateCompanionBuilder =
       Value<int> iconColor,
       Value<int?> parentId,
       Value<bool> isDefault,
+      Value<int> sortOrder,
       Value<DateTime> createdAt,
     });
 
@@ -4792,6 +4840,11 @@ class $$CategoriesTableFilterComposer
 
   ColumnFilters<bool> get isDefault => $composableBuilder(
     column: $table.isDefault,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4888,6 +4941,11 @@ class $$CategoriesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
     column: $table.createdAt,
     builder: (column) => ColumnOrderings(column),
@@ -4943,6 +5001,9 @@ class $$CategoriesTableAnnotationComposer
 
   GeneratedColumn<bool> get isDefault =>
       $composableBuilder(column: $table.isDefault, builder: (column) => column);
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
@@ -5031,6 +5092,7 @@ class $$CategoriesTableTableManager
                 Value<int> iconColor = const Value.absent(),
                 Value<int?> parentId = const Value.absent(),
                 Value<bool> isDefault = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => CategoriesCompanion(
                 id: id,
@@ -5040,6 +5102,7 @@ class $$CategoriesTableTableManager
                 iconColor: iconColor,
                 parentId: parentId,
                 isDefault: isDefault,
+                sortOrder: sortOrder,
                 createdAt: createdAt,
               ),
           createCompanionCallback:
@@ -5051,6 +5114,7 @@ class $$CategoriesTableTableManager
                 Value<int> iconColor = const Value.absent(),
                 Value<int?> parentId = const Value.absent(),
                 Value<bool> isDefault = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
               }) => CategoriesCompanion.insert(
                 id: id,
@@ -5060,6 +5124,7 @@ class $$CategoriesTableTableManager
                 iconColor: iconColor,
                 parentId: parentId,
                 isDefault: isDefault,
+                sortOrder: sortOrder,
                 createdAt: createdAt,
               ),
           withReferenceMapper: (p0) => p0

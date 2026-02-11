@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 
 class FinancialSummaryCard extends StatelessWidget {
@@ -36,13 +37,15 @@ class FinancialSummaryCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: EdgeInsets.all(6.w),
-                decoration: BoxDecoration(
-                  color: backgroundColor.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(10.r),
+              Skeleton.ignore(
+                child: Container(
+                  padding: EdgeInsets.all(6.w),
+                  decoration: BoxDecoration(
+                    color: backgroundColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 16.sp),
                 ),
-                child: Icon(icon, color: iconColor, size: 16.sp),
               ),
               if (percentage != null) ...[
                 SizedBox(width: 4.w),
@@ -64,15 +67,17 @@ class FinancialSummaryCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 8.h),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: const Color(0xFF6B7280),
-              fontWeight: FontWeight.w500,
+          Skeleton.ignore(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: const Color(0xFF6B7280),
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: 2.h),
           FittedBox(

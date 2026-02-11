@@ -62,6 +62,10 @@ class DebtDao extends DatabaseAccessor<AppDatabase> with _$DebtDaoMixin {
             ..orderBy([(t) => OrderingTerm.asc(t.dueDate)]))
           .get();
 
+  /// Get a single debt by ID
+  Future<Debt?> getDebt(int id) =>
+      (select(debts)..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+
   /// Watch all debts for real-time updates
   Stream<List<Debt>> watchAllDebts() =>
       (select(debts)..orderBy([(t) => OrderingTerm.asc(t.dueDate)])).watch();

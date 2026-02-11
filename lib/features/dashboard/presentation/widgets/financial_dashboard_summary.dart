@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../settings/presentation/cubit/security_cubit.dart';
 import '../../../settings/presentation/cubit/security_state.dart';
@@ -13,6 +14,7 @@ class FinancialDashboardSummary extends StatelessWidget {
   final double prevIncome;
   final double prevExpense;
   final double prevTotal;
+  final bool isLoading;
 
   const FinancialDashboardSummary({
     super.key,
@@ -22,6 +24,7 @@ class FinancialDashboardSummary extends StatelessWidget {
     required this.prevIncome,
     required this.prevExpense,
     required this.prevTotal,
+    this.isLoading = false,
   });
 
   String _formatPercentage(double current, double previous) {
@@ -57,57 +60,60 @@ class FinancialDashboardSummary extends StatelessWidget {
       builder: (context, state) {
         final isMasked = state.isBalanceSensorEnabled;
 
-        return Row(
-          children: [
-            Expanded(
-              child: FinancialSummaryCard(
-                title: 'Income',
-                amount: isMasked
-                    ? '••••••'
-                    : 'Rp ${CurrencyFormatter.format(income.toStringAsFixed(0))}',
-                percentage: _formatPercentage(income, prevIncome),
-                percentageColor: _getPercentageColor(income, prevIncome),
-                icon: Icons.trending_up,
-                iconColor: const Color(0xFF10B981),
-                backgroundColor: const Color(0xFF10B981),
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: FinancialSummaryCard(
-                title: 'Expense',
-                amount: isMasked
-                    ? '••••••'
-                    : 'Rp ${CurrencyFormatter.format(expense.toStringAsFixed(0))}',
-                percentage: _formatPercentage(expense, prevExpense),
-                percentageColor: _getPercentageColor(
-                  expense,
-                  prevExpense,
-                  invert: true,
+        return Skeletonizer(
+          enabled: isLoading,
+          child: Row(
+            children: [
+              Expanded(
+                child: FinancialSummaryCard(
+                  title: 'Income',
+                  amount: isMasked
+                      ? '••••••'
+                      : 'Rp ${CurrencyFormatter.format(income.toStringAsFixed(0))}',
+                  percentage: _formatPercentage(income, prevIncome),
+                  percentageColor: _getPercentageColor(income, prevIncome),
+                  icon: Icons.trending_up,
+                  iconColor: const Color(0xFF10B981),
+                  backgroundColor: const Color(0xFF10B981),
                 ),
-                icon: Icons.trending_down,
-                iconColor: const Color(0xFFEF4444),
-                backgroundColor: const Color(0xFFEF4444),
               ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: FinancialSummaryCard(
-                title: 'Total',
-                amount: isMasked
-                    ? '••••••'
-                    : 'Rp ${CurrencyFormatter.format(total.abs().toStringAsFixed(0))}',
-                percentage: _formatPercentage(total, prevTotal),
-                percentageColor: _getPercentageColor(total, prevTotal),
-                icon: Icons.account_balance_wallet,
-                iconColor: const Color(0xFF6366F1),
-                backgroundColor: const Color(0xFF6366F1),
-                amountColor: total >= 0
-                    ? const Color(0xFF10B981)
-                    : const Color(0xFFEF4444),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: FinancialSummaryCard(
+                  title: 'Expense',
+                  amount: isMasked
+                      ? '••••••'
+                      : 'Rp ${CurrencyFormatter.format(expense.toStringAsFixed(0))}',
+                  percentage: _formatPercentage(expense, prevExpense),
+                  percentageColor: _getPercentageColor(
+                    expense,
+                    prevExpense,
+                    invert: true,
+                  ),
+                  icon: Icons.trending_down,
+                  iconColor: const Color(0xFFEF4444),
+                  backgroundColor: const Color(0xFFEF4444),
+                ),
               ),
-            ),
-          ],
+              SizedBox(width: 12.w),
+              Expanded(
+                child: FinancialSummaryCard(
+                  title: 'Total',
+                  amount: isMasked
+                      ? '••••••'
+                      : 'Rp ${CurrencyFormatter.format(total.abs().toStringAsFixed(0))}',
+                  percentage: _formatPercentage(total, prevTotal),
+                  percentageColor: _getPercentageColor(total, prevTotal),
+                  icon: Icons.account_balance_wallet,
+                  iconColor: const Color(0xFF6366F1),
+                  backgroundColor: const Color(0xFF6366F1),
+                  amountColor: total >= 0
+                      ? const Color(0xFF10B981)
+                      : const Color(0xFFEF4444),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

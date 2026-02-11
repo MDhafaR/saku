@@ -55,6 +55,7 @@ dependencies:
   local_auth: ^3.0.0
   crypto: ^3.0.7
   screen_protector: ^1.5.1
+  skeletonizer: ^2.1.2
 
 dev_dependencies:
   flutter_test:

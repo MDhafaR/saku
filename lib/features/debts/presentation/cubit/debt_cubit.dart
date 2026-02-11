@@ -102,6 +102,25 @@ class DebtCubit extends Cubit<DebtState> {
     return _db.debtDao.getPersonById(id);
   }
 
+  /// Get debt by ID
+  Future<Debt?> getDebt(int id) {
+    return _db.debtDao.getDebt(id);
+  }
+
+  /// Delete the last payment for a debt (Undo Lunas)
+  Future<void> deleteLastPayment(int debtId) async {
+    final payments = await _db.debtDao.getPaymentsByDebt(debtId);
+    if (payments.isNotEmpty) {
+      // Sort by ID descending to get the latest inserted payment
+      payments.sort((a, b) => b.id.compareTo(a.id));
+      final lastPaymentId = payments.first.id;
+
+      await (_db.delete(
+        _db.debtPayments,
+      )..where((tbl) => tbl.id.equals(lastPaymentId))).go();
+    }
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

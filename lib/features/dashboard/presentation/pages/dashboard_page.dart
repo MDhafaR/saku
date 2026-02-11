@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../components/components.dart' as components;
 import '../components/filter_bottom_sheet.dart';
@@ -21,6 +23,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   DateTime _selectedDate = DateTime.now();
   late final TransactionCubit _cubit;
+  bool _isLoading = true;
 
   // Cache for categories and wallets
   Map<int, Category> _categoriesCache = {};
@@ -45,7 +48,6 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _cubit = locator<TransactionCubit>();
-    _cubit.start();
     _loadCategoriesAndWallets();
   }
 
@@ -60,10 +62,18 @@ class _DashboardPageState extends State<DashboardPage> {
     // Load all wallets
     final wallets = await db.walletDao.getAllWallets();
 
-    setState(() {
-      _categoriesCache = {for (var c in allCategories) c.id: c};
-      _walletsCache = {for (var w in wallets) w.id: w};
-    });
+    _categoriesCache = {for (var c in allCategories) c.id: c};
+    _walletsCache = {for (var w in wallets) w.id: w};
+
+    // Start listening to transactions only AFTER cache is ready
+    _cubit.start();
+
+    // Trigger rebuild now that cache + stream are both initialized
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _onPreviousMonth() {
@@ -479,6 +489,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           prevIncome: prevIncome,
                           prevExpense: prevExpense,
                           prevTotal: prevTotal,
+                          isLoading: _isLoading,
                         ),
 
                         // Search bar
@@ -535,8 +546,10 @@ class _DashboardPageState extends State<DashboardPage> {
     TransactionState state,
     List<Transaction> transactions,
   ) {
-    if (state is TransactionLoading || state is TransactionInitial) {
-      return const SizedBox.shrink();
+    if (state is TransactionLoading ||
+        state is TransactionInitial ||
+        _isLoading) {
+      return _buildSkeletonTransactions();
     }
 
     if (state is TransactionError) {
@@ -599,7 +612,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 24.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -612,6 +625,89 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           // Bottom padding for FAB
           SizedBox(height: 140.h),
+        ],
+      ),
+    );
+  }
+
+  /// Builds skeleton placeholder items matching the TransactionItem layout
+  Widget _buildSkeletonTransactions() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 24.h),
+      child: Skeletonizer(
+        enabled: true,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Skeleton section title
+            Padding(
+              padding: EdgeInsets.only(bottom: 10.h),
+              child: Text(
+                'Hari Ini',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            // 4 skeleton transaction items
+            ...List.generate(4, (_) => _buildSkeletonItem()),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSkeletonItem() {
+    return SakuCard(
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      child: Row(
+        children: [
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: Colors.blue.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(Icons.category, color: Colors.blue, size: 18.sp),
+          ),
+          SizedBox(width: 10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Category Name',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111111),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                SizedBox(height: 2.h),
+                Text(
+                  'Wallet Name',
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    color: Colors.grey[500],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Text(
+            '-Rp 100.000',
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w800,
+              color: const Color(0xFFD32F2F),
+              letterSpacing: -0.3,
+            ),
+          ),
         ],
       ),
     );

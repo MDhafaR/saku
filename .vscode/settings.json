@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "a:/Projects/saku/linux"
+    "cmake.sourceDirectory": "a:/Projects/saku/linux",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

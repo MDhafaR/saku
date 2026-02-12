@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_service.dart';
+import 'core/services/notification_service.dart';
 import 'features/onboarding/presentation/pages/onboarding_wrapper.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
@@ -18,6 +19,7 @@ void main() async {
   await setupLocator();
   await ThemeService.init();
   await initializeDateFormatting('id_ID', null);
+  await NotificationService().init();
   runApp(
     BlocProvider(
       create: (context) => locator<SecurityCubit>(),

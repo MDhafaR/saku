@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/services/notification_service.dart';
 
 class ReminderPage extends StatefulWidget {
   const ReminderPage({super.key});
@@ -15,11 +16,53 @@ class _ReminderPageState extends State<ReminderPage> {
   final TextEditingController _customMessageController = TextEditingController(
     text: "Jangan lupa catat pengeluaran hari ini ya! 💸",
   );
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final settings = await NotificationService().loadReminderSettings();
+    if (mounted) {
+      setState(() {
+        _isReminderEnabled = settings['isEnabled'];
+        _reminderTimes = List<String>.from(settings['times']);
+        _selectedMessageType = settings['messageType'];
+        _customMessageController.text = settings['customMessage'];
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
     _customMessageController.dispose();
     super.dispose();
+  }
+
+  void _saveSettings() async {
+    final notifService = NotificationService();
+
+    // Save settings to SharedPreferences first
+    await notifService.saveReminderSettings(
+      isEnabled: _isReminderEnabled,
+      times: _reminderTimes,
+      messageType: _selectedMessageType,
+      customMessage: _customMessageController.text,
+    );
+
+    // Reschedule notifications based on saved settings
+    await notifService.rescheduleNotifications();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pengaturan pengingat berhasil disimpan')),
+      );
+      Navigator.pop(context);
+    }
   }
 
   void _addTime() async {
@@ -55,6 +98,35 @@ class _ReminderPageState extends State<ReminderPage> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFFAFAFA),
+        appBar: AppBar(
+          title: Text(
+            'Pengingat Harian',
+            style: TextStyle(
+              color: const Color(0xFF111111),
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new,
+              color: Colors.black,
+              size: 20.sp,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(color: Color(0xFF111111)),
+        ),
+      );
+    }
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
@@ -317,6 +389,28 @@ class _ReminderPageState extends State<ReminderPage> {
                 ),
               ),
 
+              SizedBox(height: 24.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveSettings,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF111111),
+                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    'Simpan Pengaturan',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(height: 40.h),
             ],
           ],

@@ -74,6 +74,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     TimePeriodSelector(
                       selectedPeriod: s is state.StatisticsLoaded
                           ? s.period
+                          : s is state.StatisticsLoading
+                          ? s.period
                           : 'Daily',
                       onPeriodChanged: (period) {
                         context.read<StatisticsCubit>().loadStatistics(period);

@@ -13,7 +13,11 @@ class StatisticsInitial extends StatisticsState {
 }
 
 class StatisticsLoading extends StatisticsState {
-  const StatisticsLoading();
+  final String period;
+  const StatisticsLoading({this.period = 'Daily'});
+
+  @override
+  List<Object?> get props => [period];
 }
 
 class CategoryBreakdownItem {

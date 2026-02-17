@@ -12,7 +12,7 @@ class StatisticsCubit extends Cubit<StatisticsState> {
     String period, {
     AppDateTimeRange? customRange,
   }) async {
-    emit(const StatisticsLoading());
+    emit(StatisticsLoading(period: period));
 
     try {
       final now = DateTime.now();

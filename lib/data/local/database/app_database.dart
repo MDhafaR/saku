@@ -12,6 +12,7 @@ import 'tables/transfer_table.dart';
 import 'tables/person_table.dart';
 import 'tables/debt_table.dart';
 import 'tables/debt_payment_table.dart';
+import 'tables/import_history_table.dart';
 import '../dao/transaction_dao.dart';
 import '../dao/category_dao.dart';
 import '../dao/wallet_dao.dart';
@@ -29,6 +30,7 @@ part 'app_database.g.dart';
     Persons,
     Debts,
     DebtPayments,
+    ImportHistories,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -38,7 +40,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -57,6 +59,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 4) {
           await m.addColumn(categories, categories.sortOrder);
+        }
+        if (from < 5) {
+          await m.createTable(importHistories);
         }
       },
     );

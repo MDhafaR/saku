@@ -166,6 +166,74 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
           ),
         ),
         centerTitle: true,
+        actions: [
+          if (_isEdit)
+            PopupMenuButton<String>(
+              icon: Icon(
+                Icons.more_horiz,
+                color: const Color(0xFF111111),
+                size: 24.sp,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              offset: Offset(0, 40.h),
+              onSelected: (value) {
+                if (value == 'delete') {
+                  _showDeleteDialog();
+                } else if (value == 'move') {
+                  _showMoveDialog();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.delete_outline,
+                        color: const Color(0xFFEF4444),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Hapus Wallet',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFFEF4444),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'move',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.drive_file_move_outline,
+                        color: const Color(0xFF111111),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Pindahkan Wallet',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF111111),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          SizedBox(width: 8.w),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
@@ -342,8 +410,6 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             // Save button
             _buildSaveButton(),
 
-            // Delete Wallet Button (if edit mode)
-            if (_isEdit) ...[SizedBox(height: 16.h), _buildDeleteButton()],
             SizedBox(height: 24.h),
           ],
         ),
@@ -646,44 +712,424 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     );
   }
 
-  Widget _buildDeleteButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: TextButton(
-        onPressed: () async {
-          final confirm = await showDialog<bool>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Hapus Wallet'),
-              content: const Text(
-                'Apakah anda yakin ingin menghapus wallet ini? Semua transaksi terkait juga akan dihapus.',
+  void _showDeleteDialog() async {
+    final db = locator<AppDatabase>();
+    final walletName = widget.wallet?.name ?? '';
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) {
+        String confirmText = '';
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) {
+            final isConfirmed = confirmText.toLowerCase() == 'delete wallet';
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              title: Row(
+                children: [
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEF4444).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Icon(
+                      Icons.warning_amber_rounded,
+                      color: const Color(0xFFEF4444),
+                      size: 22.sp,
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      'Hapus Wallet',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFFEF4444),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF6B7280),
+                          height: 1.5,
+                        ),
+                        children: [
+                          const TextSpan(text: 'Anda akan menghapus wallet '),
+                          TextSpan(
+                            text: '"$walletName"',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF111111),
+                            ),
+                          ),
+                          const TextSpan(
+                            text: '. Tindakan ini tidak dapat dibatalkan.',
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(10.r),
+                        border: Border.all(color: const Color(0xFFFECACA)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Data berikut akan DIHAPUS PERMANEN:',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFFDC2626),
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          _buildDeleteInfoRow(
+                            Icons.receipt_long_outlined,
+                            'Semua transaksi di wallet ini',
+                          ),
+                          SizedBox(height: 4.h),
+                          _buildDeleteInfoRow(
+                            Icons.money_off_outlined,
+                            'Semua hutang/piutang terkait',
+                          ),
+                          SizedBox(height: 4.h),
+                          _buildDeleteInfoRow(
+                            Icons.payments_outlined,
+                            'Semua pembayaran hutang terkait',
+                          ),
+                          SizedBox(height: 4.h),
+                          _buildDeleteInfoRow(
+                            Icons.account_balance_wallet_outlined,
+                            'Saldo wallet',
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                    Text(
+                      'Ketik "delete wallet" untuk konfirmasi:',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: const Color(0xFF374151),
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+                    TextField(
+                      onChanged: (val) {
+                        setDialogState(() => confirmText = val);
+                      },
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF111111),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'delete wallet',
+                        hintStyle: TextStyle(
+                          fontSize: 14.sp,
+                          color: const Color(0xFFD1D5DB),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFF9FAFB),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 12.h,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: BorderSide(
+                            color: isConfirmed
+                                ? const Color(0xFFEF4444)
+                                : const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: BorderSide(
+                            color: isConfirmed
+                                ? const Color(0xFFEF4444)
+                                : const Color(0xFFE5E7EB),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                          borderSide: BorderSide(
+                            color: isConfirmed
+                                ? const Color(0xFFEF4444)
+                                : const Color(0xFF9CA3AF),
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actionsPadding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 12.h,
               ),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Batal'),
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text(
+                    'Batal',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF6B7280),
+                    ),
+                  ),
                 ),
-                TextButton(
-                  onPressed: () => Navigator.pop(context, true),
-                  style: TextButton.styleFrom(foregroundColor: Colors.red),
-                  child: const Text('Hapus'),
+                ElevatedButton(
+                  onPressed: isConfirmed
+                      ? () async {
+                          Navigator.pop(ctx);
+                          await db.walletDao.deleteWalletWithAllData(
+                            widget.wallet!.id,
+                          );
+                          if (mounted) {
+                            Navigator.pop(context, true);
+                            Navigator.pop(context, true);
+                          }
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFEF4444),
+                    disabledBackgroundColor: const Color(0xFFFCA5A5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    'Hapus Semua',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
-            ),
-          );
+            );
+          },
+        );
+      },
+    );
+  }
 
-          if (confirm == true && mounted) {
-            await locator<AppDatabase>().walletDao.deleteWallet(widget.wallet!);
-            if (mounted) Navigator.pop(context, true);
-          }
-        },
-        child: Text(
-          'Hapus Wallet',
-          style: TextStyle(
-            color: const Color(0xFFEF4444),
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
+  Widget _buildDeleteInfoRow(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.sp, color: const Color(0xFFDC2626)),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: const Color(0xFFDC2626),
+              height: 1.4,
+            ),
           ),
+        ),
+      ],
+    );
+  }
+
+  void _showMoveDialog() async {
+    final db = locator<AppDatabase>();
+    final allWallets = await db.walletDao.getAllWallets();
+    final otherWallets = allWallets
+        .where((w) => w.id != widget.wallet!.id)
+        .toList();
+
+    if (otherWallets.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tidak ada wallet lain untuk dipindahkan.'),
+          ),
+        );
+      }
+      return;
+    }
+
+    Wallet? selectedTarget = otherWallets.first;
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: Text(
+            'Pindahkan Wallet',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111111),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Wallet ini akan dihapus, tetapi semua transaksi dan saldo akan dipindahkan ke wallet lain.',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF6B7280),
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'Pindahkan ke:',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111111),
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  borderRadius: BorderRadius.circular(10.r),
+                  color: const Color(0xFFF9FAFB),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<Wallet>(
+                    isExpanded: true,
+                    value: selectedTarget,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: const Color(0xFF6B7280),
+                      size: 22.sp,
+                    ),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: const Color(0xFF111111),
+                    ),
+                    items: otherWallets
+                        .map(
+                          (w) => DropdownMenuItem<Wallet>(
+                            value: w,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28.w,
+                                  height: 28.w,
+                                  decoration: BoxDecoration(
+                                    color: Color(w.iconColor).withOpacity(0.15),
+                                    borderRadius: BorderRadius.circular(8.r),
+                                  ),
+                                  child: Icon(
+                                    _icons[w.icon] ??
+                                        Icons.account_balance_wallet,
+                                    color: Color(w.iconColor),
+                                    size: 14.sp,
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: Text(
+                                    w.name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedTarget = val);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Batal',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (selectedTarget == null) return;
+                Navigator.pop(ctx);
+                await db.walletDao.deleteWalletAndReassign(
+                  widget.wallet!,
+                  targetWalletId: selectedTarget!.id,
+                );
+                if (mounted) {
+                  Navigator.pop(context, true);
+                  Navigator.pop(context, true);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF111111),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                'Pindahkan',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

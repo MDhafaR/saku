@@ -5,4 +5,6 @@ part of 'category_dao.dart';
 // ignore_for_file: type=lint
 mixin _$CategoryDaoMixin on DatabaseAccessor<AppDatabase> {
   $CategoriesTable get categories => attachedDatabase.categories;
+  $WalletsTable get wallets => attachedDatabase.wallets;
+  $TransactionsTable get transactions => attachedDatabase.transactions;
 }

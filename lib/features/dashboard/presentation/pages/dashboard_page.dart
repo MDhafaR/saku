@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -29,6 +31,12 @@ class _DashboardPageState extends State<DashboardPage> {
   Map<int, Category> _categoriesCache = {};
   Map<int, Wallet> _walletsCache = {};
 
+  // Stream subscriptions to keep cache in sync
+  StreamSubscription<List<Category>>? _categoriesSubscription;
+  StreamSubscription<List<Wallet>>? _walletsSubscription;
+  bool _categoriesReady = false;
+  bool _walletsReady = false;
+
   final List<String> _months = [
     'Januari',
     'Februari',
@@ -48,31 +56,48 @@ class _DashboardPageState extends State<DashboardPage> {
   void initState() {
     super.initState();
     _cubit = locator<TransactionCubit>();
-    _loadCategoriesAndWallets();
+    _startWatchingCategoriesAndWallets();
   }
 
-  Future<void> _loadCategoriesAndWallets() async {
+  void _startWatchingCategoriesAndWallets() {
     final db = locator<AppDatabase>();
 
-    // Load all categories
-    final expenseCategories = await db.categoryDao.getExpenseCategories();
-    final incomeCategories = await db.categoryDao.getIncomeCategories();
-    final allCategories = [...expenseCategories, ...incomeCategories];
+    // Watch all categories for real-time updates (icon changes, etc.)
+    _categoriesSubscription = db.categoryDao.watchAllCategories().listen((
+      categories,
+    ) {
+      if (mounted) {
+        setState(() {
+          _categoriesCache = {for (var c in categories) c.id: c};
+          _categoriesReady = true;
+        });
+        _maybeStartTransactions();
+      }
+    });
 
-    // Load all wallets
-    final wallets = await db.walletDao.getAllWallets();
+    // Watch all wallets for real-time updates
+    _walletsSubscription = db.walletDao.watchAllWallets().listen((wallets) {
+      if (mounted) {
+        setState(() {
+          _walletsCache = {for (var w in wallets) w.id: w};
+          _walletsReady = true;
+        });
+        _maybeStartTransactions();
+      }
+    });
+  }
 
-    _categoriesCache = {for (var c in allCategories) c.id: c};
-    _walletsCache = {for (var w in wallets) w.id: w};
-
-    // Start listening to transactions only AFTER cache is ready
-    _cubit.start();
-
-    // Trigger rebuild now that cache + stream are both initialized
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
+  void _maybeStartTransactions() {
+    if (_categoriesReady && _walletsReady && _isLoading) {
+      // Start listening to transactions only AFTER cache is ready
+      if (!_cubit.isClosed) {
+        _cubit.start();
+      }
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -110,8 +135,6 @@ class _DashboardPageState extends State<DashboardPage> {
 
   void _deleteTransaction(int id) async {
     await _cubit.deleteTransaction(id);
-    // Reload cache after deletion (wallet balance might have changed)
-    _loadCategoriesAndWallets();
   }
 
   double _calculateIncome(List<Transaction> transactions) {
@@ -715,6 +738,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   void dispose() {
+    _categoriesSubscription?.cancel();
+    _walletsSubscription?.cancel();
     _cubit.close();
     super.dispose();
   }

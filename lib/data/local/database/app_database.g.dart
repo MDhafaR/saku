@@ -4043,6 +4043,674 @@ class DebtPaymentsCompanion extends UpdateCompanion<DebtPayment> {
   }
 }
 
+class $ImportHistoriesTable extends ImportHistories
+    with TableInfo<$ImportHistoriesTable, ImportHistory> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ImportHistoriesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _fileNameMeta = const VerificationMeta(
+    'fileName',
+  );
+  @override
+  late final GeneratedColumn<String> fileName = GeneratedColumn<String>(
+    'file_name',
+    aliasedName,
+    false,
+    additionalChecks: GeneratedColumn.checkTextLength(
+      minTextLength: 1,
+      maxTextLength: 255,
+    ),
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _filePathMeta = const VerificationMeta(
+    'filePath',
+  );
+  @override
+  late final GeneratedColumn<String> filePath = GeneratedColumn<String>(
+    'file_path',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _totalRowsMeta = const VerificationMeta(
+    'totalRows',
+  );
+  @override
+  late final GeneratedColumn<int> totalRows = GeneratedColumn<int>(
+    'total_rows',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _importedCountMeta = const VerificationMeta(
+    'importedCount',
+  );
+  @override
+  late final GeneratedColumn<int> importedCount = GeneratedColumn<int>(
+    'imported_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _skippedDuplicatesMeta = const VerificationMeta(
+    'skippedDuplicates',
+  );
+  @override
+  late final GeneratedColumn<int> skippedDuplicates = GeneratedColumn<int>(
+    'skipped_duplicates',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _incomeCountMeta = const VerificationMeta(
+    'incomeCount',
+  );
+  @override
+  late final GeneratedColumn<int> incomeCount = GeneratedColumn<int>(
+    'income_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _expenseCountMeta = const VerificationMeta(
+    'expenseCount',
+  );
+  @override
+  late final GeneratedColumn<int> expenseCount = GeneratedColumn<int>(
+    'expense_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _isSuccessMeta = const VerificationMeta(
+    'isSuccess',
+  );
+  @override
+  late final GeneratedColumn<bool> isSuccess = GeneratedColumn<bool>(
+    'is_success',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_success" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _errorMessageMeta = const VerificationMeta(
+    'errorMessage',
+  );
+  @override
+  late final GeneratedColumn<String> errorMessage = GeneratedColumn<String>(
+    'error_message',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _importedAtMeta = const VerificationMeta(
+    'importedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> importedAt = GeneratedColumn<DateTime>(
+    'imported_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    fileName,
+    filePath,
+    totalRows,
+    importedCount,
+    skippedDuplicates,
+    incomeCount,
+    expenseCount,
+    isSuccess,
+    errorMessage,
+    importedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'import_histories';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ImportHistory> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('file_name')) {
+      context.handle(
+        _fileNameMeta,
+        fileName.isAcceptableOrUnknown(data['file_name']!, _fileNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fileNameMeta);
+    }
+    if (data.containsKey('file_path')) {
+      context.handle(
+        _filePathMeta,
+        filePath.isAcceptableOrUnknown(data['file_path']!, _filePathMeta),
+      );
+    }
+    if (data.containsKey('total_rows')) {
+      context.handle(
+        _totalRowsMeta,
+        totalRows.isAcceptableOrUnknown(data['total_rows']!, _totalRowsMeta),
+      );
+    }
+    if (data.containsKey('imported_count')) {
+      context.handle(
+        _importedCountMeta,
+        importedCount.isAcceptableOrUnknown(
+          data['imported_count']!,
+          _importedCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('skipped_duplicates')) {
+      context.handle(
+        _skippedDuplicatesMeta,
+        skippedDuplicates.isAcceptableOrUnknown(
+          data['skipped_duplicates']!,
+          _skippedDuplicatesMeta,
+        ),
+      );
+    }
+    if (data.containsKey('income_count')) {
+      context.handle(
+        _incomeCountMeta,
+        incomeCount.isAcceptableOrUnknown(
+          data['income_count']!,
+          _incomeCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('expense_count')) {
+      context.handle(
+        _expenseCountMeta,
+        expenseCount.isAcceptableOrUnknown(
+          data['expense_count']!,
+          _expenseCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_success')) {
+      context.handle(
+        _isSuccessMeta,
+        isSuccess.isAcceptableOrUnknown(data['is_success']!, _isSuccessMeta),
+      );
+    }
+    if (data.containsKey('error_message')) {
+      context.handle(
+        _errorMessageMeta,
+        errorMessage.isAcceptableOrUnknown(
+          data['error_message']!,
+          _errorMessageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('imported_at')) {
+      context.handle(
+        _importedAtMeta,
+        importedAt.isAcceptableOrUnknown(data['imported_at']!, _importedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ImportHistory map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ImportHistory(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      fileName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_name'],
+      )!,
+      filePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}file_path'],
+      ),
+      totalRows: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_rows'],
+      )!,
+      importedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}imported_count'],
+      )!,
+      skippedDuplicates: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}skipped_duplicates'],
+      )!,
+      incomeCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}income_count'],
+      )!,
+      expenseCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}expense_count'],
+      )!,
+      isSuccess: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_success'],
+      )!,
+      errorMessage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}error_message'],
+      ),
+      importedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}imported_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ImportHistoriesTable createAlias(String alias) {
+    return $ImportHistoriesTable(attachedDatabase, alias);
+  }
+}
+
+class ImportHistory extends DataClass implements Insertable<ImportHistory> {
+  final int id;
+  final String fileName;
+  final String? filePath;
+  final int totalRows;
+  final int importedCount;
+  final int skippedDuplicates;
+  final int incomeCount;
+  final int expenseCount;
+  final bool isSuccess;
+  final String? errorMessage;
+  final DateTime importedAt;
+  const ImportHistory({
+    required this.id,
+    required this.fileName,
+    this.filePath,
+    required this.totalRows,
+    required this.importedCount,
+    required this.skippedDuplicates,
+    required this.incomeCount,
+    required this.expenseCount,
+    required this.isSuccess,
+    this.errorMessage,
+    required this.importedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['file_name'] = Variable<String>(fileName);
+    if (!nullToAbsent || filePath != null) {
+      map['file_path'] = Variable<String>(filePath);
+    }
+    map['total_rows'] = Variable<int>(totalRows);
+    map['imported_count'] = Variable<int>(importedCount);
+    map['skipped_duplicates'] = Variable<int>(skippedDuplicates);
+    map['income_count'] = Variable<int>(incomeCount);
+    map['expense_count'] = Variable<int>(expenseCount);
+    map['is_success'] = Variable<bool>(isSuccess);
+    if (!nullToAbsent || errorMessage != null) {
+      map['error_message'] = Variable<String>(errorMessage);
+    }
+    map['imported_at'] = Variable<DateTime>(importedAt);
+    return map;
+  }
+
+  ImportHistoriesCompanion toCompanion(bool nullToAbsent) {
+    return ImportHistoriesCompanion(
+      id: Value(id),
+      fileName: Value(fileName),
+      filePath: filePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(filePath),
+      totalRows: Value(totalRows),
+      importedCount: Value(importedCount),
+      skippedDuplicates: Value(skippedDuplicates),
+      incomeCount: Value(incomeCount),
+      expenseCount: Value(expenseCount),
+      isSuccess: Value(isSuccess),
+      errorMessage: errorMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(errorMessage),
+      importedAt: Value(importedAt),
+    );
+  }
+
+  factory ImportHistory.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ImportHistory(
+      id: serializer.fromJson<int>(json['id']),
+      fileName: serializer.fromJson<String>(json['fileName']),
+      filePath: serializer.fromJson<String?>(json['filePath']),
+      totalRows: serializer.fromJson<int>(json['totalRows']),
+      importedCount: serializer.fromJson<int>(json['importedCount']),
+      skippedDuplicates: serializer.fromJson<int>(json['skippedDuplicates']),
+      incomeCount: serializer.fromJson<int>(json['incomeCount']),
+      expenseCount: serializer.fromJson<int>(json['expenseCount']),
+      isSuccess: serializer.fromJson<bool>(json['isSuccess']),
+      errorMessage: serializer.fromJson<String?>(json['errorMessage']),
+      importedAt: serializer.fromJson<DateTime>(json['importedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'fileName': serializer.toJson<String>(fileName),
+      'filePath': serializer.toJson<String?>(filePath),
+      'totalRows': serializer.toJson<int>(totalRows),
+      'importedCount': serializer.toJson<int>(importedCount),
+      'skippedDuplicates': serializer.toJson<int>(skippedDuplicates),
+      'incomeCount': serializer.toJson<int>(incomeCount),
+      'expenseCount': serializer.toJson<int>(expenseCount),
+      'isSuccess': serializer.toJson<bool>(isSuccess),
+      'errorMessage': serializer.toJson<String?>(errorMessage),
+      'importedAt': serializer.toJson<DateTime>(importedAt),
+    };
+  }
+
+  ImportHistory copyWith({
+    int? id,
+    String? fileName,
+    Value<String?> filePath = const Value.absent(),
+    int? totalRows,
+    int? importedCount,
+    int? skippedDuplicates,
+    int? incomeCount,
+    int? expenseCount,
+    bool? isSuccess,
+    Value<String?> errorMessage = const Value.absent(),
+    DateTime? importedAt,
+  }) => ImportHistory(
+    id: id ?? this.id,
+    fileName: fileName ?? this.fileName,
+    filePath: filePath.present ? filePath.value : this.filePath,
+    totalRows: totalRows ?? this.totalRows,
+    importedCount: importedCount ?? this.importedCount,
+    skippedDuplicates: skippedDuplicates ?? this.skippedDuplicates,
+    incomeCount: incomeCount ?? this.incomeCount,
+    expenseCount: expenseCount ?? this.expenseCount,
+    isSuccess: isSuccess ?? this.isSuccess,
+    errorMessage: errorMessage.present ? errorMessage.value : this.errorMessage,
+    importedAt: importedAt ?? this.importedAt,
+  );
+  ImportHistory copyWithCompanion(ImportHistoriesCompanion data) {
+    return ImportHistory(
+      id: data.id.present ? data.id.value : this.id,
+      fileName: data.fileName.present ? data.fileName.value : this.fileName,
+      filePath: data.filePath.present ? data.filePath.value : this.filePath,
+      totalRows: data.totalRows.present ? data.totalRows.value : this.totalRows,
+      importedCount: data.importedCount.present
+          ? data.importedCount.value
+          : this.importedCount,
+      skippedDuplicates: data.skippedDuplicates.present
+          ? data.skippedDuplicates.value
+          : this.skippedDuplicates,
+      incomeCount: data.incomeCount.present
+          ? data.incomeCount.value
+          : this.incomeCount,
+      expenseCount: data.expenseCount.present
+          ? data.expenseCount.value
+          : this.expenseCount,
+      isSuccess: data.isSuccess.present ? data.isSuccess.value : this.isSuccess,
+      errorMessage: data.errorMessage.present
+          ? data.errorMessage.value
+          : this.errorMessage,
+      importedAt: data.importedAt.present
+          ? data.importedAt.value
+          : this.importedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportHistory(')
+          ..write('id: $id, ')
+          ..write('fileName: $fileName, ')
+          ..write('filePath: $filePath, ')
+          ..write('totalRows: $totalRows, ')
+          ..write('importedCount: $importedCount, ')
+          ..write('skippedDuplicates: $skippedDuplicates, ')
+          ..write('incomeCount: $incomeCount, ')
+          ..write('expenseCount: $expenseCount, ')
+          ..write('isSuccess: $isSuccess, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('importedAt: $importedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    fileName,
+    filePath,
+    totalRows,
+    importedCount,
+    skippedDuplicates,
+    incomeCount,
+    expenseCount,
+    isSuccess,
+    errorMessage,
+    importedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ImportHistory &&
+          other.id == this.id &&
+          other.fileName == this.fileName &&
+          other.filePath == this.filePath &&
+          other.totalRows == this.totalRows &&
+          other.importedCount == this.importedCount &&
+          other.skippedDuplicates == this.skippedDuplicates &&
+          other.incomeCount == this.incomeCount &&
+          other.expenseCount == this.expenseCount &&
+          other.isSuccess == this.isSuccess &&
+          other.errorMessage == this.errorMessage &&
+          other.importedAt == this.importedAt);
+}
+
+class ImportHistoriesCompanion extends UpdateCompanion<ImportHistory> {
+  final Value<int> id;
+  final Value<String> fileName;
+  final Value<String?> filePath;
+  final Value<int> totalRows;
+  final Value<int> importedCount;
+  final Value<int> skippedDuplicates;
+  final Value<int> incomeCount;
+  final Value<int> expenseCount;
+  final Value<bool> isSuccess;
+  final Value<String?> errorMessage;
+  final Value<DateTime> importedAt;
+  const ImportHistoriesCompanion({
+    this.id = const Value.absent(),
+    this.fileName = const Value.absent(),
+    this.filePath = const Value.absent(),
+    this.totalRows = const Value.absent(),
+    this.importedCount = const Value.absent(),
+    this.skippedDuplicates = const Value.absent(),
+    this.incomeCount = const Value.absent(),
+    this.expenseCount = const Value.absent(),
+    this.isSuccess = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.importedAt = const Value.absent(),
+  });
+  ImportHistoriesCompanion.insert({
+    this.id = const Value.absent(),
+    required String fileName,
+    this.filePath = const Value.absent(),
+    this.totalRows = const Value.absent(),
+    this.importedCount = const Value.absent(),
+    this.skippedDuplicates = const Value.absent(),
+    this.incomeCount = const Value.absent(),
+    this.expenseCount = const Value.absent(),
+    this.isSuccess = const Value.absent(),
+    this.errorMessage = const Value.absent(),
+    this.importedAt = const Value.absent(),
+  }) : fileName = Value(fileName);
+  static Insertable<ImportHistory> custom({
+    Expression<int>? id,
+    Expression<String>? fileName,
+    Expression<String>? filePath,
+    Expression<int>? totalRows,
+    Expression<int>? importedCount,
+    Expression<int>? skippedDuplicates,
+    Expression<int>? incomeCount,
+    Expression<int>? expenseCount,
+    Expression<bool>? isSuccess,
+    Expression<String>? errorMessage,
+    Expression<DateTime>? importedAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (fileName != null) 'file_name': fileName,
+      if (filePath != null) 'file_path': filePath,
+      if (totalRows != null) 'total_rows': totalRows,
+      if (importedCount != null) 'imported_count': importedCount,
+      if (skippedDuplicates != null) 'skipped_duplicates': skippedDuplicates,
+      if (incomeCount != null) 'income_count': incomeCount,
+      if (expenseCount != null) 'expense_count': expenseCount,
+      if (isSuccess != null) 'is_success': isSuccess,
+      if (errorMessage != null) 'error_message': errorMessage,
+      if (importedAt != null) 'imported_at': importedAt,
+    });
+  }
+
+  ImportHistoriesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? fileName,
+    Value<String?>? filePath,
+    Value<int>? totalRows,
+    Value<int>? importedCount,
+    Value<int>? skippedDuplicates,
+    Value<int>? incomeCount,
+    Value<int>? expenseCount,
+    Value<bool>? isSuccess,
+    Value<String?>? errorMessage,
+    Value<DateTime>? importedAt,
+  }) {
+    return ImportHistoriesCompanion(
+      id: id ?? this.id,
+      fileName: fileName ?? this.fileName,
+      filePath: filePath ?? this.filePath,
+      totalRows: totalRows ?? this.totalRows,
+      importedCount: importedCount ?? this.importedCount,
+      skippedDuplicates: skippedDuplicates ?? this.skippedDuplicates,
+      incomeCount: incomeCount ?? this.incomeCount,
+      expenseCount: expenseCount ?? this.expenseCount,
+      isSuccess: isSuccess ?? this.isSuccess,
+      errorMessage: errorMessage ?? this.errorMessage,
+      importedAt: importedAt ?? this.importedAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (fileName.present) {
+      map['file_name'] = Variable<String>(fileName.value);
+    }
+    if (filePath.present) {
+      map['file_path'] = Variable<String>(filePath.value);
+    }
+    if (totalRows.present) {
+      map['total_rows'] = Variable<int>(totalRows.value);
+    }
+    if (importedCount.present) {
+      map['imported_count'] = Variable<int>(importedCount.value);
+    }
+    if (skippedDuplicates.present) {
+      map['skipped_duplicates'] = Variable<int>(skippedDuplicates.value);
+    }
+    if (incomeCount.present) {
+      map['income_count'] = Variable<int>(incomeCount.value);
+    }
+    if (expenseCount.present) {
+      map['expense_count'] = Variable<int>(expenseCount.value);
+    }
+    if (isSuccess.present) {
+      map['is_success'] = Variable<bool>(isSuccess.value);
+    }
+    if (errorMessage.present) {
+      map['error_message'] = Variable<String>(errorMessage.value);
+    }
+    if (importedAt.present) {
+      map['imported_at'] = Variable<DateTime>(importedAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ImportHistoriesCompanion(')
+          ..write('id: $id, ')
+          ..write('fileName: $fileName, ')
+          ..write('filePath: $filePath, ')
+          ..write('totalRows: $totalRows, ')
+          ..write('importedCount: $importedCount, ')
+          ..write('skippedDuplicates: $skippedDuplicates, ')
+          ..write('incomeCount: $incomeCount, ')
+          ..write('expenseCount: $expenseCount, ')
+          ..write('isSuccess: $isSuccess, ')
+          ..write('errorMessage: $errorMessage, ')
+          ..write('importedAt: $importedAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4053,6 +4721,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $PersonsTable persons = $PersonsTable(this);
   late final $DebtsTable debts = $DebtsTable(this);
   late final $DebtPaymentsTable debtPayments = $DebtPaymentsTable(this);
+  late final $ImportHistoriesTable importHistories = $ImportHistoriesTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4065,6 +4736,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     persons,
     debts,
     debtPayments,
+    importHistories,
   ];
 }
 
@@ -7568,6 +8240,328 @@ typedef $$DebtPaymentsTableProcessedTableManager =
       DebtPayment,
       PrefetchHooks Function({bool debtId, bool walletId})
     >;
+typedef $$ImportHistoriesTableCreateCompanionBuilder =
+    ImportHistoriesCompanion Function({
+      Value<int> id,
+      required String fileName,
+      Value<String?> filePath,
+      Value<int> totalRows,
+      Value<int> importedCount,
+      Value<int> skippedDuplicates,
+      Value<int> incomeCount,
+      Value<int> expenseCount,
+      Value<bool> isSuccess,
+      Value<String?> errorMessage,
+      Value<DateTime> importedAt,
+    });
+typedef $$ImportHistoriesTableUpdateCompanionBuilder =
+    ImportHistoriesCompanion Function({
+      Value<int> id,
+      Value<String> fileName,
+      Value<String?> filePath,
+      Value<int> totalRows,
+      Value<int> importedCount,
+      Value<int> skippedDuplicates,
+      Value<int> incomeCount,
+      Value<int> expenseCount,
+      Value<bool> isSuccess,
+      Value<String?> errorMessage,
+      Value<DateTime> importedAt,
+    });
+
+class $$ImportHistoriesTableFilterComposer
+    extends Composer<_$AppDatabase, $ImportHistoriesTable> {
+  $$ImportHistoriesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalRows => $composableBuilder(
+    column: $table.totalRows,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get importedCount => $composableBuilder(
+    column: $table.importedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get skippedDuplicates => $composableBuilder(
+    column: $table.skippedDuplicates,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get incomeCount => $composableBuilder(
+    column: $table.incomeCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get expenseCount => $composableBuilder(
+    column: $table.expenseCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isSuccess => $composableBuilder(
+    column: $table.isSuccess,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ImportHistoriesTableOrderingComposer
+    extends Composer<_$AppDatabase, $ImportHistoriesTable> {
+  $$ImportHistoriesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fileName => $composableBuilder(
+    column: $table.fileName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get filePath => $composableBuilder(
+    column: $table.filePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalRows => $composableBuilder(
+    column: $table.totalRows,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get importedCount => $composableBuilder(
+    column: $table.importedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get skippedDuplicates => $composableBuilder(
+    column: $table.skippedDuplicates,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get incomeCount => $composableBuilder(
+    column: $table.incomeCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get expenseCount => $composableBuilder(
+    column: $table.expenseCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isSuccess => $composableBuilder(
+    column: $table.isSuccess,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ImportHistoriesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ImportHistoriesTable> {
+  $$ImportHistoriesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get fileName =>
+      $composableBuilder(column: $table.fileName, builder: (column) => column);
+
+  GeneratedColumn<String> get filePath =>
+      $composableBuilder(column: $table.filePath, builder: (column) => column);
+
+  GeneratedColumn<int> get totalRows =>
+      $composableBuilder(column: $table.totalRows, builder: (column) => column);
+
+  GeneratedColumn<int> get importedCount => $composableBuilder(
+    column: $table.importedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get skippedDuplicates => $composableBuilder(
+    column: $table.skippedDuplicates,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get incomeCount => $composableBuilder(
+    column: $table.incomeCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get expenseCount => $composableBuilder(
+    column: $table.expenseCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isSuccess =>
+      $composableBuilder(column: $table.isSuccess, builder: (column) => column);
+
+  GeneratedColumn<String> get errorMessage => $composableBuilder(
+    column: $table.errorMessage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get importedAt => $composableBuilder(
+    column: $table.importedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$ImportHistoriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ImportHistoriesTable,
+          ImportHistory,
+          $$ImportHistoriesTableFilterComposer,
+          $$ImportHistoriesTableOrderingComposer,
+          $$ImportHistoriesTableAnnotationComposer,
+          $$ImportHistoriesTableCreateCompanionBuilder,
+          $$ImportHistoriesTableUpdateCompanionBuilder,
+          (
+            ImportHistory,
+            BaseReferences<_$AppDatabase, $ImportHistoriesTable, ImportHistory>,
+          ),
+          ImportHistory,
+          PrefetchHooks Function()
+        > {
+  $$ImportHistoriesTableTableManager(
+    _$AppDatabase db,
+    $ImportHistoriesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ImportHistoriesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ImportHistoriesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ImportHistoriesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> fileName = const Value.absent(),
+                Value<String?> filePath = const Value.absent(),
+                Value<int> totalRows = const Value.absent(),
+                Value<int> importedCount = const Value.absent(),
+                Value<int> skippedDuplicates = const Value.absent(),
+                Value<int> incomeCount = const Value.absent(),
+                Value<int> expenseCount = const Value.absent(),
+                Value<bool> isSuccess = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<DateTime> importedAt = const Value.absent(),
+              }) => ImportHistoriesCompanion(
+                id: id,
+                fileName: fileName,
+                filePath: filePath,
+                totalRows: totalRows,
+                importedCount: importedCount,
+                skippedDuplicates: skippedDuplicates,
+                incomeCount: incomeCount,
+                expenseCount: expenseCount,
+                isSuccess: isSuccess,
+                errorMessage: errorMessage,
+                importedAt: importedAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String fileName,
+                Value<String?> filePath = const Value.absent(),
+                Value<int> totalRows = const Value.absent(),
+                Value<int> importedCount = const Value.absent(),
+                Value<int> skippedDuplicates = const Value.absent(),
+                Value<int> incomeCount = const Value.absent(),
+                Value<int> expenseCount = const Value.absent(),
+                Value<bool> isSuccess = const Value.absent(),
+                Value<String?> errorMessage = const Value.absent(),
+                Value<DateTime> importedAt = const Value.absent(),
+              }) => ImportHistoriesCompanion.insert(
+                id: id,
+                fileName: fileName,
+                filePath: filePath,
+                totalRows: totalRows,
+                importedCount: importedCount,
+                skippedDuplicates: skippedDuplicates,
+                incomeCount: incomeCount,
+                expenseCount: expenseCount,
+                isSuccess: isSuccess,
+                errorMessage: errorMessage,
+                importedAt: importedAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ImportHistoriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ImportHistoriesTable,
+      ImportHistory,
+      $$ImportHistoriesTableFilterComposer,
+      $$ImportHistoriesTableOrderingComposer,
+      $$ImportHistoriesTableAnnotationComposer,
+      $$ImportHistoriesTableCreateCompanionBuilder,
+      $$ImportHistoriesTableUpdateCompanionBuilder,
+      (
+        ImportHistory,
+        BaseReferences<_$AppDatabase, $ImportHistoriesTable, ImportHistory>,
+      ),
+      ImportHistory,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7586,4 +8580,6 @@ class $AppDatabaseManager {
       $$DebtsTableTableManager(_db, _db.debts);
   $$DebtPaymentsTableTableManager get debtPayments =>
       $$DebtPaymentsTableTableManager(_db, _db.debtPayments);
+  $$ImportHistoriesTableTableManager get importHistories =>
+      $$ImportHistoriesTableTableManager(_db, _db.importHistories);
 }

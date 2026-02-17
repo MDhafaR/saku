@@ -19,7 +19,6 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
   late String _selectedIcon;
   late int _selectedColor;
   late final AppDatabase _db;
-  bool _isDefault = false;
 
   final List<String> _icons = [
     'restaurant',
@@ -69,7 +68,6 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     _nameController = TextEditingController(text: widget.category?.name ?? '');
     _selectedIcon = widget.category?.icon ?? 'category';
     _selectedColor = widget.category?.iconColor ?? 0xFF2196F3;
-    _isDefault = widget.category?.isDefault ?? false;
 
     // Set default icon/color if new
     if (widget.category == null) {
@@ -141,10 +139,6 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
       icon: drift.Value(_selectedIcon),
       iconColor: drift.Value(_selectedColor),
       isDefault: const drift.Value(false),
-      // sortOrder will be handled:
-      // specific logic might be needed to put it at the end?
-      // For now, let's default to 0 or we should fetch max sortOrder?
-      // Since we just added sortOrder, we can just let it be 0 and let user reorder.
     );
 
     if (widget.category != null) {
@@ -162,10 +156,284 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     if (mounted) Navigator.pop(context);
   }
 
-  void _delete() async {
-    if (widget.category == null) return;
-    await _db.categoryDao.deleteCategory(widget.category!.id);
-    if (mounted) Navigator.pop(context);
+  void _showDeleteDialog() {
+    final categoryName = widget.category?.name ?? '';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Hapus Kategori',
+          style: TextStyle(
+            fontSize: 18.sp,
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF111111),
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF6B7280),
+                  height: 1.5,
+                ),
+                children: [
+                  const TextSpan(text: 'Semua item yang berkategori '),
+                  TextSpan(
+                    text: '"$categoryName"',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF111111),
+                    ),
+                  ),
+                  const TextSpan(text: ' akan menjadi '),
+                  const TextSpan(
+                    text: 'Uncategorized',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontStyle: FontStyle.italic,
+                      color: Color(0xFF111111),
+                    ),
+                  ),
+                  const TextSpan(text: '.'),
+                ],
+              ),
+            ),
+            SizedBox(height: 12.h),
+            Text(
+              'Apakah Anda yakin ingin menghapus kategori ini?',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: const Color(0xFF6B7280),
+                height: 1.5,
+              ),
+            ),
+          ],
+        ),
+        actionsPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Batal',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF6B7280),
+              ),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _db.categoryDao.deleteCategoryAndReassign(
+                widget.category!.id,
+                widget.type,
+              );
+              if (mounted) Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              elevation: 0,
+            ),
+            child: Text(
+              'Hapus',
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showMoveDialog() async {
+    // Fetch categories of the same type, excluding current
+    final allCategories = await _db.categoryDao.getCategoriesByType(
+      widget.type,
+    );
+    final otherCategories = allCategories
+        .where((c) => c.id != widget.category!.id)
+        .toList();
+
+    if (otherCategories.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tidak ada kategori lain untuk dipindahkan.'),
+          ),
+        );
+      }
+      return;
+    }
+
+    Category? selectedTarget = otherCategories.first;
+
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          title: Text(
+            'Pindahkan Kategori',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFF111111),
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Kategori ini akan dihapus, tetapi semua item dengan kategori ini akan dipindahkan ke kategori lain.',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF6B7280),
+                  height: 1.5,
+                ),
+              ),
+              SizedBox(height: 16.h),
+              Text(
+                'Pindahkan ke:',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF111111),
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                decoration: BoxDecoration(
+                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  borderRadius: BorderRadius.circular(10.r),
+                  color: const Color(0xFFF9FAFB),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<Category>(
+                    isExpanded: true,
+                    value: selectedTarget,
+                    icon: Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: const Color(0xFF6B7280),
+                      size: 22.sp,
+                    ),
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: const Color(0xFF111111),
+                    ),
+                    items: otherCategories
+                        .map(
+                          (cat) => DropdownMenuItem<Category>(
+                            value: cat,
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 28.w,
+                                  height: 28.w,
+                                  decoration: BoxDecoration(
+                                    color: Color(
+                                      cat.iconColor,
+                                    ).withOpacity(0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    _getIconData(cat.icon),
+                                    color: Color(cat.iconColor),
+                                    size: 14.sp,
+                                  ),
+                                ),
+                                SizedBox(width: 10.w),
+                                Expanded(
+                                  child: Text(
+                                    cat.name,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setDialogState(() => selectedTarget = val);
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actionsPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Batal',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF6B7280),
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (selectedTarget == null) return;
+                Navigator.pop(ctx);
+                await _db.categoryDao.deleteCategoryAndReassign(
+                  widget.category!.id,
+                  widget.type,
+                  targetCategoryId: selectedTarget!.id,
+                );
+                if (mounted) Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF111111),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                elevation: 0,
+              ),
+              child: Text(
+                'Pindahkan',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -195,14 +463,70 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
         ),
         centerTitle: true,
         actions: [
-          if (isEditing && !_isDefault)
-            IconButton(
+          if (isEditing)
+            PopupMenuButton<String>(
               icon: Icon(
-                Icons.delete_outline,
-                color: const Color(0xFFEF4444),
+                Icons.more_horiz,
+                color: const Color(0xFF111111),
                 size: 24.sp,
               ),
-              onPressed: _delete,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              color: Colors.white,
+              elevation: 4,
+              offset: Offset(0, 40.h),
+              onSelected: (value) {
+                if (value == 'delete') {
+                  _showDeleteDialog();
+                } else if (value == 'move') {
+                  _showMoveDialog();
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.delete_outline,
+                        color: const Color(0xFFEF4444),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Hapus Kategori',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFFEF4444),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'move',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.drive_file_move_outline,
+                        color: const Color(0xFF111111),
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Pindahkan Kategori',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF111111),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           SizedBox(width: 8.w),
         ],

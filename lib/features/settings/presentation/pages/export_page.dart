@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/injection.dart';
+import '../../../../core/services/export_service.dart';
+import '../../../../data/local/database/app_database.dart';
 
 class ExportPage extends StatefulWidget {
   const ExportPage({super.key});
@@ -11,12 +14,168 @@ class ExportPage extends StatefulWidget {
 class _ExportPageState extends State<ExportPage> {
   int _selectedFormat = 0; // 0: PDF, 1: Excel, 2: CSV
   int _selectedDateFilter =
-      0; // 0: This Month, 1: Last Month, 2: This Year, 3: All
+      0; // 0: Bulan Ini, 1: Bulan Lalu, 2: Tahun Ini, 3: Semua
   bool _includeReceipts = false;
   bool _passwordProtection = false;
+  bool _isExporting = false;
 
-  DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
-  DateTime _endDate = DateTime.now();
+  late DateTime _startDate;
+  late DateTime _endDate;
+
+  late final ExportService _exportService;
+
+  @override
+  void initState() {
+    super.initState();
+    _exportService = ExportService(locator<AppDatabase>());
+    _applyDateFilter(0);
+  }
+
+  // ─── Date logic ─────────────────────────────────────────────────────
+
+  /// Returns the last day of a given month/year.
+  DateTime _lastDayOfMonth(int year, int month) {
+    // The 0th day of the next month = last day of this month
+    return DateTime(year, month + 1, 0, 23, 59, 59);
+  }
+
+  void _applyDateFilter(int index) {
+    final now = DateTime.now();
+    switch (index) {
+      case 0: // Bulan Ini
+        _startDate = DateTime(now.year, now.month, 1);
+        _endDate = _lastDayOfMonth(now.year, now.month);
+        break;
+      case 1: // Bulan Lalu
+        final lastMonth = DateTime(now.year, now.month - 1, 1);
+        _startDate = DateTime(lastMonth.year, lastMonth.month, 1);
+        _endDate = _lastDayOfMonth(lastMonth.year, lastMonth.month);
+        break;
+      case 2: // Tahun Ini
+        _startDate = DateTime(now.year, 1, 1);
+        _endDate = DateTime(now.year, 12, 31, 23, 59, 59);
+        break;
+      case 3: // Semua
+        _startDate = DateTime(2000, 1, 1);
+        _endDate = DateTime(now.year, 12, 31, 23, 59, 59);
+        break;
+    }
+  }
+
+  Future<void> _pickDate({required bool isStart}) async {
+    final initial = isStart ? _startDate : _endDate;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      locale: const Locale('id'),
+    );
+    if (picked != null) {
+      setState(() {
+        if (isStart) {
+          _startDate = picked;
+        } else {
+          _endDate = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            23,
+            59,
+            59,
+          );
+        }
+      });
+    }
+  }
+
+  // ─── Export action ──────────────────────────────────────────────────
+
+  Future<void> _doExport() async {
+    // If password protection is enabled (PDF only), ask for password first
+    String? password;
+    if (_selectedFormat == 0 && _passwordProtection) {
+      password = await _showPasswordDialog();
+      if (password == null || password.isEmpty) return; // cancelled
+    }
+
+    setState(() => _isExporting = true);
+
+    try {
+      final filePath = await _exportService.exportAndShare(
+        format: _selectedFormat,
+        startDate: _startDate,
+        endDate: _endDate,
+        includeReceipts: _includeReceipts,
+        passwordProtection: _passwordProtection,
+        password: password,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('File tersimpan: $filePath'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Gagal export: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isExporting = false);
+    }
+  }
+
+  Future<String?> _showPasswordDialog() {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Proteksi Password',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
+        ),
+        content: TextField(
+          controller: controller,
+          obscureText: true,
+          decoration: InputDecoration(
+            hintText: 'Masukkan password',
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, controller.text),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF111111),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: const Text('OK', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ─── Build ──────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
@@ -110,9 +269,21 @@ class _ExportPageState extends State<ExportPage> {
             SizedBox(height: 16.h),
             Row(
               children: [
-                Expanded(child: _buildDatePicker('Dari Tanggal', _startDate)),
+                Expanded(
+                  child: _buildDatePicker(
+                    'Dari Tanggal',
+                    _startDate,
+                    onTap: () => _pickDate(isStart: true),
+                  ),
+                ),
                 SizedBox(width: 12.w),
-                Expanded(child: _buildDatePicker('Sampai Tanggal', _endDate)),
+                Expanded(
+                  child: _buildDatePicker(
+                    'Sampai Tanggal',
+                    _endDate,
+                    onTap: () => _pickDate(isStart: false),
+                  ),
+                ),
               ],
             ),
 
@@ -170,14 +341,19 @@ class _ExportPageState extends State<ExportPage> {
           ],
         ),
         child: ElevatedButton.icon(
-          onPressed: () {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(const SnackBar(content: Text('Exporting...')));
-          },
-          icon: Icon(Icons.share, color: Colors.white, size: 24.sp),
+          onPressed: _isExporting ? null : _doExport,
+          icon: _isExporting
+              ? SizedBox(
+                  width: 20.sp,
+                  height: 20.sp,
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Icon(Icons.share, color: Colors.white, size: 24.sp),
           label: Text(
-            'Export & Share',
+            _isExporting ? 'Memproses...' : 'Export & Share',
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -196,6 +372,8 @@ class _ExportPageState extends State<ExportPage> {
       ),
     );
   }
+
+  // ─── Widget builders ────────────────────────────────────────────────
 
   Widget _buildSectionHeader(String title) {
     return Text(
@@ -218,11 +396,15 @@ class _ExportPageState extends State<ExportPage> {
   ) {
     final isSelected = _selectedFormat == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedFormat = index),
+      onTap: () => setState(() {
+        _selectedFormat = index;
+        // Reset password protection when switching away from PDF
+        if (index != 0) _passwordProtection = false;
+      }),
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 8.w),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.white,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
             color: isSelected ? const Color(0xFF111111) : Colors.transparent,
@@ -248,9 +430,7 @@ class _ExportPageState extends State<ExportPage> {
                 ),
               )
             else
-              SizedBox(
-                height: 16.sp,
-              ), // Spacer to keep icon centered relative to card
+              SizedBox(height: 16.sp),
 
             Container(
               padding: EdgeInsets.all(12.w),
@@ -280,7 +460,12 @@ class _ExportPageState extends State<ExportPage> {
   Widget _buildFilterChip(int index, String label) {
     final isSelected = _selectedDateFilter == index;
     return GestureDetector(
-      onTap: () => setState(() => _selectedDateFilter = index),
+      onTap: () {
+        setState(() {
+          _selectedDateFilter = index;
+          _applyDateFilter(index);
+        });
+      },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
@@ -302,37 +487,44 @@ class _ExportPageState extends State<ExportPage> {
     );
   }
 
-  Widget _buildDatePicker(String label, DateTime date) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.calendar_today, size: 14.sp, color: Colors.grey[400]),
-              SizedBox(width: 8.w),
-              Text(
-                label,
-                style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
-              ),
-            ],
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            "${date.day} ${_getMonthName(date.month)} ${date.year}",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14.sp,
-              color: const Color(0xFF111111),
+  Widget _buildDatePicker(String label, DateTime date, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: Colors.grey[200]!),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.calendar_today,
+                  size: 14.sp,
+                  color: Colors.grey[400],
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
+                ),
+              ],
             ),
-          ),
-        ],
+            SizedBox(height: 4.h),
+            Text(
+              "${date.day} ${_getMonthName(date.month)} ${date.year}",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14.sp,
+                color: const Color(0xFF111111),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

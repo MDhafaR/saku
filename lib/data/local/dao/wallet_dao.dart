@@ -80,4 +80,55 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
 
   /// Delete wallet permanently
   Future<int> deleteWallet(Wallet entry) => delete(wallets).delete(entry);
+
+  /// Delete a wallet and ALL associated data (transactions, debts, debt payments).
+  /// This is a destructive operation — all data is permanently lost.
+  Future<void> deleteWalletWithAllData(int walletId) async {
+    final txns = attachedDatabase.transactions;
+    final debts = attachedDatabase.debts;
+    final debtPayments = attachedDatabase.debtPayments;
+
+    // Delete all debt payments linked to this wallet
+    await (delete(
+      debtPayments,
+    )..where((tbl) => tbl.walletId.equals(walletId))).go();
+
+    // Delete all debts linked to this wallet (nullable walletId)
+    await (delete(debts)..where((tbl) => tbl.walletId.equals(walletId))).go();
+
+    // Delete all transactions linked to this wallet
+    await (delete(txns)..where((tbl) => tbl.walletId.equals(walletId))).go();
+
+    // Delete the wallet itself
+    await (delete(wallets)..where((tbl) => tbl.id.equals(walletId))).go();
+  }
+
+  /// Reassign all transactions from one wallet to another
+  Future<int> reassignTransactions(int fromWalletId, int toWalletId) {
+    final txns = attachedDatabase.transactions;
+    return (update(txns)..where((tbl) => tbl.walletId.equals(fromWalletId)))
+        .write(TransactionsCompanion(walletId: Value(toWalletId)));
+  }
+
+  /// Delete a wallet and reassign its transactions to another wallet.
+  /// Also transfers the balance to the target wallet.
+  Future<void> deleteWalletAndReassign(
+    Wallet wallet, {
+    required int targetWalletId,
+  }) async {
+    // Reassign all transactions
+    await reassignTransactions(wallet.id, targetWalletId);
+
+    // Transfer remaining balance to target wallet
+    final targetWallet = await getWalletById(targetWalletId);
+    if (targetWallet != null) {
+      await updateBalance(
+        targetWalletId,
+        targetWallet.currentBalance + wallet.currentBalance,
+      );
+    }
+
+    // Delete the wallet
+    await deleteWallet(wallet);
+  }
 }

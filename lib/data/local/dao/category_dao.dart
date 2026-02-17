@@ -51,6 +51,11 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
             ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
           .watch();
 
+  /// Watch all categories for real-time updates
+  Stream<List<Category>> watchAllCategories() => (select(
+    categories,
+  )..orderBy([(t) => OrderingTerm(expression: t.sortOrder)])).watch();
+
   /// Create a new category
   Future<int> createCategory(CategoriesCompanion entry) =>
       into(categories).insert(entry);
@@ -77,4 +82,50 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
   Future<int> deleteCategory(int id) => (delete(
     categories,
   )..where((tbl) => tbl.id.equals(id) & tbl.isDefault.equals(false))).go();
+
+  /// Reassign all transactions from one category to another
+  Future<int> reassignTransactions(int fromCategoryId, int toCategoryId) {
+    final txns = attachedDatabase.transactions;
+    return (update(txns)..where((tbl) => tbl.categoryId.equals(fromCategoryId)))
+        .write(TransactionsCompanion(categoryId: Value(toCategoryId)));
+  }
+
+  /// Get or create an 'Uncategorized' category for a given type
+  Future<Category> getOrCreateUncategorizedCategory(String type) async {
+    final existing =
+        await (select(categories)..where(
+              (tbl) => tbl.name.equals('Uncategorized') & tbl.type.equals(type),
+            ))
+            .getSingleOrNull();
+
+    if (existing != null) return existing;
+
+    final id = await into(categories).insert(
+      CategoriesCompanion.insert(
+        name: 'Uncategorized',
+        type: type,
+        icon: const Value('category'),
+        iconColor: const Value(0xFF9E9E9E),
+        isDefault: const Value(true),
+        sortOrder: const Value(999),
+      ),
+    );
+
+    return (select(categories)..where((tbl) => tbl.id.equals(id))).getSingle();
+  }
+
+  /// Delete a category and reassign its transactions.
+  /// If [targetCategoryId] is null, reassign to 'Uncategorized'.
+  /// If [targetCategoryId] is provided, reassign to that category.
+  Future<void> deleteCategoryAndReassign(
+    int categoryId,
+    String type, {
+    int? targetCategoryId,
+  }) async {
+    final targetId =
+        targetCategoryId ?? (await getOrCreateUncategorizedCategory(type)).id;
+
+    await reassignTransactions(categoryId, targetId);
+    await (delete(categories)..where((tbl) => tbl.id.equals(categoryId))).go();
+  }
 }

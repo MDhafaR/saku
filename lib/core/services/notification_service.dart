@@ -143,6 +143,65 @@ class NotificationService {
     );
   }
 
+  // ── Import progress notifications ───────────────────────────────────
+
+  Future<void> showProgressNotification({
+    required String title,
+    required String body,
+    required int progress,
+    required int maxProgress,
+  }) async {
+    await flutterLocalNotificationsPlugin.show(
+      id: 998,
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          'import_progress_channel',
+          'Import Progress',
+          channelDescription: 'Shows import progress',
+          importance: Importance.low,
+          priority: Priority.low,
+          onlyAlertOnce: true,
+          showProgress: true,
+          maxProgress: maxProgress,
+          progress: progress,
+          ongoing: true,
+          autoCancel: false,
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  Future<void> showImportResultNotification({
+    required String title,
+    required String body,
+  }) async {
+    // Cancel progress notification first
+    await flutterLocalNotificationsPlugin.cancel(id: 998);
+
+    await flutterLocalNotificationsPlugin.show(
+      id: 998,
+      title: title,
+      body: body,
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'import_progress_channel',
+          'Import Progress',
+          channelDescription: 'Shows import progress',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(),
+      ),
+    );
+  }
+
+  Future<void> cancelProgressNotification() async {
+    await flutterLocalNotificationsPlugin.cancel(id: 998);
+  }
+
   // ── Scheduling ──────────────────────────────────────────────────────
 
   Future<void> scheduleDailyNotification({

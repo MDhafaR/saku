@@ -14,8 +14,8 @@ class BackupPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => locator<BackupCubit>()..checkSignInStatus(),
+    return BlocProvider.value(
+      value: locator<BackupCubit>()..checkSignInStatus(),
       child: const _BackupView(),
     );
   }

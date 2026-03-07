@@ -20,7 +20,6 @@ class ImportMenuPage extends StatefulWidget {
 }
 
 class _ImportMenuPageState extends State<ImportMenuPage> {
-  int _selectedOption = 0; // 0: Bank/Excel, 1: Backup
   bool _isPickingFile = false;
   List<ImportHistory> _importHistory = [];
   final ImportService _importService = ImportService(locator<AppDatabase>());
@@ -130,38 +129,6 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 32.h),
-
-                  // File type options
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Pilih Jenis File',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey[800],
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 12.h),
-                  _buildOptionCard(
-                    index: 0,
-                    icon: Icons.table_chart_outlined,
-                    iconColor: const Color(0xFF111111),
-                    title: 'Bank Statement / Excel',
-                    subtitle:
-                        'Import transaksi dari file CSV atau Excel eksternal.',
-                  ),
-                  SizedBox(height: 12.h),
-                  _buildOptionCard(
-                    index: 1,
-                    icon: Icons.storage_outlined,
-                    iconColor: const Color(0xFF111111),
-                    title: 'Saku Backup File',
-                    subtitle: 'Restore data dari cadangan aplikasi Saku.',
-                  ),
-
-                  SizedBox(height: 32.h),
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Row(
@@ -236,83 +203,6 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildOptionCard({
-    required int index,
-    required IconData icon,
-    required Color iconColor,
-    required String title,
-    required String subtitle,
-  }) {
-    final isSelected = _selectedOption == index;
-    return GestureDetector(
-      onTap: () => setState(() => _selectedOption = index),
-      child: Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: isSelected ? const Color(0xFF111111) : Colors.grey[200]!,
-            width: isSelected ? 1.5.w : 1.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.05),
-              blurRadius: 4.r,
-              offset: Offset(0, 2.h),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(10.w),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 24.sp),
-            ),
-            SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14.sp,
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Container(
-              width: 20.w,
-              height: 20.w,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? const Color(0xFF111111)
-                      : Colors.grey[400]!,
-                  width: isSelected ? 5.w : 1.w,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

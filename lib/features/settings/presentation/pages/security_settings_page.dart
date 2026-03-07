@@ -199,6 +199,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                           icon: Icons.timer_outlined,
                           title: 'Waktu Kunci Otomatis',
                           valueText: 'Segera',
+                          isDisabled: true,
                           onTap: () {},
                         ),
                       ],
@@ -332,9 +333,19 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     required String title,
     String? valueText,
     required VoidCallback onTap,
+    bool isDisabled = false,
   }) {
+    final Color contentColor = isDisabled
+        ? Colors.grey[350]!
+        : const Color(0xFF1F2937);
+    final Color iconBgColor = isDisabled
+        ? Colors.grey[100]!
+        : Colors.grey[100]!;
+    final Color iconColor = isDisabled ? Colors.grey[350]! : Colors.grey[600]!;
+    final Color arrowColor = isDisabled ? Colors.grey[300]! : Colors.grey[400]!;
+
     return InkWell(
-      onTap: onTap,
+      onTap: isDisabled ? null : onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Row(
@@ -342,10 +353,10 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: iconBgColor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: Colors.grey[600], size: 20.sp),
+              child: Icon(icon, color: iconColor, size: 20.sp),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -354,7 +365,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1F2937),
+                  color: contentColor,
                 ),
               ),
             ),
@@ -363,13 +374,13 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 valueText,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: Colors.grey[500],
+                  color: isDisabled ? Colors.grey[350]! : Colors.grey[500]!,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               SizedBox(width: 8.w),
             ],
-            Icon(Icons.arrow_forward_ios, size: 16.sp, color: Colors.grey[400]),
+            Icon(Icons.arrow_forward_ios, size: 16.sp, color: arrowColor),
           ],
         ),
       ),

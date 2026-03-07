@@ -23,47 +23,30 @@ class GoogleDriveService {
   static const _backupMimeType = 'application/x-sqlite3';
   static const _driveScope = drive.DriveApi.driveAppdataScope;
 
-  final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
-  bool _initialized = false;
+  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [_driveScope]);
+
   GoogleSignInAccount? _currentUser;
 
   GoogleSignInAccount? get currentUser => _currentUser;
   bool get isSignedIn => _currentUser != null;
 
-  Future<void> _ensureInitialized() async {
-    if (!_initialized) {
-      await _googleSignIn.initialize();
-      _initialized = true;
-    }
-  }
-
   Future<GoogleSignInAccount?> signIn() async {
-    await _ensureInitialized();
     try {
-      final account = await _googleSignIn.authenticate(
-        scopeHint: [_driveScope],
-      );
+      final account = await _googleSignIn.signIn();
       _currentUser = account;
       return account;
-    } on GoogleSignInException catch (e) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
-        return null;
-      }
+    } catch (e) {
       rethrow;
     }
   }
 
   Future<void> signOut() async {
-    await _ensureInitialized();
     await _googleSignIn.disconnect();
     _currentUser = null;
   }
 
   Future<GoogleSignInAccount?> signInSilently() async {
-    await _ensureInitialized();
-    final futureOrNull = _googleSignIn.attemptLightweightAuthentication();
-    if (futureOrNull == null) return null;
-    final account = await futureOrNull;
+    final account = await _googleSignIn.signInSilently();
     _currentUser = account;
     return account;
   }
@@ -71,10 +54,9 @@ class GoogleDriveService {
   Future<drive.DriveApi?> _getDriveApi() async {
     if (_currentUser == null) return null;
 
-    final authorization = await _currentUser!.authorizationClient
-        .authorizeScopes([_driveScope]);
+    final httpClient = await _googleSignIn.authenticatedClient();
+    if (httpClient == null) return null;
 
-    final httpClient = authorization.authClient(scopes: [_driveScope]);
     return drive.DriveApi(httpClient);
   }
 

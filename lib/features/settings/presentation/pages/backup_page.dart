@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -49,7 +51,29 @@ class _BackupView extends StatelessWidget {
       ),
       body: BlocConsumer<BackupCubit, BackupState>(
         listener: (context, state) {
-          if (state.message != null) {
+          if (state.status == BackupStatus.success) {
+            // Restore berhasil — perlu restart app
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => AlertDialog(
+                title: const Text('Restore Berhasil ✅'),
+                content: const Text(
+                  'Data berhasil dipulihkan. Aplikasi perlu ditutup dan dibuka ulang agar perubahan aktif.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => exit(0),
+                    style: TextButton.styleFrom(foregroundColor: Colors.black),
+                    child: const Text(
+                      'Tutup Aplikasi',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          } else if (state.message != null) {
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
@@ -356,7 +380,10 @@ class _BackupView extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
               ),
               Text(
-                _formatLastBackup(state.lastBackupTime),
+                _formatLastBackup(
+                  state.remoteBackupInfo?.modifiedTime?.toLocal() ??
+                      state.lastBackupTime,
+                ),
                 style: TextStyle(
                   color: Colors.greenAccent,
                   fontSize: 12.sp,

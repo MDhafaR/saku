@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "30720981300",
+    "project_id": "saku-489501",
+    "storage_bucket": "saku-489501.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30720981300:android:9eef3fc2c8bfca0bf28d61",
+        "android_client_info": {
+          "package_name": "com.jawalock.saku"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "30720981300-md98ts207q4g2o93efkt6frbre587dkn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jawalock.saku",
+            "certificate_hash": "a8351cf361861dc3585444f2b4efe1c5fc737825"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4dMOKr2idR-e_wj6OSSpe2ZAlikzi8DQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

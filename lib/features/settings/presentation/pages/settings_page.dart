@@ -14,6 +14,10 @@ import 'reminder_page.dart';
 import 'export_page.dart';
 import 'backup_page.dart';
 import 'about_page.dart';
+import '../cubit/backup_cubit.dart';
+import '../cubit/backup_state.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/injection.dart' show locator;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -29,6 +33,8 @@ class _SettingsPageState extends State<SettingsPage> {
   void initState() {
     super.initState();
     _walletsStream = locator<AppDatabase>().walletDao.watchAllWallets();
+    // Refresh backup status saat halaman Settings dibuka
+    locator<BackupCubit>().checkSignInStatus();
   }
 
   // Sample data untuk settings items
@@ -74,7 +80,6 @@ class _SettingsPageState extends State<SettingsPage> {
       subtitle: 'Connect to Google Drive',
       iconPath: 'backup',
       iconColor: const Color(0xFFF59E0B),
-      status: 'Connected',
     ),
     SettingsItem(
       id: '5',
@@ -635,7 +640,29 @@ class _SettingsPageState extends State<SettingsPage> {
                     );
                   }
                 },
-                child: SettingsItemWidget(item: item),
+                child: item.id == '4'
+                    ? BlocProvider.value(
+                        value: locator<BackupCubit>(),
+                        child: BlocBuilder<BackupCubit, BackupState>(
+                          builder: (context, backupState) {
+                            final isConnected =
+                                backupState.status == BackupStatus.signedIn ||
+                                backupState.status == BackupStatus.backingUp ||
+                                backupState.status == BackupStatus.restoring ||
+                                backupState.status == BackupStatus.success;
+                            return SettingsItemWidget(
+                              item: item.copyWith(
+                                subtitle: isConnected
+                                    ? backupState.email ?? 'Terhubung'
+                                    : 'Connect to Google Drive',
+                                status: isConnected ? 'Connected' : null,
+                                clearStatus: !isConnected,
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    : SettingsItemWidget(item: item),
               ),
             ),
           ],

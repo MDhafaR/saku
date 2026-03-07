@@ -44,7 +44,7 @@ Future<void> setupLocator() async {
     () => SecurityCubit(locator<SharedPreferences>()),
   );
 
-  locator.registerFactory<BackupCubit>(
+  locator.registerLazySingleton<BackupCubit>(
     () => BackupCubit(locator<BackupService>(), locator<GoogleDriveService>()),
   );
 }

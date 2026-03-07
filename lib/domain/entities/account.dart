@@ -40,4 +40,27 @@ class SettingsItem {
     this.isToggle = false,
     this.toggleValue = false,
   });
+
+  SettingsItem copyWith({
+    String? id,
+    String? title,
+    String? subtitle,
+    String? iconPath,
+    Color? iconColor,
+    String? status,
+    bool clearStatus = false,
+    bool? isToggle,
+    bool? toggleValue,
+  }) {
+    return SettingsItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      iconPath: iconPath ?? this.iconPath,
+      iconColor: iconColor ?? this.iconColor,
+      status: clearStatus ? null : (status ?? this.status),
+      isToggle: isToggle ?? this.isToggle,
+      toggleValue: toggleValue ?? this.toggleValue,
+    );
+  }
 }

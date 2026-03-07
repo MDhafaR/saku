@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart' as spdf;
 
 import '../../data/local/database/app_database.dart';
 
@@ -262,8 +263,21 @@ class ExportService {
       );
     }
 
+    final pdfBytes = await pdf.save();
     final file = File(path);
-    await file.writeAsBytes(await pdf.save());
+
+    if (passwordProtection && password != null && password.isNotEmpty) {
+      // Load bytes ke Syncfusion lalu terapkan enkripsi AES-256
+      final sfDoc = spdf.PdfDocument(inputBytes: pdfBytes);
+      sfDoc.security
+        ..userPassword = password
+        ..ownerPassword = password
+        ..algorithm = spdf.PdfEncryptionAlgorithm.aesx256Bit;
+      await file.writeAsBytes(sfDoc.saveSync());
+      sfDoc.dispose();
+    } else {
+      await file.writeAsBytes(pdfBytes);
+    }
   }
 
   // ─── Excel generation ───────────────────────────────────────────────

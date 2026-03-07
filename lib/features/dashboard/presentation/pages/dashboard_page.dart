@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../components/components.dart' as components;
 import '../components/filter_bottom_sheet.dart';
@@ -26,6 +28,9 @@ class _DashboardPageState extends State<DashboardPage> {
   DateTime _selectedDate = DateTime.now();
   late final TransactionCubit _cubit;
   bool _isLoading = true;
+  String _searchQuery = '';
+  DashboardFilterResult _activeFilter = const DashboardFilterResult();
+  List<Transaction> _allTransactions = const [];
 
   // Cache for categories and wallets
   Map<int, Category> _categoriesCache = {};
@@ -114,11 +119,14 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _onSearchChanged(String query) {
-    // TODO: Implement search logic
+    setState(() {
+      _searchQuery = query.trim().toLowerCase();
+    });
   }
 
   void _onFilterTap() {
-    showModalBottomSheet(
+    final maxSelectableAmount = _computeAmountUpperBound(_allTransactions);
+    showModalBottomSheet<DashboardFilterResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -128,9 +136,22 @@ class _DashboardPageState extends State<DashboardPage> {
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
-        child: const FilterBottomSheet(),
+        child: FilterBottomSheet(
+          initialFilter: _activeFilter,
+          wallets: _walletsCache.values.toList()
+            ..sort((a, b) => a.name.compareTo(b.name)),
+          categories: _categoriesCache.values.toList()
+            ..sort((a, b) => a.name.compareTo(b.name)),
+          maxSelectableAmount: maxSelectableAmount,
+        ),
       ),
-    );
+    ).then((result) {
+      if (result != null) {
+        setState(() {
+          _activeFilter = result;
+        });
+      }
+    });
   }
 
   void _deleteTransaction(int id) async {
@@ -151,6 +172,196 @@ class _DashboardPageState extends State<DashboardPage> {
 
   bool _isSameMonth(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.month == date2.month;
+  }
+
+  List<Transaction> _getFilteredTransactions(List<Transaction> allTransactions) {
+    final now = DateTime.now();
+    final minimumDate = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(const Duration(days: 29));
+
+    final filteredByDate = allTransactions.where((transaction) {
+      switch (_activeFilter.dateRange) {
+        case DashboardDateRange.last30Days:
+          return !transaction.transactionDate.isBefore(minimumDate);
+        case DashboardDateRange.customRange:
+          if (_activeFilter.customStartDate == null ||
+              _activeFilter.customEndDate == null) {
+            return true;
+          }
+          final txDate = DateTime(
+            transaction.transactionDate.year,
+            transaction.transactionDate.month,
+            transaction.transactionDate.day,
+          );
+          final startDate = DateTime(
+            _activeFilter.customStartDate!.year,
+            _activeFilter.customStartDate!.month,
+            _activeFilter.customStartDate!.day,
+          );
+          final endDate = DateTime(
+            _activeFilter.customEndDate!.year,
+            _activeFilter.customEndDate!.month,
+            _activeFilter.customEndDate!.day,
+          );
+          return !txDate.isBefore(startDate) && !txDate.isAfter(endDate);
+        case DashboardDateRange.selectedMonth:
+          return _isSameMonth(transaction.transactionDate, _selectedDate);
+      }
+    });
+
+    return filteredByDate.where((transaction) {
+      if (_activeFilter.transactionType == DashboardTransactionType.income &&
+          transaction.type != 'income') {
+        return false;
+      }
+      if (_activeFilter.transactionType == DashboardTransactionType.expense &&
+          transaction.type != 'expense') {
+        return false;
+      }
+      if (_activeFilter.walletId != null &&
+          transaction.walletId != _activeFilter.walletId) {
+        return false;
+      }
+      if (_activeFilter.categoryIds.isNotEmpty &&
+          !_activeFilter.categoryIds.contains(transaction.categoryId)) {
+        return false;
+      }
+      final hasAmountFilter = _activeFilter.amountUpperBound > 0 &&
+          (_activeFilter.amountRange.start > 0 ||
+              _activeFilter.amountRange.end < _activeFilter.amountUpperBound);
+      if (hasAmountFilter &&
+          (transaction.amount < _activeFilter.amountRange.start ||
+              transaction.amount > _activeFilter.amountRange.end)) {
+        return false;
+      }
+
+      if (_searchQuery.isEmpty) return true;
+
+      final categoryName =
+          _categoriesCache[transaction.categoryId]?.name.toLowerCase() ?? '';
+      final walletName =
+          _walletsCache[transaction.walletId]?.name.toLowerCase() ?? '';
+      final description = transaction.description.toLowerCase();
+      final note = (transaction.note ?? '').toLowerCase();
+      final amountText = transaction.amount.toStringAsFixed(0);
+
+      return categoryName.contains(_searchQuery) ||
+          walletName.contains(_searchQuery) ||
+          description.contains(_searchQuery) ||
+          note.contains(_searchQuery) ||
+          amountText.contains(_searchQuery);
+    }).toList();
+  }
+
+  double _computeAmountUpperBound(List<Transaction> transactions) {
+    final rawMax = transactions.fold<double>(
+      0,
+      (max, t) => t.amount > max ? t.amount : max,
+    );
+    if (rawMax <= 0) {
+      return 1000000;
+    }
+    final padded = rawMax * 1.2;
+    final digits = padded.floor().toString().length;
+    final step = switch (digits) {
+      <= 3 => 100.0,
+      4 => 1000.0,
+      5 => 10000.0,
+      6 => 100000.0,
+      7 => 1000000.0,
+      _ => 10000000.0,
+    };
+    return (padded / step).ceil() * step;
+  }
+
+  String _buildFilterSummaryText() {
+    final parts = <String>[];
+
+    if (_activeFilter.transactionType == DashboardTransactionType.income) {
+      parts.add('Pemasukan');
+    } else if (_activeFilter.transactionType ==
+        DashboardTransactionType.expense) {
+      parts.add('Pengeluaran');
+    }
+
+    switch (_activeFilter.dateRange) {
+      case DashboardDateRange.selectedMonth:
+        break;
+      case DashboardDateRange.last30Days:
+        parts.add('30 hari terakhir');
+        break;
+      case DashboardDateRange.customRange:
+        if (_activeFilter.customStartDate != null &&
+            _activeFilter.customEndDate != null) {
+          final format = DateFormat('dd MMM', 'id');
+          parts.add(
+            '${format.format(_activeFilter.customStartDate!)} - ${format.format(_activeFilter.customEndDate!)}',
+          );
+        }
+        break;
+    }
+
+    if (_activeFilter.walletId != null) {
+      final walletName = _walletsCache[_activeFilter.walletId!]?.name;
+      if (walletName != null && walletName.isNotEmpty) {
+        parts.add(walletName);
+      }
+    }
+
+    if (_activeFilter.categoryIds.isNotEmpty) {
+      parts.add('${_activeFilter.categoryIds.length} kategori');
+    }
+
+    if (_activeFilter.amountUpperBound > 0 &&
+        (_activeFilter.amountRange.start > 0 ||
+            _activeFilter.amountRange.end < _activeFilter.amountUpperBound)) {
+      parts.add(
+        'Nominal Rp ${CurrencyFormatter.format(_activeFilter.amountRange.start.toStringAsFixed(0))} - Rp ${CurrencyFormatter.format(_activeFilter.amountRange.end.toStringAsFixed(0))}',
+      );
+    }
+
+    if (_searchQuery.isNotEmpty) {
+      parts.add('Cari: "$_searchQuery"');
+    }
+
+    if (parts.isEmpty) {
+      return 'Filter default: bulan dipilih';
+    }
+
+    return parts.join(' • ');
+  }
+
+  Widget _buildFilterSummary() {
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(top: 10.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3F4F6),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.filter_alt_outlined, size: 14.sp, color: const Color(0xFF4B5563)),
+          SizedBox(width: 6.w),
+          Expanded(
+            child: Text(
+              _buildFilterSummaryText(),
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: const Color(0xFF4B5563),
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _selectMonthYear() async {
@@ -461,11 +672,15 @@ class _DashboardPageState extends State<DashboardPage> {
               if (state is TransactionLoaded) {
                 allTransactions = state.transactions;
               }
+              _allTransactions = allTransactions;
 
-              // Filter for current month
+              // Base for summary cards (month focused)
               final currentTransactions = allTransactions
                   .where((t) => _isSameMonth(t.transactionDate, _selectedDate))
                   .toList();
+              final filteredTransactions = _getFilteredTransactions(
+                allTransactions,
+              );
 
               // Filter for previous month
               final prevDate = DateTime(
@@ -519,14 +734,18 @@ class _DashboardPageState extends State<DashboardPage> {
                         components.SearchBar(
                           onChanged: _onSearchChanged,
                           onFilterTap: _onFilterTap,
+                          hasActiveFilter: _activeFilter.hasActiveFilters,
                         ),
+                        if (_activeFilter.hasActiveFilters ||
+                            _searchQuery.isNotEmpty)
+                          _buildFilterSummary(),
                       ],
                     ),
                   ),
 
                   // Scrollable transaction sections
                   Expanded(
-                    child: _buildTransactionList(state, currentTransactions),
+                    child: _buildTransactionList(state, filteredTransactions),
                   ),
                 ],
               );
@@ -691,7 +910,7 @@ class _DashboardPageState extends State<DashboardPage> {
             width: 36.w,
             height: 36.w,
             decoration: BoxDecoration(
-              color: Colors.blue.withOpacity(0.15),
+              color: Colors.blue.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Icon(Icons.category, color: Colors.blue, size: 18.sp),

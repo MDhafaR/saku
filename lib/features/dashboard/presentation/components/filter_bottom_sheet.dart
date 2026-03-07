@@ -1,19 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../data/local/database/app_database.dart';
+
+enum DashboardTransactionType { all, income, expense }
+
+enum DashboardDateRange { selectedMonth, last30Days, customRange }
+
+class DashboardFilterResult {
+  final DashboardTransactionType transactionType;
+  final DashboardDateRange dateRange;
+  final int? walletId;
+  final Set<int> categoryIds;
+  final RangeValues amountRange;
+  final DateTime? customStartDate;
+  final DateTime? customEndDate;
+  final double amountUpperBound;
+
+  const DashboardFilterResult({
+    this.transactionType = DashboardTransactionType.all,
+    this.dateRange = DashboardDateRange.selectedMonth,
+    this.walletId,
+    this.categoryIds = const <int>{},
+    this.amountRange = const RangeValues(0, 100),
+    this.customStartDate,
+    this.customEndDate,
+    this.amountUpperBound = 0,
+  });
+
+  bool get hasActiveFilters {
+    return transactionType != DashboardTransactionType.all ||
+        dateRange != DashboardDateRange.selectedMonth ||
+        walletId != null ||
+        categoryIds.isNotEmpty ||
+        (amountUpperBound > 0 &&
+            (amountRange.start > 0 || amountRange.end < amountUpperBound)) ||
+        (dateRange == DashboardDateRange.customRange &&
+            customStartDate != null &&
+            customEndDate != null);
+  }
+}
 
 class FilterBottomSheet extends StatefulWidget {
-  const FilterBottomSheet({super.key});
+  final DashboardFilterResult initialFilter;
+  final List<Wallet> wallets;
+  final List<Category> categories;
+  final double maxSelectableAmount;
+
+  const FilterBottomSheet({
+    super.key,
+    required this.initialFilter,
+    required this.wallets,
+    required this.categories,
+    required this.maxSelectableAmount,
+  });
 
   @override
   State<FilterBottomSheet> createState() => _FilterBottomSheetState();
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  String _selectedTransactionType = 'Semua';
-  String _selectedDateRange = 'Bulan Ini';
-  String _selectedWallet = 'Semua';
-  RangeValues _currentRangeValues = const RangeValues(0, 100);
+  late DashboardTransactionType _selectedTransactionType;
+  late DashboardDateRange _selectedDateRange;
+  int? _selectedWalletId;
+  late Set<int> _selectedCategoryIds;
+  late RangeValues _currentRangeValues;
+  late double _amountUpperBound;
+  DateTime? _customStartDate;
+  DateTime? _customEndDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedTransactionType = widget.initialFilter.transactionType;
+    _selectedDateRange = widget.initialFilter.dateRange;
+    _selectedWalletId = widget.initialFilter.walletId;
+    _selectedCategoryIds = Set<int>.from(widget.initialFilter.categoryIds);
+    _amountUpperBound = widget.maxSelectableAmount;
+    if (widget.initialFilter.amountUpperBound > 0) {
+      _currentRangeValues = RangeValues(
+        widget.initialFilter.amountRange.start.clamp(0, _amountUpperBound),
+        widget.initialFilter.amountRange.end.clamp(0, _amountUpperBound),
+      );
+    } else {
+      _currentRangeValues = RangeValues(0, _amountUpperBound);
+    }
+    _customStartDate = widget.initialFilter.customStartDate;
+    _customEndDate = widget.initialFilter.customEndDate;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +103,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Drag Handle
           Center(
             child: Container(
               margin: EdgeInsets.only(top: 12.h),
@@ -38,14 +114,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
             ),
           ),
-
-          // Header
           Padding(
             padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                SizedBox(width: 24.w), // Spacer for title centering
+                SizedBox(width: 24.w),
                 Text(
                   'Filter Pencarian',
                   style: TextStyle(
@@ -64,17 +138,13 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ],
             ),
           ),
-
           Divider(color: const Color(0xFFF3F4F6), height: 32.h),
-
-          // Scrollable Content
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Transaction Type
                   _buildSectionTitle('Tipe Transaksi'),
                   SizedBox(height: 12.h),
                   Wrap(
@@ -83,37 +153,40 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     children: [
                       _buildChip(
                         'Semua',
-                        isSelected: _selectedTransactionType == 'Semua',
-                        onTap: () =>
-                            setState(() => _selectedTransactionType = 'Semua'),
+                        isSelected:
+                            _selectedTransactionType ==
+                            DashboardTransactionType.all,
+                        onTap: () => setState(
+                          () =>
+                              _selectedTransactionType =
+                                  DashboardTransactionType.all,
+                        ),
                       ),
                       _buildChip(
                         'Pemasukan',
-                        isSelected: _selectedTransactionType == 'Pemasukan',
+                        isSelected:
+                            _selectedTransactionType ==
+                            DashboardTransactionType.income,
                         onTap: () => setState(
-                          () => _selectedTransactionType = 'Pemasukan',
+                          () =>
+                              _selectedTransactionType =
+                                  DashboardTransactionType.income,
                         ),
                       ),
                       _buildChip(
                         'Pengeluaran',
-                        isSelected: _selectedTransactionType == 'Pengeluaran',
+                        isSelected:
+                            _selectedTransactionType ==
+                            DashboardTransactionType.expense,
                         onTap: () => setState(
-                          () => _selectedTransactionType = 'Pengeluaran',
-                        ),
-                      ),
-                      _buildChip(
-                        'Transfer',
-                        isSelected: _selectedTransactionType == 'Transfer',
-                        onTap: () => setState(
-                          () => _selectedTransactionType = 'Transfer',
+                          () =>
+                              _selectedTransactionType =
+                                  DashboardTransactionType.expense,
                         ),
                       ),
                     ],
                   ),
-
                   SizedBox(height: 24.h),
-
-                  // Date Range
                   _buildSectionTitle('Rentang Waktu'),
                   SizedBox(height: 12.h),
                   Wrap(
@@ -121,32 +194,42 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     runSpacing: 8.h,
                     children: [
                       _buildChip(
-                        'Bulan Ini',
-                        isSelected: _selectedDateRange == 'Bulan Ini',
-                        onTap: () =>
-                            setState(() => _selectedDateRange = 'Bulan Ini'),
+                        'Bulan Dipilih',
+                        isSelected:
+                            _selectedDateRange ==
+                            DashboardDateRange.selectedMonth,
+                        onTap: () => setState(
+                          () =>
+                              _selectedDateRange =
+                                  DashboardDateRange.selectedMonth,
+                        ),
                       ),
                       _buildChip(
                         '30 Hari Terakhir',
-                        isSelected: _selectedDateRange == '30 Hari Terakhir',
+                        isSelected:
+                            _selectedDateRange == DashboardDateRange.last30Days,
                         onTap: () => setState(
-                          () => _selectedDateRange = '30 Hari Terakhir',
+                          () =>
+                              _selectedDateRange = DashboardDateRange.last30Days,
                         ),
                       ),
                       _buildChip(
                         'Pilih Tanggal',
                         icon: Icons.calendar_today_outlined,
-                        isSelected: _selectedDateRange == 'Pilih Tanggal',
+                        isSelected:
+                            _selectedDateRange == DashboardDateRange.customRange,
                         onTap: () => setState(
-                          () => _selectedDateRange = 'Pilih Tanggal',
+                          () =>
+                              _selectedDateRange = DashboardDateRange.customRange,
                         ),
                       ),
                     ],
                   ),
-
+                  if (_selectedDateRange == DashboardDateRange.customRange) ...[
+                    SizedBox(height: 12.h),
+                    _buildCustomDateRangePicker(),
+                  ],
                   SizedBox(height: 24.h),
-
-                  // Wallet
                   _buildSectionTitle('Dompet'),
                   SizedBox(height: 12.h),
                   Wrap(
@@ -156,120 +239,72 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       _buildChip(
                         'Semua',
                         icon: Icons.account_balance_wallet_outlined,
-                        isSelected: _selectedWallet == 'Semua',
-                        onTap: () => setState(() => _selectedWallet = 'Semua'),
+                        isSelected: _selectedWalletId == null,
+                        onTap: () => setState(() => _selectedWalletId = null),
                       ),
-                      _buildChip(
-                        'BCA',
-                        labelPrefix: 'BCA',
-                        isWallet: true,
-                        isSelected: _selectedWallet == 'BCA',
-                        onTap: () => setState(() => _selectedWallet = 'BCA'),
-                      ),
-                      _buildChip(
-                        'Cash',
-                        icon: Icons.payments_outlined,
-                        isSelected: _selectedWallet == 'Cash',
-                        onTap: () => setState(() => _selectedWallet = 'Cash'),
-                      ),
-                      _buildChip(
-                        'OVO',
-                        labelPrefix: 'OVO',
-                        isWallet: true,
-                        isSelected: _selectedWallet == 'OVO',
-                        onTap: () => setState(() => _selectedWallet = 'OVO'),
-                      ),
-                      _buildChip(
-                        'GoPay',
-                        icon: Icons.stay_current_portrait,
-                        isSelected: _selectedWallet == 'GoPay',
-                        onTap: () => setState(() => _selectedWallet = 'GoPay'),
+                      ...widget.wallets.map(
+                        (wallet) => _buildChip(
+                          wallet.name,
+                          isSelected: _selectedWalletId == wallet.id,
+                          onTap: () =>
+                              setState(() => _selectedWalletId = wallet.id),
+                        ),
                       ),
                     ],
                   ),
-
                   SizedBox(height: 24.h),
-
-                  // Category
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildSectionTitle('Kategori'),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () =>
+                            setState(() => _selectedCategoryIds.clear()),
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.zero,
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: Row(
-                          children: [
-                            Text(
-                              'Lihat Semua',
-                              style: TextStyle(
-                                color: AppTheme.primaryBlue,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Icon(
-                              Icons.chevron_right,
-                              size: 16.sp,
-                              color: AppTheme.primaryBlue,
-                            ),
-                          ],
+                        child: Text(
+                          'Reset',
+                          style: TextStyle(
+                            color: AppTheme.primaryBlue,
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
                   SizedBox(height: 12.h),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 16.h,
-                    crossAxisSpacing: 16.w,
-                    childAspectRatio: 0.8,
-                    children: [
-                      _buildCategoryItem(
-                        Icons.restaurant,
-                        'Makan',
-                        Colors.orange,
-                      ),
-                      _buildCategoryItem(
-                        Icons.directions_car,
-                        'Transport',
-                        Colors.blue,
-                      ),
-                      _buildCategoryItem(
-                        Icons.shopping_bag,
-                        'Belanja',
-                        Colors.pink,
-                      ),
-                      _buildCategoryItem(
-                        Icons.receipt_long,
-                        'Tagihan',
-                        Colors.green,
-                      ),
-                      _buildCategoryItem(Icons.movie, 'Hiburan', Colors.purple),
-                      _buildCategoryItem(
-                        Icons.favorite,
-                        'Kesehatan',
-                        Colors.red,
-                      ),
-                    ],
+                  Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: widget.categories.map((category) {
+                      final selected = _selectedCategoryIds.contains(category.id);
+                      return _buildChip(
+                        category.name,
+                        isSelected: selected,
+                        onTap: () {
+                          setState(() {
+                            if (selected) {
+                              _selectedCategoryIds.remove(category.id);
+                            } else {
+                              _selectedCategoryIds.add(category.id);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
                   ),
-
                   SizedBox(height: 24.h),
-
-                  // Nominal Slider
                   _buildSectionTitle('Nominal'),
                   SizedBox(height: 12.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Rp 0',
+                        'Rp ${CurrencyFormatter.format(_currentRangeValues.start.toStringAsFixed(0))}',
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
@@ -277,7 +312,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         ),
                       ),
                       Text(
-                        'Rp 10.000.000+',
+                        'Rp ${CurrencyFormatter.format(_currentRangeValues.end.toStringAsFixed(0))}',
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
@@ -295,12 +330,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         enabledThumbRadius: 12.r,
                         elevation: 2,
                       ),
-                      overlayColor: AppTheme.primaryBlue.withOpacity(0.1),
+                      overlayColor: AppTheme.primaryBlue.withValues(alpha: 0.1),
                     ),
                     child: RangeSlider(
                       values: _currentRangeValues,
                       min: 0,
-                      max: 100,
+                      max: _amountUpperBound,
                       onChanged: (RangeValues values) {
                         setState(() {
                           _currentRangeValues = values;
@@ -327,14 +362,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                     ],
                   ),
-
-                  SizedBox(height: 100.h), // Bottom padding
+                  SizedBox(height: 100.h),
                 ],
               ),
             ),
           ),
-
-          // Bottom Buttons
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: const BoxDecoration(
@@ -346,7 +378,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Expanded(
                   flex: 1,
                   child: TextButton(
-                    onPressed: () {},
+                    onPressed: _resetFilter,
                     child: const Text(
                       'Reset',
                       style: TextStyle(
@@ -360,7 +392,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 Expanded(
                   flex: 2,
                   child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
+                    onPressed: _applyFilter,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppTheme.primaryBlue,
                       padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -387,6 +419,133 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
   }
 
+  void _resetFilter() {
+    setState(() {
+      _selectedTransactionType = DashboardTransactionType.all;
+      _selectedDateRange = DashboardDateRange.selectedMonth;
+      _selectedWalletId = null;
+      _selectedCategoryIds.clear();
+      _currentRangeValues = RangeValues(0, _amountUpperBound);
+      _customStartDate = null;
+      _customEndDate = null;
+    });
+  }
+
+  void _applyFilter() {
+    if (_selectedDateRange == DashboardDateRange.customRange &&
+        (_customStartDate == null || _customEndDate == null)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pilih tanggal awal dan akhir dulu.')),
+      );
+      return;
+    }
+
+    Navigator.pop(
+      context,
+      DashboardFilterResult(
+        transactionType: _selectedTransactionType,
+        dateRange: _selectedDateRange,
+        walletId: _selectedWalletId,
+        categoryIds: _selectedCategoryIds,
+        amountRange: _currentRangeValues,
+        customStartDate: _customStartDate,
+        customEndDate: _customEndDate,
+        amountUpperBound: _amountUpperBound,
+      ),
+    );
+  }
+
+  Widget _buildCustomDateRangePicker() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildDateField(
+            label: 'Dari',
+            value: _customStartDate,
+            onTap: () => _pickDate(isStartDate: true),
+          ),
+        ),
+        SizedBox(width: 8.w),
+        Expanded(
+          child: _buildDateField(
+            label: 'Sampai',
+            value: _customEndDate,
+            onTap: () => _pickDate(isStartDate: false),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateField({
+    required String label,
+    required DateTime? value,
+    required VoidCallback onTap,
+  }) {
+    final formatter = DateFormat('dd MMM yyyy', 'id');
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: const Color(0xFFE5E7EB)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.event_outlined, size: 16.sp, color: const Color(0xFF6B7280)),
+            SizedBox(width: 6.w),
+            Expanded(
+              child: Text(
+                value == null ? label : formatter.format(value),
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: value == null
+                      ? const Color(0xFF9CA3AF)
+                      : const Color(0xFF111111),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _pickDate({required bool isStartDate}) async {
+    final now = DateTime.now();
+    final initialDate = isStartDate
+        ? (_customStartDate ?? _customEndDate ?? now)
+        : (_customEndDate ?? _customStartDate ?? now);
+    final firstDate = DateTime(2000);
+    final lastDate = DateTime(now.year + 2, 12, 31);
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+      locale: const Locale('id', 'ID'),
+    );
+
+    if (picked == null) return;
+
+    setState(() {
+      if (isStartDate) {
+        _customStartDate = DateTime(picked.year, picked.month, picked.day);
+        if (_customEndDate != null && _customEndDate!.isBefore(_customStartDate!)) {
+          _customEndDate = _customStartDate;
+        }
+      } else {
+        _customEndDate = DateTime(picked.year, picked.month, picked.day);
+        if (_customStartDate != null && _customStartDate!.isAfter(_customEndDate!)) {
+          _customStartDate = _customEndDate;
+        }
+      }
+    });
+  }
+
   Widget _buildSectionTitle(String title) {
     return Text(
       title,
@@ -402,17 +561,15 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     String label, {
     IconData? icon,
     bool isSelected = false,
-    String? labelPrefix,
-    bool isWallet = false,
     VoidCallback? onTap,
   }) {
-    Color textColor = isSelected
+    final textColor = isSelected
         ? AppTheme.primaryBlue
         : const Color(0xFF4B5563);
-    Color borderColor = isSelected
+    final borderColor = isSelected
         ? AppTheme.primaryBlue
         : const Color(0xFFE5E7EB);
-    Color bgColor = isSelected ? const Color(0xFFEFF6FF) : Colors.white;
+    final bgColor = isSelected ? const Color(0xFFEFF6FF) : Colors.white;
 
     return GestureDetector(
       onTap: onTap,
@@ -430,24 +587,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               Icon(icon, size: 16.sp, color: textColor),
               SizedBox(width: 8.w),
             ],
-            if (labelPrefix != null) ...[
-              Container(
-                padding: EdgeInsets.all(2.w),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-                child: Text(
-                  labelPrefix,
-                  style: TextStyle(
-                    fontSize: 8.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-              SizedBox(width: 6.w),
-            ],
             Text(
               label,
               style: TextStyle(
@@ -459,32 +598,6 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildCategoryItem(IconData icon, String label, MaterialColor color) {
-    return Column(
-      children: [
-        Container(
-          width: 56.w,
-          height: 56.w,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Icon(icon, color: Colors.white, size: 24.sp),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: const Color(0xFF4B5563),
-            fontWeight: FontWeight.w500,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }

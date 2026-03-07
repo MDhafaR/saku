@@ -3,8 +3,11 @@ import 'package:saku/features/dashboard/presentation/cubit/transaction_cubit.dar
 import 'package:saku/features/debts/presentation/cubit/debt_cubit.dart';
 import 'package:saku/features/statistics/presentation/cubit/statistics_cubit.dart';
 import 'package:saku/features/settings/presentation/cubit/security_cubit.dart';
+import 'package:saku/features/settings/presentation/cubit/backup_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/local/database/app_database.dart';
+import 'services/google_drive_service.dart';
+import 'services/backup_service.dart';
 
 final GetIt locator = GetIt.instance;
 
@@ -16,6 +19,16 @@ Future<void> setupLocator() async {
   // SharedPreferences
   final prefs = await SharedPreferences.getInstance();
   locator.registerSingleton<SharedPreferences>(prefs);
+
+  // Services
+  locator.registerLazySingleton<GoogleDriveService>(() => GoogleDriveService());
+  locator.registerLazySingleton<BackupService>(
+    () => BackupService(
+      locator<GoogleDriveService>(),
+      locator<AppDatabase>(),
+      locator<SharedPreferences>(),
+    ),
+  );
 
   // Cubit - injected with database or prefs
   locator.registerFactory<TransactionCubit>(
@@ -29,5 +42,9 @@ Future<void> setupLocator() async {
 
   locator.registerLazySingleton<SecurityCubit>(
     () => SecurityCubit(locator<SharedPreferences>()),
+  );
+
+  locator.registerFactory<BackupCubit>(
+    () => BackupCubit(locator<BackupService>(), locator<GoogleDriveService>()),
   );
 }

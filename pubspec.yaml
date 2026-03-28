@@ -67,6 +67,7 @@ dependencies:
   extension_google_sign_in_as_googleapis_auth: ^2.0.13
   googleapis: ^16.0.0
   syncfusion_flutter_pdf: ^32.2.8
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:

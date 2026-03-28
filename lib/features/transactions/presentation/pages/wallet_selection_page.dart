@@ -64,24 +64,24 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Pilih Wallet',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -127,11 +127,11 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                             vertical: 16.h,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(16.r),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -177,7 +177,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                               // Arrow
                               Icon(
                                 Icons.chevron_right,
-                                color: const Color(0xFF9CA3AF),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                 size: 22.sp,
                               ),
                             ],
@@ -211,7 +211,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
           Icon(
             Icons.account_balance_wallet_outlined,
             size: 64.sp,
-            color: const Color(0xFF9CA3AF),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -219,13 +219,13 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF6B7280),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           SizedBox(height: 8.h),
           Text(
             'Tap tombol + untuk menambah wallet',
-            style: TextStyle(fontSize: 13.sp, color: const Color(0xFF9CA3AF)),
+            style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
           ),
         ],
       ),

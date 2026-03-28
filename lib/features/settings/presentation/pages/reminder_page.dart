@@ -100,23 +100,23 @@ class _ReminderPageState extends State<ReminderPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
             'Pengingat Harian',
             style: TextStyle(
-              color: const Color(0xFF111111),
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
           centerTitle: true,
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           elevation: 0,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
-              color: Colors.black,
+              color: Theme.of(context).colorScheme.onSurface,
               size: 20.sp,
             ),
             onPressed: () => Navigator.pop(context),
@@ -128,23 +128,23 @@ class _ReminderPageState extends State<ReminderPage> {
       );
     }
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Pengingat Harian',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -158,12 +158,12 @@ class _ReminderPageState extends State<ReminderPage> {
             Container(
               padding: EdgeInsets.all(20.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withValues(alpha: 0.05),
                     blurRadius: 10.r,
                     offset: Offset(0, 4.h),
                   ),
@@ -180,7 +180,7 @@ class _ReminderPageState extends State<ReminderPage> {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1F2937),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         SizedBox(height: 4.h),
@@ -188,7 +188,7 @@ class _ReminderPageState extends State<ReminderPage> {
                           'Terima notifikasi untuk membangun kebiasaan',
                           style: TextStyle(
                             fontSize: 12.sp,
-                            color: Colors.grey[500],
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                           ),
                         ),
                       ],
@@ -198,7 +198,7 @@ class _ReminderPageState extends State<ReminderPage> {
                     value: _isReminderEnabled,
                     onChanged: (val) =>
                         setState(() => _isReminderEnabled = val),
-                    activeColor: const Color(0xFF111111), // Primary Dark
+                    activeColor: Theme.of(context).colorScheme.primary, // Primary Dark
                   ),
                 ],
               ),
@@ -210,12 +210,12 @@ class _ReminderPageState extends State<ReminderPage> {
               Container(
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10.r,
                       offset: Offset(0, 4.h),
                     ),
@@ -229,7 +229,7 @@ class _ReminderPageState extends State<ReminderPage> {
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -247,18 +247,18 @@ class _ReminderPageState extends State<ReminderPage> {
                                   style: TextStyle(
                                     fontSize: 20.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1F2937),
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                                 IconButton(
                                   icon: Icon(
                                     Icons.close,
-                                    color: Colors.grey[400],
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                                     size: 24.sp,
                                   ),
                                   onPressed: () => _removeTime(time),
                                   style: IconButton.styleFrom(
-                                    backgroundColor: Colors.grey[100],
+                                    backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.07),
                                     padding: EdgeInsets.all(8.w),
                                   ),
                                 ),
@@ -266,7 +266,7 @@ class _ReminderPageState extends State<ReminderPage> {
                             ),
                             SizedBox(height: 12.h),
                             if (time != _reminderTimes.last)
-                              Divider(height: 1.h, color: Colors.grey[100]),
+                              Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                           ],
                         ),
                       ),
@@ -281,13 +281,13 @@ class _ReminderPageState extends State<ReminderPage> {
                           children: [
                             Container(
                               padding: EdgeInsets.all(2.w),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF111111),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
                                 Icons.add,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 size: 16.sp,
                               ),
                             ),
@@ -295,7 +295,7 @@ class _ReminderPageState extends State<ReminderPage> {
                             Text(
                               'Tambah Waktu Pengingat',
                               style: TextStyle(
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14.sp,
                               ),
@@ -313,12 +313,12 @@ class _ReminderPageState extends State<ReminderPage> {
               Container(
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                  border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10.r,
                       offset: Offset(0, 4.h),
                     ),
@@ -332,7 +332,7 @@ class _ReminderPageState extends State<ReminderPage> {
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                         letterSpacing: 1.0,
                       ),
                     ),
@@ -348,7 +348,9 @@ class _ReminderPageState extends State<ReminderPage> {
                       Container(
                         padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(context).colorScheme.surfaceContainerLow
+                              : const Color(0xFFF3F4F6),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Column(
@@ -362,7 +364,7 @@ class _ReminderPageState extends State<ReminderPage> {
                               ),
                               style: TextStyle(
                                 fontSize: 14.sp,
-                                color: const Color(0xFF4B5563),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                             Align(
@@ -370,7 +372,7 @@ class _ReminderPageState extends State<ReminderPage> {
                               child: Icon(
                                 Icons.edit,
                                 size: 16.sp,
-                                color: Colors.grey[400],
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                               ),
                             ),
                           ],
@@ -381,7 +383,7 @@ class _ReminderPageState extends State<ReminderPage> {
                         'Pesan ini akan dikirim sesuai jadwal di atas.',
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: Colors.grey[500],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                         ),
                       ),
                     ],
@@ -395,7 +397,7 @@ class _ReminderPageState extends State<ReminderPage> {
                 child: ElevatedButton(
                   onPressed: _saveSettings,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF111111),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     padding: EdgeInsets.symmetric(vertical: 16.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
@@ -406,7 +408,7 @@ class _ReminderPageState extends State<ReminderPage> {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
                 ),
@@ -431,7 +433,7 @@ class _ReminderPageState extends State<ReminderPage> {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected ? const Color(0xFF111111) : Colors.grey[300]!,
+                color: isSelected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.outline.withValues(alpha: 0.35),
                 width: isSelected ? 6.w : 1.w,
               ),
             ),
@@ -442,7 +444,7 @@ class _ReminderPageState extends State<ReminderPage> {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: const Color(0xFF1F2937),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],

@@ -54,11 +54,12 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
   @override
   Widget build(BuildContext context) {
     final selectedIndex = periods.indexOf(widget.selectedPeriod);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: EdgeInsets.all(3.w),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(24.r),
       ),
       child: LayoutBuilder(
@@ -77,7 +78,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                 width: tabWidth,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surface,
                     borderRadius: BorderRadius.circular(20.r),
                     boxShadow: [
                       BoxShadow(
@@ -112,8 +113,8 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: isSelected
-                                ? const Color(0xFF111111)
-                                : const Color(0xFF9CA3AF),
+                                ? colorScheme.onSurface
+                                : colorScheme.onSurfaceVariant,
                             fontSize: 11.sp,
                             fontWeight: isSelected
                                 ? FontWeight.w600

@@ -17,6 +17,9 @@ class MonthNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final navBtnColor = isDark ? cs.surfaceContainerLow : const Color(0xFFF3F4F6);
     return Container(
       padding: EdgeInsets.symmetric(vertical: 16.h),
       child: Row(
@@ -27,12 +30,12 @@ class MonthNavigation extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: navBtnColor,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 Icons.chevron_left,
-                color: Colors.grey[600],
+                color: cs.onSurface.withValues(alpha: 0.6),
                 size: 20.sp,
               ),
             ),
@@ -52,13 +55,13 @@ class MonthNavigation extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                      color: cs.onSurface,
                     ),
                   ),
                   SizedBox(width: 4.w),
                   Icon(
                     Icons.arrow_drop_down,
-                    color: Colors.black87,
+                    color: cs.onSurface,
                     size: 20.sp,
                   ),
                 ],
@@ -70,12 +73,12 @@ class MonthNavigation extends StatelessWidget {
             child: Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: navBtnColor,
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 Icons.chevron_right,
-                color: Colors.grey[600],
+                color: cs.onSurface.withValues(alpha: 0.6),
                 size: 20.sp,
               ),
             ),

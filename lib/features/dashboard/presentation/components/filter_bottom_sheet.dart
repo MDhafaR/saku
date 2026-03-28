@@ -96,7 +96,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Column(
@@ -109,7 +109,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),
@@ -125,11 +125,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.close, color: Color(0xFF6B7280)),
+                  icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   onPressed: () => Navigator.pop(context),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(),
@@ -138,7 +138,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ],
             ),
           ),
-          Divider(color: const Color(0xFFF3F4F6), height: 32.h),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3), height: 32.h),
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -308,7 +308,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111111),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       Text(
@@ -316,7 +316,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xFF111111),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -350,14 +350,14 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         'Min',
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: const Color(0xFF9CA3AF),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       Text(
                         'Max',
                         style: TextStyle(
                           fontSize: 12.sp,
-                          color: const Color(0xFF9CA3AF),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ],
@@ -369,9 +369,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
           ),
           Container(
             padding: EdgeInsets.all(20.w),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3))),
             ),
             child: Row(
               children: [
@@ -379,10 +379,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                   flex: 1,
                   child: TextButton(
                     onPressed: _resetFilter,
-                    child: const Text(
+                    child: Text(
                       'Reset',
                       style: TextStyle(
-                        color: Color(0xFF6B7280),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -490,11 +490,11 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5)),
         ),
         child: Row(
           children: [
-            Icon(Icons.event_outlined, size: 16.sp, color: const Color(0xFF6B7280)),
+            Icon(Icons.event_outlined, size: 16.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
             SizedBox(width: 6.w),
             Expanded(
               child: Text(
@@ -502,8 +502,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                 style: TextStyle(
                   fontSize: 12.sp,
                   color: value == null
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF111111),
+                      ? Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7)
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -552,7 +552,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
       style: TextStyle(
         fontSize: 14.sp,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF4B5563),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
       ),
     );
   }
@@ -564,12 +564,12 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     VoidCallback? onTap,
   }) {
     final textColor = isSelected
-        ? AppTheme.primaryBlue
-        : const Color(0xFF4B5563);
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.onSurface;
     final borderColor = isSelected
-        ? AppTheme.primaryBlue
-        : const Color(0xFFE5E7EB);
-    final bgColor = isSelected ? const Color(0xFFEFF6FF) : Colors.white;
+        ? Theme.of(context).colorScheme.primary
+        : Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5);
+    final bgColor = isSelected ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3) : Colors.transparent;
 
     return GestureDetector(
       onTap: onTap,

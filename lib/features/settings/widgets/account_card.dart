@@ -9,15 +9,20 @@ class AccountCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       margin: EdgeInsets.only(bottom: 6.h),
       padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(10.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.grey.withOpacity(0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: Offset(0, 2.h),
@@ -49,7 +54,7 @@ class AccountCard extends StatelessWidget {
                 Text(
                   wallet.name,
                   style: TextStyle(
-                    color: const Color(0xFF333333),
+                    color: colorScheme.onSurface,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -57,7 +62,7 @@ class AccountCard extends StatelessWidget {
                 Text(
                   'Rp ${_formatCurrency(wallet.currentBalance)}',
                   style: TextStyle(
-                    color: const Color(0xFF666666),
+                    color: colorScheme.onSurfaceVariant,
                     fontSize: 11.sp,
                   ),
                 ),
@@ -67,7 +72,7 @@ class AccountCard extends StatelessWidget {
           // Arrow icon
           Icon(
             Icons.arrow_forward_ios,
-            color: const Color(0xFF999999),
+            color: colorScheme.onSurfaceVariant,
             size: 12.sp,
           ),
         ],

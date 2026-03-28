@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/presentation/components/saku_card.dart';
@@ -11,11 +12,13 @@ import '../cubit/debt_cubit.dart';
 class DebtDetailPage extends StatefulWidget {
   final Debt debt;
   final String personName;
+  final String? phone;
 
   const DebtDetailPage({
     super.key,
     required this.debt,
     required this.personName,
+    this.phone,
   });
 
   @override
@@ -27,6 +30,24 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
   List<DebtPayment> _payments = [];
   bool _isLoading = true;
   Debt? _debt;
+
+  Future<void> _handleCall() async {
+    final phone = widget.phone;
+    if (phone == null || phone.trim().isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Nomor telepon tidak tersimpan'),
+          ),
+        );
+      }
+      return;
+    }
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 
   @override
   void initState() {
@@ -591,7 +612,7 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                       color: AppTheme.semanticGreen,
                       label: 'Hubungi',
                       bgColor: const Color(0xFFECFDF5),
-                      onTap: () {}, // TODO: Implement call
+                      onTap: _handleCall,
                     ),
 
                     // Delete Button

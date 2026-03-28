@@ -180,30 +180,30 @@ class _ExportPageState extends State<ExportPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Report Builder',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.help_outline, color: Colors.black, size: 24.sp),
+            icon: Icon(Icons.help_outline, color: Theme.of(context).colorScheme.onSurface, size: 24.sp),
             onPressed: () {},
           ),
         ],
@@ -292,7 +292,7 @@ class _ExportPageState extends State<ExportPage> {
             SizedBox(height: 12.h),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
@@ -312,7 +312,7 @@ class _ExportPageState extends State<ExportPage> {
                     onChanged: (val) => setState(() => _includeReceipts = val),
                   ),
                   if (_selectedFormat == 0) ...[
-                    Divider(height: 1.h, color: Colors.grey[100]),
+                    Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                     _buildToggleItem(
                       icon: Icons.lock_outline,
                       title: 'Proteksi Password',
@@ -331,7 +331,7 @@ class _ExportPageState extends State<ExportPage> {
       bottomNavigationBar: Container(
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -404,10 +404,10 @@ class _ExportPageState extends State<ExportPage> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 8.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF111111) : Colors.transparent,
+            color: isSelected ? Theme.of(context).colorScheme.onSurface : Colors.transparent,
             width: 2.w,
           ),
           boxShadow: [
@@ -425,7 +425,7 @@ class _ExportPageState extends State<ExportPage> {
                 alignment: Alignment.topRight,
                 child: Icon(
                   Icons.check_circle,
-                  color: const Color(0xFF111111),
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 16.sp,
                 ),
               )
@@ -469,7 +469,11 @@ class _ExportPageState extends State<ExportPage> {
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF111111) : const Color(0xFFF3F4F6),
+          color: isSelected
+              ? Theme.of(context).colorScheme.onSurface
+              : (Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerLow
+                  : const Color(0xFFF3F4F6)),
           borderRadius: BorderRadius.circular(30.r),
           border: Border.all(
             color: isSelected ? const Color(0xFF111111) : Colors.transparent,
@@ -478,7 +482,9 @@ class _ExportPageState extends State<ExportPage> {
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF6B7280),
+            color: isSelected
+                ? Theme.of(context).colorScheme.surface
+                : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
             fontWeight: FontWeight.w600,
             fontSize: 12.sp,
           ),
@@ -493,9 +499,9 @@ class _ExportPageState extends State<ExportPage> {
       child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: Colors.grey[200]!),
+          border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -505,12 +511,12 @@ class _ExportPageState extends State<ExportPage> {
                 Icon(
                   Icons.calendar_today,
                   size: 14.sp,
-                  color: Colors.grey[400],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                 ),
                 SizedBox(width: 8.w),
                 Text(
                   label,
-                  style: TextStyle(fontSize: 10.sp, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 10.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                 ),
               ],
             ),
@@ -520,7 +526,7 @@ class _ExportPageState extends State<ExportPage> {
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14.sp,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -543,10 +549,10 @@ class _ExportPageState extends State<ExportPage> {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
               borderRadius: BorderRadius.circular(8.r),
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20.sp),
+            child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4), size: 20.sp),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -562,7 +568,7 @@ class _ExportPageState extends State<ExportPage> {
                 ),
                 Text(
                   subtitle,
-                  style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
+                  style: TextStyle(fontSize: 11.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35)),
                 ),
               ],
             ),

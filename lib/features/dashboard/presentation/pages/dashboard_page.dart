@@ -15,6 +15,7 @@ import '../components/transaction_section.dart';
 import '../cubit/transaction_cubit.dart';
 import '../cubit/transaction_state.dart';
 import '../widgets/financial_dashboard_summary.dart';
+import '../../../settings/presentation/cubit/theme_cubit.dart';
 
 /// Dashboard page showing recent transactions and summary information.
 class DashboardPage extends StatefulWidget {
@@ -133,7 +134,7 @@ class _DashboardPageState extends State<DashboardPage> {
       builder: (context) => Container(
         height: MediaQuery.of(context).size.height * 0.85,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
         ),
         child: FilterBottomSheet(
@@ -335,24 +336,26 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildFilterSummary() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Container(
       width: double.infinity,
       margin: EdgeInsets.only(top: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: isDark ? cs.surfaceContainerLow : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(10.r),
       ),
       child: Row(
         children: [
-          Icon(Icons.filter_alt_outlined, size: 14.sp, color: const Color(0xFF4B5563)),
+          Icon(Icons.filter_alt_outlined, size: 14.sp, color: cs.onSurface.withValues(alpha: 0.6)),
           SizedBox(width: 6.w),
           Expanded(
             child: Text(
               _buildFilterSummaryText(),
               style: TextStyle(
                 fontSize: 11.sp,
-                color: const Color(0xFF4B5563),
+                color: cs.onSurface.withValues(alpha: 0.6),
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 2,
@@ -372,12 +375,13 @@ class _DashboardPageState extends State<DashboardPage> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
+        final cs = Theme.of(context).colorScheme;
         return StatefulBuilder(
           builder: (context, setModalState) {
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cs.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
               ),
               child: Column(
@@ -425,7 +429,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                   vertical: 16.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
+                                  color: cs.surface,
                                   borderRadius: BorderRadius.vertical(
                                     top: Radius.circular(24.r),
                                   ),
@@ -449,7 +453,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                       style: TextStyle(
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.w600,
-                                        color: const Color(0xFF111111),
+                                        color: cs.onSurface,
                                       ),
                                     ),
                                     SizedBox(height: 12.h),
@@ -475,7 +479,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                           child: Container(
                                             decoration: BoxDecoration(
                                               color: isYearSelected
-                                                  ? const Color(0xFF111111)
+                                                  ? cs.onSurface
                                                   : Colors.transparent,
                                               borderRadius:
                                                   BorderRadius.circular(12.r),
@@ -489,8 +493,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                                     ? FontWeight.w600
                                                     : FontWeight.w500,
                                                 color: isYearSelected
-                                                    ? Colors.white
-                                                    : const Color(0xFF4B5563),
+                                                    ? cs.surface
+                                                    : cs.onSurface.withValues(alpha: 0.6),
                                               ),
                                             ),
                                           ),
@@ -594,7 +598,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF111111)
+                                ? cs.onSurface
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(12.r),
                           ),
@@ -607,8 +611,8 @@ class _DashboardPageState extends State<DashboardPage> {
                                   ? FontWeight.w600
                                   : FontWeight.w500,
                               color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF4B5563),
+                                  ? cs.surface
+                                  : cs.onSurface.withValues(alpha: 0.6),
                             ),
                           ),
                         ),
@@ -626,8 +630,8 @@ class _DashboardPageState extends State<DashboardPage> {
                         Navigator.of(context).pop(tempDate);
                       },
                       style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        foregroundColor: Colors.white,
+                        backgroundColor: cs.onSurface,
+                        foregroundColor: cs.surface,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -664,7 +668,7 @@ class _DashboardPageState extends State<DashboardPage> {
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: BlocBuilder<TransactionCubit, TransactionState>(
             builder: (context, state) {
@@ -704,7 +708,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   // Fixed header section
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     child: Column(
                       children: [
                         SizedBox(height: 16.h),
@@ -757,6 +761,9 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildHeader() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -765,19 +772,24 @@ class _DashboardPageState extends State<DashboardPage> {
           style: TextStyle(
             fontSize: 24.sp,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: colorScheme.onSurface,
           ),
         ),
-        Container(
-          padding: EdgeInsets.all(8.w),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Icon(
-            Icons.dark_mode_outlined,
-            color: Colors.grey[600],
-            size: 20.sp,
+        GestureDetector(
+          onTap: () {
+            context.read<ThemeCubit>().toggleTheme();
+          },
+          child: Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: isDark ? colorScheme.surfaceContainerHighest : Colors.grey[100],
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Icon(
+              isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              color: isDark ? colorScheme.onSurfaceVariant : Colors.grey[600],
+              size: 20.sp,
+            ),
           ),
         ),
       ],
@@ -812,10 +824,12 @@ class _DashboardPageState extends State<DashboardPage> {
 
     if (transactions.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
               Icons.receipt_long_outlined,
               size: 64.sp,
               color: Colors.grey[300],
@@ -836,7 +850,8 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ],
         ),
-      );
+      ),
+    );
     }
 
     // Convert transactions to TransactionWithDetails

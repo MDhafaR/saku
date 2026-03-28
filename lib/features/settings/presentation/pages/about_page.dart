@@ -7,23 +7,23 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'About',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -63,13 +63,13 @@ class AboutPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF1F2937),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 8.h),
             Text(
               'Your personal finance companion.',
-              style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
             ),
             SizedBox(height: 16.h),
 
@@ -77,7 +77,7 @@ class AboutPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
@@ -95,7 +95,7 @@ class AboutPage extends StatelessWidget {
             // Menu
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
@@ -108,20 +108,23 @@ class AboutPage extends StatelessWidget {
               child: Column(
                 children: [
                   _buildMenuItem(
+                    context,
                     Icons.privacy_tip_outlined,
                     'Privacy Policy',
                     false,
                   ),
-                  Divider(height: 1.h, color: Colors.grey[100]),
+                  Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                   _buildMenuItem(
+                    context,
                     Icons.description_outlined,
                     'Terms of Service',
                     false,
                   ),
-                  Divider(height: 1.h, color: Colors.grey[100]),
-                  _buildMenuItem(Icons.code, 'Open Source Licenses', false),
-                  Divider(height: 1.h, color: Colors.grey[100]),
+                  Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
+                  _buildMenuItem(context, Icons.code, 'Open Source Licenses', false),
+                  Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                   _buildMenuItem(
+                    context,
                     Icons.cloud_sync_outlined,
                     'Check for Updates',
                     true,
@@ -135,7 +138,7 @@ class AboutPage extends StatelessWidget {
             // Footer
             Text(
               '© 2026 Saku Team.',
-              style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+              style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
             ),
             SizedBox(height: 4.h),
             Row(
@@ -143,12 +146,12 @@ class AboutPage extends StatelessWidget {
               children: [
                 Text(
                   'Made with ',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                 ),
                 Icon(Icons.favorite, size: 12.sp, color: Colors.red[400]),
                 Text(
                   ' in Indonesia.',
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                 ),
               ],
             ),
@@ -158,7 +161,7 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(IconData icon, String title, bool isAction) {
+  Widget _buildMenuItem(BuildContext context, IconData icon, String title, bool isAction) {
     return InkWell(
       onTap: () {},
       child: Padding(
@@ -168,7 +171,7 @@ class AboutPage extends StatelessWidget {
             Icon(
               icon,
               size: 20.sp,
-              color: isAction ? const Color(0xFF111111) : Colors.grey[500],
+              color: isAction ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
             ),
             SizedBox(width: 16.w),
             Expanded(
@@ -178,8 +181,8 @@ class AboutPage extends StatelessWidget {
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
                   color: isAction
-                      ? const Color(0xFF111111)
-                      : const Color(0xFF1F2937),
+                      ? Theme.of(context).colorScheme.onSurface
+                      : Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
@@ -187,7 +190,7 @@ class AboutPage extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios,
                 size: 14.sp,
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
               ),
           ],
         ),

@@ -23,17 +23,28 @@ class SakuCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = backgroundColor ?? colorScheme.surface;
+
     return Container(
       margin: margin ?? EdgeInsets.only(bottom: 16.h),
       decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.white,
+        color: bgColor,
         borderRadius: BorderRadius.circular(borderRadius.r),
         border: hasBorder
-            ? Border.all(color: const Color(0xFFF0F0F0), width: 1)
+            ? Border.all(
+                color: isDark
+                    ? colorScheme.outline.withValues(alpha: 0.3)
+                    : const Color(0xFFF0F0F0),
+                width: 1,
+              )
             : null,
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF1A1A1A).withOpacity(0.06),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : const Color(0xFF1A1A1A).withValues(alpha: 0.06),
             blurRadius: 15,
             offset: const Offset(0, 8),
             spreadRadius: 0,

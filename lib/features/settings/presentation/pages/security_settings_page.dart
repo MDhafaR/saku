@@ -66,23 +66,23 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
           final cubit = context.read<SecurityCubit>();
 
           return Scaffold(
-            backgroundColor: const Color(0xFFFAFAFA),
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               title: Text(
                 'Pengaturan Keamanan',
                 style: TextStyle(
-                  color: const Color(0xFF111111),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18.sp,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               centerTitle: true,
-              backgroundColor: Colors.white,
+              backgroundColor: Theme.of(context).colorScheme.surface,
               elevation: 0,
               leading: IconButton(
                 icon: Icon(
                   Icons.arrow_back_ios_new,
-                  color: Colors.black,
+                  color: Theme.of(context).colorScheme.onSurface,
                   size: 20.sp,
                 ),
                 onPressed: () => Navigator.pop(context),
@@ -97,7 +97,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                   SizedBox(height: 12.h),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
@@ -211,7 +211,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                   SizedBox(height: 12.h),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
@@ -249,7 +249,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                     child: Text(
                       'Versi Keamanan 2.4.0 • Terlindungi Enkripsi AES-256',
                       style: TextStyle(
-                        color: Colors.grey[400],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                         fontSize: 12.sp,
                       ),
                     ),
@@ -267,7 +267,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     return Text(
       title,
       style: TextStyle(
-        color: Colors.grey[600],
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
         fontSize: 12.sp,
         fontWeight: FontWeight.bold,
         letterSpacing: 1.2.w,
@@ -289,10 +289,10 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20.sp),
+            child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4), size: 20.sp),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -304,7 +304,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1F2937),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 if (subtitle != null) ...[
@@ -336,13 +336,15 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     bool isDisabled = false,
   }) {
     final Color contentColor = isDisabled
-        ? Colors.grey[350]!
-        : const Color(0xFF1F2937);
-    final Color iconBgColor = isDisabled
-        ? Colors.grey[100]!
-        : Colors.grey[100]!;
-    final Color iconColor = isDisabled ? Colors.grey[350]! : Colors.grey[600]!;
-    final Color arrowColor = isDisabled ? Colors.grey[300]! : Colors.grey[400]!;
+        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.25)
+        : Theme.of(context).colorScheme.onSurface;
+    final Color iconBgColor = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06);
+    final Color iconColor = isDisabled
+        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.25)
+        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4);
+    final Color arrowColor = isDisabled
+        ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)
+        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3);
 
     return InkWell(
       onTap: isDisabled ? null : onTap,
@@ -374,7 +376,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                 valueText,
                 style: TextStyle(
                   fontSize: 14.sp,
-                  color: isDisabled ? Colors.grey[350]! : Colors.grey[500]!,
+                  color: isDisabled
+                      ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.25)
+                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -391,7 +395,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
     return Divider(
       height: 1.h,
       thickness: 1.h,
-      color: Colors.grey[100],
+      color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
       indent: 60.w,
     );
   }

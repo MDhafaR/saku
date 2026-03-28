@@ -37,7 +37,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
               ),
               child: Column(
@@ -49,7 +49,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     height: 4.h,
                     margin: EdgeInsets.only(bottom: 16.h),
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -69,7 +69,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                         },
                         icon: Icon(
                           Icons.chevron_left,
-                          color: const Color(0xFF111111),
+                          color: Theme.of(context).colorScheme.onSurface,
                           size: 24.sp,
                         ),
                       ),
@@ -96,13 +96,13 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             SizedBox(width: 4.w),
                             Icon(
                               Icons.arrow_drop_down,
-                              color: const Color(0xFF111111),
+                              color: Theme.of(context).colorScheme.onSurface,
                               size: 20.sp,
                             ),
                           ],
@@ -119,7 +119,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                         },
                         icon: Icon(
                           Icons.chevron_right,
-                          color: const Color(0xFF111111),
+                          color: Theme.of(context).colorScheme.onSurface,
                           size: 24.sp,
                         ),
                       ),
@@ -168,7 +168,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF111111)
+                                ? Theme.of(context).colorScheme.primary
                                 : Colors.transparent,
                             borderRadius: BorderRadius.circular(12.r),
                           ),
@@ -181,8 +181,8 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                                   ? FontWeight.w600
                                   : FontWeight.w500,
                               color: isSelected
-                                  ? Colors.white
-                                  : const Color(0xFF4B5563),
+                                  ? Theme.of(context).colorScheme.onPrimary
+                                  : Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -200,8 +200,8 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                         Navigator.of(context).pop(tempDate);
                       },
                       style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        foregroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
@@ -251,7 +251,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           ),
           child: Column(
@@ -262,7 +262,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 height: 4.h,
                 margin: EdgeInsets.only(bottom: 16.h),
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
@@ -271,7 +271,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111111),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 12.h),
@@ -293,7 +293,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: isYearSelected
-                            ? const Color(0xFF111111)
+                            ? Theme.of(context).colorScheme.primary
                             : Colors.transparent,
                         borderRadius: BorderRadius.circular(12.r),
                       ),
@@ -306,8 +306,8 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                               ? FontWeight.w600
                               : FontWeight.w500,
                           color: isYearSelected
-                              ? Colors.white
-                              : const Color(0xFF4B5563),
+                              ? Theme.of(context).colorScheme.onPrimary
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -352,16 +352,16 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         );
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
-          backgroundColor: const Color(0xFFFAFAFA),
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back_ios_new,
-              color: const Color(0xFF1F2937),
+              color: Theme.of(context).colorScheme.onSurface,
               size: 20.sp,
             ),
             onPressed: () => Navigator.pop(context),
@@ -371,7 +371,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111111),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           centerTitle: true,
@@ -379,7 +379,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
             IconButton(
               icon: Icon(
                 Icons.share_outlined,
-                color: const Color(0xFF1F2937),
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 24.sp,
               ),
               onPressed: () {},
@@ -416,7 +416,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w500,
-                                color: Colors.grey[600],
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             SizedBox(height: 2.h),
@@ -427,7 +427,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                               style: TextStyle(
                                 fontSize: 22.sp,
                                 fontWeight: FontWeight.w800,
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.onSurface,
                                 letterSpacing: -1,
                               ),
                             ),
@@ -441,7 +441,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                               vertical: 6.h,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF3F4F6),
+                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(16.r),
                             ),
                             child: Row(
@@ -451,14 +451,14 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF111111),
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                                 SizedBox(width: 2.w),
                                 Icon(
                                   Icons.keyboard_arrow_down,
                                   size: 14.sp,
-                                  color: const Color(0xFF111111),
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                               ],
                             ),

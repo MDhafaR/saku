@@ -61,24 +61,24 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           widget.isExpense ? 'Kategori Pengeluaran' : 'Kategori Pemasukan',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -122,11 +122,11 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                             vertical: 16.h,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(16.r),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 6,
                                 offset: const Offset(0, 2),
                               ),
@@ -152,14 +152,14 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF111111),
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
                               ),
                               // Arrow
                               Icon(
                                 Icons.chevron_right,
-                                color: const Color(0xFF9CA3AF),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                 size: 22.sp,
                               ),
                             ],

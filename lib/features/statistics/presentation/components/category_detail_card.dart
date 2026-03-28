@@ -56,7 +56,7 @@ class CategoryDetailCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,
-                              color: const Color(0xFF111111),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           Text(
@@ -64,7 +64,7 @@ class CategoryDetailCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w800,
-                              color: const Color(0xFF111111),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ],
@@ -77,7 +77,7 @@ class CategoryDetailCard extends StatelessWidget {
                             '${item.transactionCount} Transaksi',
                             style: TextStyle(
                               fontSize: 11.sp,
-                              color: const Color(0xFF6B7280),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -85,7 +85,7 @@ class CategoryDetailCard extends StatelessWidget {
                             '${item.percentage.toStringAsFixed(1)}%',
                             style: TextStyle(
                               fontSize: 11.sp,
-                              color: const Color(0xFF6B7280),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -99,7 +99,7 @@ class CategoryDetailCard extends StatelessWidget {
                             height: 4.h,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
+                              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(2.r),
                             ),
                           ),
@@ -128,7 +128,7 @@ class CategoryDetailCard extends StatelessWidget {
                   curve: Curves.easeInOut,
                   child: Icon(
                     Icons.keyboard_arrow_down,
-                    color: Colors.grey[400],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     size: 20.sp,
                   ),
                 ),
@@ -185,13 +185,13 @@ class CategoryDetailCard extends StatelessWidget {
 
         if (item.topTransactions.isNotEmpty) ...[
           SizedBox(height: 12.h),
-          Divider(color: Colors.grey[200], height: 1.h),
+          Divider(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3), height: 1.h),
           SizedBox(height: 12.h),
           Text(
             'Top 3 Transaksi Terbesar',
             style: TextStyle(
               fontSize: 10.sp,
-              color: const Color(0xFF9CA3AF),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -223,7 +223,7 @@ class CategoryDetailCard extends StatelessWidget {
             child: Text(
               'Lihat Semua',
               style: TextStyle(
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w600,
                 fontSize: 11.sp,
               ),
@@ -235,55 +235,59 @@ class CategoryDetailCard extends StatelessWidget {
   }
 
   Widget _buildTransactionItem(Transaction tx, Color color, IconData iconData) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 10.h),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: const Color(0xFFF9FAFB)),
-            ),
-            child: Icon(iconData, color: const Color(0xFF9CA3AF), size: 14.sp),
-          ),
-          SizedBox(width: 10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  tx.description,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF1F2937),
-                  ),
+    return Builder(
+      builder: (context) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: 10.h),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
-                SizedBox(height: 1.h),
-                Text(
-                  tx.transactionDate.toString().split(' ')[0], // Simple date
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    color: const Color(0xFF9CA3AF),
-                  ),
+                child: Icon(iconData, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 14.sp),
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      tx.description,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: 1.h),
+                    Text(
+                      tx.transactionDate.toString().split(' ')[0], // Simple date
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Text(
+                '-${CurrencyFormatter.formatRupiah(tx.amount)}',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w700,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ],
           ),
-          Text(
-            '-${CurrencyFormatter.formatRupiah(tx.amount)}',
-            style: TextStyle(
-              fontSize: 12.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1F2937),
-            ),
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 

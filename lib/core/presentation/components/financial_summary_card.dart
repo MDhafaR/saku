@@ -72,7 +72,7 @@ class FinancialSummaryCard extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 11.sp,
-                color: const Color(0xFF6B7280),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 fontWeight: FontWeight.w500,
               ),
               maxLines: 1,
@@ -88,7 +88,7 @@ class FinancialSummaryCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.w800,
-                color: amountColor ?? const Color(0xFF111111),
+                color: amountColor ?? Theme.of(context).colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),

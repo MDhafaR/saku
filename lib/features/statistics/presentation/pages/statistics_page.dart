@@ -29,7 +29,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
     return BlocProvider(
       create: (context) => locator<StatisticsCubit>()..loadStatistics('Daily'),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: BlocBuilder<StatisticsCubit, state.StatisticsState>(
             builder: (context, s) {
@@ -47,23 +47,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
                           style: TextStyle(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF111111),
+                            color: Theme.of(context).colorScheme.onSurface,
                             letterSpacing: -0.5,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () async {
-                            await ThemeService.toggleTheme();
-                            if (mounted) {
-                              setState(() {});
-                            }
-                          },
-                          icon: Icon(
-                            ThemeService.isLightMode
-                                ? Icons.dark_mode
-                                : Icons.sunny,
-                            color: const Color(0xFFF59E0B),
-                            size: 20.sp,
                           ),
                         ),
                       ],
@@ -127,7 +112,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                   style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF111111),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
@@ -143,8 +130,15 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                         padding: EdgeInsets.all(6.w),
                                         decoration: BoxDecoration(
                                           color: isLineChart
-                                              ? const Color(0xFF111111)
-                                              : const Color(0xFFF3F4F6),
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface
+                                              : (Theme.of(context).brightness ==
+                                                        Brightness.dark
+                                                    ? Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerLow
+                                                    : const Color(0xFFF3F4F6)),
                                           borderRadius: BorderRadius.circular(
                                             8.r,
                                           ),
@@ -152,8 +146,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                         child: Icon(
                                           Icons.show_chart,
                                           color: isLineChart
-                                              ? Colors.white
-                                              : const Color(0xFF6B7280),
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.surface
+                                              : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.5),
                                           size: 14.sp,
                                         ),
                                       ),
@@ -169,8 +168,15 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                         padding: EdgeInsets.all(6.w),
                                         decoration: BoxDecoration(
                                           color: !isLineChart
-                                              ? const Color(0xFF111111)
-                                              : const Color(0xFFF3F4F6),
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.onSurface
+                                              : (Theme.of(context).brightness ==
+                                                        Brightness.dark
+                                                    ? Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerLow
+                                                    : const Color(0xFFF3F4F6)),
                                           borderRadius: BorderRadius.circular(
                                             6.r,
                                           ),
@@ -178,8 +184,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                         child: Icon(
                                           Icons.bar_chart,
                                           color: !isLineChart
-                                              ? Colors.white
-                                              : const Color(0xFF6B7280),
+                                              ? Theme.of(
+                                                  context,
+                                                ).colorScheme.surface
+                                              : Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurface
+                                                    .withValues(alpha: 0.5),
                                           size: 14.sp,
                                         ),
                                       ),
@@ -210,7 +221,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                   style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w700,
-                                    color: const Color(0xFF111111),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                     letterSpacing: -0.5,
                                   ),
                                 ),

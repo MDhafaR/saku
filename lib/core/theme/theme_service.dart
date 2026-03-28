@@ -9,7 +9,13 @@ class ThemeService {
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeIndex = prefs.getInt(_themeKey) ?? 0;
+    
+    // Default to explicit light (var 1) instead of system (0)
+    int themeIndex = prefs.getInt(_themeKey) ?? 1; 
+    if (themeIndex == 0) {
+      themeIndex = 1; // Migrate system format to explicitly light
+      await prefs.setInt(_themeKey, 1);
+    }
     _currentThemeMode = ThemeMode.values[themeIndex];
   }
 

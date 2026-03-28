@@ -73,23 +73,23 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Import Data',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -106,7 +106,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                   Icon(
                     Icons.cloud_upload_outlined,
                     size: 80.sp,
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   SizedBox(height: 24.h),
                   Text(
@@ -114,7 +114,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1F2937),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -123,7 +123,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     'Pindahkan data keuanganmu dari aplikasi lain atau rekening koran bank dengan mudah.',
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: const Color(0xFF6B7280),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       height: 1.5,
                     ),
                     textAlign: TextAlign.center,
@@ -138,7 +138,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                           'Riwayat Import',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.grey[800],
+                            color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 14.sp,
                           ),
                         ),
@@ -152,7 +152,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                       child: Text(
                         'Belum ada riwayat import.',
                         style: TextStyle(
-                          color: Colors.grey[400],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           fontSize: 13.sp,
                         ),
                       ),
@@ -175,24 +175,24 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     ? SizedBox(
                         width: 20.sp,
                         height: 20.sp,
-                        child: const CircularProgressIndicator(
-                          color: Colors.white,
+                        child: CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.onPrimary,
                           strokeWidth: 2,
                         ),
                       )
-                    : Icon(Icons.add, color: Colors.white, size: 24.sp),
+                    : Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary, size: 24.sp),
                 label: Text(
                   _isPickingFile
                       ? 'Memilih file...'
                       : 'Pilih File dari Penyimpanan',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
                     fontSize: 16.sp,
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF111111),
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24.r),
@@ -215,21 +215,21 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
               Icons.description_outlined,
-              color: Colors.grey,
+              color: Theme.of(context).colorScheme.primary,
               size: 24.sp,
             ),
           ),
@@ -243,18 +243,19 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14.sp,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
                 SizedBox(height: 2.h),
                 Text(
                   dateStr,
-                  style: TextStyle(fontSize: 12.sp, color: Colors.grey),
+                  style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                 ),
                 if (history.isSuccess)
                   Text(
                     '${history.importedCount} transaksi${history.skippedDuplicates > 0 ? ', ${history.skippedDuplicates} duplikat' : ''}',
-                    style: TextStyle(fontSize: 11.sp, color: Colors.grey[500]),
+                    style: TextStyle(fontSize: 11.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
               ],
             ),
@@ -262,7 +263,9 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: history.isSuccess ? Colors.green[50] : Colors.red[50],
+              color: history.isSuccess 
+                  ? Colors.green.withValues(alpha: 0.1) 
+                  : Theme.of(context).colorScheme.errorContainer,
               borderRadius: BorderRadius.circular(4.r),
             ),
             child: Text(
@@ -270,7 +273,9 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
               style: TextStyle(
                 fontSize: 10.sp,
                 fontWeight: FontWeight.bold,
-                color: history.isSuccess ? Colors.green[700] : Colors.red[700],
+                color: history.isSuccess 
+                    ? Colors.green 
+                    : Theme.of(context).colorScheme.onErrorContainer,
               ),
             ),
           ),
@@ -634,23 +639,23 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
         : (_currentStep <= 2 ? _currentStep : _currentStep - 1);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           title,
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () {
@@ -665,7 +670,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           IconButton(
             icon: Icon(
               Icons.help_outline,
-              color: const Color(0xFF111111),
+              color: Theme.of(context).colorScheme.onSurface,
               size: 24.sp,
             ),
             onPressed: () {},
@@ -675,8 +680,8 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
           preferredSize: Size.fromHeight(1.0.h),
           child: LinearProgressIndicator(
             value: displayStep / totalSteps,
-            backgroundColor: Colors.grey[200],
-            valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF111111)),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+            valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary),
           ),
         ),
       ),
@@ -692,7 +697,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                     child: Text(
                       'Langkah $displayStep dari $totalSteps: ${_getStepName()}',
                       style: TextStyle(
-                        color: const Color(0xFF1F2937),
+                        color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
                         fontSize: 14.sp,
                       ),
@@ -708,7 +713,6 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                 // Bottom button
                 Container(
                   padding: EdgeInsets.all(20.w),
-                  color: Colors.white,
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -716,8 +720,8 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                           ? _nextStep
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        disabledBackgroundColor: Colors.grey[300],
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        disabledBackgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24.r),
@@ -728,8 +732,8 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                           ? SizedBox(
                               width: 24.sp,
                               height: 24.sp,
-                              child: const CircularProgressIndicator(
-                                color: Colors.white,
+                              child: CircularProgressIndicator(
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 strokeWidth: 2,
                               ),
                             )
@@ -742,7 +746,7 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                                               ? 'Simpan & Lanjut'
                                               : 'Mulai Import Sekarang')),
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16.sp,
                               ),
@@ -752,14 +756,13 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
                 ),
                 if (_currentStep == 3)
                   Container(
-                    color: Colors.white,
                     padding: EdgeInsets.only(bottom: 20.h),
                     alignment: Alignment.center,
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
                       child: Text(
                         'Batalkan',
-                        style: TextStyle(color: Colors.grey, fontSize: 14.sp),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 14.sp),
                       ),
                     ),
                   ),

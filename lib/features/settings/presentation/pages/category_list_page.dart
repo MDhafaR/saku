@@ -84,16 +84,16 @@ class _CategoryListPageState extends State<CategoryListPage> {
     final type = _selectedTab == 0 ? 'expense' : 'income';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF1F2937),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -101,7 +101,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
         title: Text(
           'Atur Kategori',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -111,7 +111,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
           IconButton(
             icon: Icon(
               Icons.help_outline,
-              color: const Color(0xFF1F2937),
+              color: Theme.of(context).colorScheme.onSurface,
               size: 22.sp,
             ),
             onPressed: () {},
@@ -128,7 +128,9 @@ class _CategoryListPageState extends State<CategoryListPage> {
             child: Container(
               padding: EdgeInsets.all(4.w),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerLow
+                  : const Color(0xFFF3F4F6),
                 borderRadius: BorderRadius.circular(32.r),
               ),
               child: LayoutBuilder(
@@ -146,11 +148,11 @@ class _CategoryListPageState extends State<CategoryListPage> {
                         width: tabWidth,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(28.r),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.05),
                                 blurRadius: 4.r,
                                 offset: Offset(0, 2.h),
                               ),
@@ -179,7 +181,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                                       size: 16.sp,
                                       color: _selectedTab == 0
                                           ? const Color(0xFFEF4444)
-                                          : const Color(0xFF9CA3AF),
+                                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                     ),
                                     SizedBox(width: 8.w),
                                     Text(
@@ -187,7 +189,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                                       style: TextStyle(
                                         color: _selectedTab == 0
                                             ? const Color(0xFFEF4444)
-                                            : const Color(0xFF9CA3AF),
+                                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14.sp,
                                       ),
@@ -215,7 +217,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                                       size: 16.sp,
                                       color: _selectedTab == 1
                                           ? const Color(0xFF10B981)
-                                          : const Color(0xFF9CA3AF),
+                                          : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                     ),
                                     SizedBox(width: 8.w),
                                     Text(
@@ -223,7 +225,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                                       style: TextStyle(
                                         color: _selectedTab == 1
                                             ? const Color(0xFF10B981)
-                                            : const Color(0xFF9CA3AF),
+                                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                         fontWeight: FontWeight.w600,
                                         fontSize: 14.sp,
                                       ),
@@ -279,7 +281,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                         return Material(
                           elevation: elevation,
                           borderRadius: BorderRadius.circular(16.r),
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           child: child,
                         );
                       },
@@ -298,11 +300,13 @@ class _CategoryListPageState extends State<CategoryListPage> {
                         vertical: 12.h,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(16.r),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
+                            color: Theme.of(context).brightness == Brightness.dark 
+                                ? Colors.black.withValues(alpha: 0.3) 
+                                : Colors.black.withValues(alpha: 0.05),
                             blurRadius: 8.r,
                             offset: Offset(0, 2.h),
                           ),
@@ -315,9 +319,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                             width: 40.w,
                             height: 40.w,
                             decoration: BoxDecoration(
-                              color: Color(
-                                category.iconColor,
-                              ).withOpacity(0.15),
+                              color: Color(category.iconColor).withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
@@ -334,7 +336,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -343,7 +345,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                             icon: Icon(
                               Icons.edit_outlined,
                               size: 20.sp,
-                              color: Colors.grey[400],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                             ),
                             onPressed: () {
                               Navigator.push(
@@ -362,7 +364,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                             index: index,
                             child: Icon(
                               Icons.drag_handle,
-                              color: Colors.grey[400],
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                               size: 24.sp,
                             ),
                           ),
@@ -385,9 +387,9 @@ class _CategoryListPageState extends State<CategoryListPage> {
             ),
           );
         },
-        backgroundColor: const Color(0xFF111111),
+        backgroundColor: Theme.of(context).colorScheme.primary,
         shape: const CircleBorder(),
-        child: Icon(Icons.add, color: Colors.white, size: 24.sp),
+        child: Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary, size: 24.sp),
       ),
     );
   }

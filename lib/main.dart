@@ -12,6 +12,7 @@ import 'package:intl/date_symbol_data_local.dart';
 
 import 'features/settings/presentation/cubit/security_cubit.dart';
 import 'features/settings/presentation/cubit/security_state.dart';
+import 'features/settings/presentation/cubit/theme_cubit.dart';
 import 'features/settings/presentation/pages/pin_page.dart';
 
 void main() async {
@@ -21,8 +22,15 @@ void main() async {
   await initializeDateFormatting('id_ID', null);
   await NotificationService().init();
   runApp(
-    BlocProvider(
-      create: (context) => locator<SecurityCubit>(),
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => locator<SecurityCubit>(),
+        ),
+        BlocProvider(
+          create: (context) => locator<ThemeCubit>(),
+        ),
+      ],
       child: const AppLifecycleObserver(child: SakuApp()),
     ),
   );
@@ -71,30 +79,34 @@ class SakuApp extends StatelessWidget {
     return ScreenUtilInit(
       designSize: const Size(360, 690),
       minTextAdapt: true,
-      builder: (context, child) => MaterialApp(
-        title: 'Saku',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.lightTheme,
-        locale: const Locale('id'),
-        supportedLocales: const [Locale('id'), Locale('en')],
-        localizationsDelegates: const [
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        builder: (context, child) {
-          return BlocBuilder<SecurityCubit, SecurityState>(
-            builder: (context, state) {
-              return Stack(
-                children: [
-                  child!,
-                  if (state.isLocked) const PinPage(mode: PinMode.verify),
-                ],
-              );
-            },
-          );
-        },
-        home: const OnboardingWrapper(),
+      builder: (context, child) => BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) => MaterialApp(
+          title: 'Saku',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          locale: const Locale('id'),
+          supportedLocales: const [Locale('id'), Locale('en')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          builder: (context, child) {
+            return BlocBuilder<SecurityCubit, SecurityState>(
+              builder: (context, state) {
+                return Stack(
+                  children: [
+                    child!,
+                    if (state.isLocked) const PinPage(mode: PinMode.verify),
+                  ],
+                );
+              },
+            );
+          },
+          home: const OnboardingWrapper(),
+        ),
       ),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../data/local/database/app_database.dart';
 import '../presentation/cubit/debt_cubit.dart';
 import '../presentation/cubit/debt_state.dart';
 import '../widgets/summary_card.dart';
@@ -71,7 +70,7 @@ class DebtPage extends StatelessWidget {
               // Scrollable content
               Expanded(
                 child: allDebts.isEmpty
-                    ? _buildEmptyState()
+                    ? _buildEmptyState(context)
                     : SingleChildScrollView(
                         padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 120.h),
                         child: Column(
@@ -79,6 +78,7 @@ class DebtPage extends StatelessWidget {
                           children: [
                             if (unpaidDebts.isNotEmpty) ...[
                               _buildSectionHeader(
+                                context,
                                 'Belum Lunas',
                                 unpaidDebts.length,
                                 const Color(0xFFF3F4F6),
@@ -91,12 +91,14 @@ class DebtPage extends StatelessWidget {
                                   personName:
                                       state.persons[debt.personId]?.name ??
                                       'Unknown',
+                                  phone: state.persons[debt.personId]?.phone,
                                 ),
                               ),
                               SizedBox(height: 16.h),
                             ],
                             if (paidDebts.isNotEmpty) ...[
                               _buildSectionHeader(
+                                context,
                                 'Sudah Lunas',
                                 paidDebts.length,
                                 const Color(0xFFDCFCE7),
@@ -109,6 +111,7 @@ class DebtPage extends StatelessWidget {
                                   personName:
                                       state.persons[debt.personId]?.name ??
                                       'Unknown',
+                                  phone: state.persons[debt.personId]?.phone,
                                 ),
                               ),
                             ],
@@ -126,6 +129,7 @@ class DebtPage extends StatelessWidget {
   }
 
   Widget _buildSectionHeader(
+    BuildContext context,
     String title,
     int count,
     Color badgeBg,
@@ -136,7 +140,7 @@ class DebtPage extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            color: Colors.grey[700],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -161,7 +165,7 @@ class DebtPage extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -169,13 +173,13 @@ class DebtPage extends StatelessWidget {
           Icon(
             Icons.receipt_long_outlined,
             size: 48.sp,
-            color: Colors.grey[400],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           SizedBox(height: 12.h),
           Text(
             'Belum ada utang',
             style: TextStyle(
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),

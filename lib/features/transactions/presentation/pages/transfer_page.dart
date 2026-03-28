@@ -270,7 +270,7 @@ class _TransferPageState extends State<TransferPage> {
               Text(
                 wallet.name,
                 style: TextStyle(
-                  color: const Color(0xFF111111),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                 ),
@@ -279,7 +279,7 @@ class _TransferPageState extends State<TransferPage> {
               Text(
                 'Saldo: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
                 style: TextStyle(
-                  color: AppTheme.lightTextSecondary,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                   fontSize: 11.sp,
                 ),
               ),
@@ -300,14 +300,14 @@ class _TransferPageState extends State<TransferPage> {
       curve: Curves.easeInOut,
       height: isOpen ? (widget.wallets.length * 60.0.h).clamp(0, 200.h) : 0,
       child: Container(
-        decoration: const BoxDecoration(color: Colors.white),
+        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
         child: SingleChildScrollView(
           child: Column(
             children: widget.wallets.map((wallet) {
               return InkWell(
                 onTap: () => onSelect(wallet),
                 child: Container(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   padding: EdgeInsets.symmetric(
                     horizontal: 16.w,
                     vertical: 12.h,
@@ -374,7 +374,7 @@ class _TransferPageState extends State<TransferPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
@@ -385,7 +385,7 @@ class _TransferPageState extends State<TransferPage> {
         title: Text(
           'Pindah Buku',
           style: TextStyle(
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -399,14 +399,14 @@ class _TransferPageState extends State<TransferPage> {
             width: double.infinity,
             padding: EdgeInsets.only(bottom: 16.h, top: 6.h),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.only(
                 bottomLeft: Radius.circular(20.r),
                 bottomRight: Radius.circular(20.r),
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
+                  color: Colors.black.withValues(alpha: 0.03),
                   blurRadius: 8,
                   offset: const Offset(0, 3),
                 ),
@@ -425,7 +425,7 @@ class _TransferPageState extends State<TransferPage> {
                 Text(
                   'Rp ${CurrencyFormatter.format(_totalAssets.toStringAsFixed(0))}',
                   style: TextStyle(
-                    color: Colors.black,
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 20.sp,
                     fontWeight: FontWeight.bold,
                   ),
@@ -555,7 +555,7 @@ class _TransferPageState extends State<TransferPage> {
                               shape: BoxShape.circle,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 3,
                                   offset: const Offset(0, 2),
                                 ),
@@ -747,7 +747,7 @@ class _TransferPageState extends State<TransferPage> {
                               style: TextStyle(
                                 fontSize: 22.sp,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             Expanded(
@@ -757,7 +757,7 @@ class _TransferPageState extends State<TransferPage> {
                                 style: TextStyle(
                                   fontSize: 22.sp,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF111111),
+                                  color: Theme.of(context).colorScheme.onSurface,
                                 ),
                                 decoration: const InputDecoration(
                                   border: InputBorder.none,

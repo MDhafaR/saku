@@ -27,23 +27,23 @@ class _BackupView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Cloud Backup',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -112,7 +112,9 @@ class _BackupView extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(24.w),
               decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerLow
+                    : const Color(0xFFF3F4F6),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -127,7 +129,7 @@ class _BackupView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 8.h),
@@ -136,7 +138,7 @@ class _BackupView extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
-                color: const Color(0xFF6B7280),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                 height: 1.5,
               ),
             ),
@@ -281,7 +283,7 @@ class _BackupView extends StatelessWidget {
               child: Text(
                 'INFO BACKUP',
                 style: TextStyle(
-                  color: Colors.grey[400],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                   fontSize: 12.sp,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2.w,
@@ -289,7 +291,7 @@ class _BackupView extends StatelessWidget {
               ),
             ),
             SizedBox(height: 12.h),
-            _buildInfoCard(state),
+            _buildInfoCard(context, state),
             SizedBox(height: 24.h),
           ],
 
@@ -397,14 +399,14 @@ class _BackupView extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard(BackupState state) {
+  Widget _buildInfoCard(BuildContext context, BackupState state) {
     final info = state.remoteBackupInfo;
     if (info == null) return const SizedBox.shrink();
 
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -417,6 +419,7 @@ class _BackupView extends StatelessWidget {
       child: Column(
         children: [
           _buildInfoRow(
+            context: context,
             icon: Icons.calendar_today,
             label: 'Tanggal Backup',
             value: info.modifiedTime != null
@@ -425,8 +428,9 @@ class _BackupView extends StatelessWidget {
                   ).format(info.modifiedTime!.toLocal())
                 : '-',
           ),
-          Divider(height: 1.h, color: Colors.grey[100]),
+          Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
           _buildInfoRow(
+            context: context,
             icon: Icons.storage,
             label: 'Ukuran File',
             value: info.sizeBytes != null
@@ -439,6 +443,7 @@ class _BackupView extends StatelessWidget {
   }
 
   Widget _buildInfoRow({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -450,10 +455,12 @@ class _BackupView extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerLow
+                  : const Color(0xFFF3F4F6),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(icon, color: const Color(0xFF6B7280), size: 20.sp),
+            child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4), size: 20.sp),
           ),
           SizedBox(width: 16.w),
           Expanded(
@@ -462,13 +469,13 @@ class _BackupView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
-                color: const Color(0xFF1F2937),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ),
           Text(
             value,
-            style: TextStyle(fontSize: 14.sp, color: const Color(0xFF6B7280)),
+            style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)),
           ),
         ],
       ),

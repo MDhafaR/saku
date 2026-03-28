@@ -42,7 +42,7 @@ class SummaryCard extends StatelessWidget {
           Text(
             title,
             style: TextStyle(
-              color: Colors.grey[600],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               fontSize: 11.sp,
               fontWeight: FontWeight.w500,
             ),
@@ -53,7 +53,7 @@ class SummaryCard extends StatelessWidget {
             style: TextStyle(
               color: isNegative
                   ? const Color(0xFFEF4444)
-                  : const Color(0xFF111111),
+                  : Theme.of(context).colorScheme.onSurface,
               fontSize: 16.sp,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,

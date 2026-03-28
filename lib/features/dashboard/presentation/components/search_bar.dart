@@ -17,31 +17,33 @@ class SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 40.h,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(
+          color: isDark ? cs.outline.withValues(alpha: 0.4) : const Color(0xFFD1D5DB),
+        ),
       ),
       child: Row(
         children: [
           SizedBox(width: 12.w),
-          Icon(Icons.search, color: const Color(0xFF9CA3AF), size: 18.sp),
+          Icon(Icons.search, color: cs.onSurface.withValues(alpha: 0.4), size: 18.sp),
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
               onChanged: onChanged,
-              style: TextStyle(fontSize: 13.sp),
+              style: TextStyle(fontSize: 13.sp, color: cs.onSurface),
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: TextStyle(
-                  color: const Color(0xFF9CA3AF),
+                  color: cs.onSurface.withValues(alpha: 0.4),
                   fontSize: 13.sp,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.only(
-                  bottom: 2.h,
-                ), // Align text vertically
+                contentPadding: EdgeInsets.only(bottom: 2.h),
                 isDense: true,
                 filled: true,
                 fillColor: Colors.transparent,
@@ -60,7 +62,7 @@ class SearchBar extends StatelessWidget {
                       Icons.tune_rounded,
                       color: hasActiveFilter
                           ? const Color(0xFF2563EB)
-                          : const Color(0xFF9CA3AF),
+                          : cs.onSurface.withValues(alpha: 0.4),
                       size: 18.sp,
                     ),
                     if (hasActiveFilter)

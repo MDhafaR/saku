@@ -99,14 +99,14 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     final expense = _calculateExpense();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -114,7 +114,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
         title: Text(
           'Detail Rekening',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -122,7 +122,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
         centerTitle: true,
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_horiz, color: Color(0xFF111111)),
+            icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurface),
             onSelected: (value) {
               if (value == 'hide') {
                 _toggleHideWallet();
@@ -169,7 +169,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -191,11 +191,11 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
       width: double.infinity,
       padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.r)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10.r,
             offset: Offset(0, 4.h),
           ),
@@ -209,13 +209,13 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(4.r),
                 ),
                 child: Text(
                   widget.wallet.type.toUpperCase(),
                   style: TextStyle(
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontWeight: FontWeight.bold,
                     fontSize: 10.sp,
                   ),
@@ -225,7 +225,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               Text(
                 widget.wallet.name,
                 style: TextStyle(
-                  color: const Color(0xFF111111),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 12.sp,
                 ),
               ),
@@ -248,7 +248,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                   ),
                   child: Icon(
                     Icons.edit,
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                     size: 14.sp,
                   ),
                 ),
@@ -259,7 +259,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           Text(
             'Saldo Utama',
             style: TextStyle(
-              color: const Color(0xFF111111).withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 10.sp,
             ),
           ),
@@ -267,7 +267,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           Text(
             'Rp ${CurrencyFormatter.format(widget.wallet.currentBalance.toStringAsFixed(0))}',
             style: TextStyle(
-              color: const Color(0xFF111111),
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 24.sp,
               fontWeight: FontWeight.bold,
             ),
@@ -304,16 +304,16 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
       margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8.r,
             offset: Offset(0, 2.h),
           ),
         ],
-        border: Border.all(color: Colors.grey[100]!),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
       ),
       child: Row(
         children: [
@@ -339,7 +339,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     Text(
                       'Pemasukan',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                         fontSize: 11.sp,
                       ),
                     ),
@@ -382,7 +382,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                       Text(
                         'Pengeluaran',
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                           fontSize: 11.sp,
                         ),
                       ),
@@ -423,7 +423,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               Icon(
                 Icons.receipt_long_outlined,
                 size: 48.sp,
-                color: Colors.grey[300],
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
               ),
               SizedBox(height: 12.h),
               Text(
@@ -431,13 +431,13 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: Colors.grey[500],
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ),
               SizedBox(height: 4.h),
               Text(
                 'Transaksi untuk rekening ini akan muncul di sini',
-                style: TextStyle(fontSize: 12.sp, color: Colors.grey[400]),
+                style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
               ),
             ],
           ),
@@ -491,14 +491,14 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           child: InkWell(
             onTap: onTap,
             customBorder: const CircleBorder(),
-            child: Icon(icon, color: const Color(0xFF111111), size: 18.sp),
+            child: Icon(icon, color: Theme.of(context).colorScheme.onSurface, size: 18.sp),
           ),
         ),
         SizedBox(height: 6.h),
         Text(
           label,
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 10.sp,
             fontWeight: FontWeight.w500,
           ),

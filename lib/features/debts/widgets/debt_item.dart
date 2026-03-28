@@ -7,8 +7,14 @@ import '../presentation/pages/debt_detail_page.dart';
 class DebtItem extends StatelessWidget {
   final Debt debt;
   final String personName;
+  final String? phone;
 
-  const DebtItem({super.key, required this.debt, required this.personName});
+  const DebtItem({
+    super.key,
+    required this.debt,
+    required this.personName,
+    this.phone,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +28,7 @@ class DebtItem extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) =>
-                DebtDetailPage(debt: debt, personName: personName),
+                DebtDetailPage(debt: debt, personName: personName, phone: phone),
           ),
         );
       },
@@ -56,7 +62,7 @@ class DebtItem extends StatelessWidget {
                 Text(
                   personName,
                   style: TextStyle(
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -73,7 +79,7 @@ class DebtItem extends StatelessWidget {
                           ? _formatDate(debt.dueDate!)
                           : 'Tanpa jatuh tempo',
                       style: TextStyle(
-                        color: const Color(0xFF9CA3AF),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 10.sp,
                         fontWeight: FontWeight.w500,
                       ),

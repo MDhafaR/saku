@@ -3,25 +3,38 @@ import '../../../../domain/entities/account.dart';
 
 class SettingsItemWidget extends StatelessWidget {
   final SettingsItem item;
+  final ValueChanged<bool>? onToggleChanged;
 
-  const SettingsItemWidget({super.key, required this.item});
+  const SettingsItemWidget({
+    super.key,
+    required this.item,
+    this.onToggleChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
         ],
+        border: isDark
+            ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3))
+            : null,
       ),
       child: Row(
         children: [
@@ -47,8 +60,8 @@ class SettingsItemWidget extends StatelessWidget {
               children: [
                 Text(
                   item.title,
-                  style: const TextStyle(
-                    color: Color(0xFF333333),
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                   ),
@@ -56,8 +69,8 @@ class SettingsItemWidget extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   item.subtitle,
-                  style: const TextStyle(
-                    color: Color(0xFF666666),
+                  style: TextStyle(
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                     fontSize: 14,
                   ),
                 ),
@@ -78,15 +91,13 @@ class SettingsItemWidget extends StatelessWidget {
           if (item.isToggle)
             Switch(
               value: item.toggleValue,
-              onChanged: (value) {
-                // TODO: Handle toggle change
-              },
-              activeColor: const Color(0xFF8A2BE2),
+              onChanged: onToggleChanged,
+              activeTrackColor: const Color(0xFF8A2BE2),
             )
           else
-            const Icon(
+            Icon(
               Icons.arrow_forward_ios,
-              color: Color(0xFF999999),
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
               size: 16,
             ),
         ],
@@ -109,7 +120,7 @@ class SettingsItemWidget extends StatelessWidget {
       case 'theme':
         return Icons.palette;
       case 'import':
-        return Icons.file_upload; // or import_export
+        return Icons.file_upload;
       case 'notification':
         return Icons.notifications;
       case 'share':

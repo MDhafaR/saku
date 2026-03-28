@@ -162,7 +162,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16.r),
         ),
@@ -171,7 +171,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
         content: Column(
@@ -289,7 +289,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: Colors.white,
+          backgroundColor: Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
@@ -298,7 +298,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111111),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           content: Column(
@@ -441,14 +441,14 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     final isEditing = widget.category != null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -456,7 +456,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
         title: Text(
           isEditing ? 'Edit Kategori' : 'Tambah Kategori',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -467,13 +467,13 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             PopupMenuButton<String>(
               icon: Icon(
                 Icons.more_horiz,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 24.sp,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               elevation: 4,
               offset: Offset(0, 40.h),
               onSelected: (value) {
@@ -548,18 +548,19 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             SizedBox(height: 8.h),
             TextField(
               controller: _nameController,
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: 'Contoh: Makanan, Transportasi',
-                hintStyle: TextStyle(color: Colors.grey[400]),
+                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: Theme.of(context).colorScheme.surface,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey[200]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Colors.grey[200]!),
+                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
                 ),
               ),
             ),
@@ -571,16 +572,16 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 12.h),
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
               ),
               child: GridView.builder(
                 shrinkWrap: true,
@@ -603,8 +604,8 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Color(_selectedColor).withOpacity(0.1)
-                            : Colors.grey[50],
+                            ? Color(_selectedColor).withValues(alpha: 0.1)
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
                         shape: BoxShape.circle,
                         border: isSelected
                             ? Border.all(color: Color(_selectedColor), width: 2)
@@ -614,7 +615,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                         _getIconData(iconName),
                         color: isSelected
                             ? Color(_selectedColor)
-                            : Colors.grey[400],
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                         size: 24.sp,
                       ),
                     ),
@@ -630,16 +631,16 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             SizedBox(height: 12.h),
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
               ),
               child: GridView.builder(
                 shrinkWrap: true,
@@ -669,7 +670,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.2),
+                                  color: Colors.black.withValues(alpha: 0.2),
                                   blurRadius: 4,
                                 ),
                               ]

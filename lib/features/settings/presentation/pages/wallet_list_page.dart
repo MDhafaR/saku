@@ -25,23 +25,23 @@ class _WalletListPageState extends State<WalletListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'My Wallets',
           style: TextStyle(
-            color: const Color(0xFF333333),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 20.sp,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Colors.black,
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -107,7 +107,7 @@ class _WalletListPageState extends State<WalletListPage> {
           Icon(
             Icons.account_balance_wallet_outlined,
             size: 72.sp,
-            color: Colors.grey[300],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
           ),
           SizedBox(height: 16.h),
           Text(
@@ -115,7 +115,7 @@ class _WalletListPageState extends State<WalletListPage> {
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
             ),
           ),
           SizedBox(height: 8.h),
@@ -124,7 +124,7 @@ class _WalletListPageState extends State<WalletListPage> {
             child: Text(
               'Tambahkan wallet pertamamu dengan menekan tombol + di bawah',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
+              style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
             ),
           ),
         ],

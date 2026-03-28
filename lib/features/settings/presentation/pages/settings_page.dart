@@ -16,6 +16,7 @@ import 'backup_page.dart';
 import 'about_page.dart';
 import '../cubit/backup_cubit.dart';
 import '../cubit/backup_state.dart';
+import '../cubit/theme_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/injection.dart' show locator;
 
@@ -37,8 +38,7 @@ class _SettingsPageState extends State<SettingsPage> {
     locator<BackupCubit>().checkSignInStatus();
   }
 
-  // Sample data untuk settings items
-  final List<SettingsItem> settingsItems = [
+  List<SettingsItem> get settingsItems => [
     SettingsItem(
       id: '1',
       title: 'Categories',
@@ -58,14 +58,14 @@ class _SettingsPageState extends State<SettingsPage> {
       title: 'Import Data',
       subtitle: 'Import from CSV/Excel',
       iconPath: 'import',
-      iconColor: const Color(0xFF8B5CF6), // Violet
+      iconColor: const Color(0xFF8B5CF6),
     ),
     SettingsItem(
       id: 'reminder',
       title: 'Reminder',
       subtitle: 'Set daily reminders',
       iconPath: 'notification',
-      iconColor: const Color(0xFFEC4899), // Pink
+      iconColor: const Color(0xFFEC4899),
     ),
     SettingsItem(
       id: '3',
@@ -95,7 +95,7 @@ class _SettingsPageState extends State<SettingsPage> {
       iconPath: 'theme',
       iconColor: const Color(0xFF8A2BE2),
       isToggle: true,
-      toggleValue: false,
+      toggleValue: locator<ThemeCubit>().isDark,
     ),
     SettingsItem(
       id: '7',
@@ -121,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
@@ -136,7 +136,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       width: 40.w,
                       height: 4.h,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF9CA3AF),
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                         borderRadius: BorderRadius.circular(2.r),
                       ),
                     ),
@@ -147,7 +147,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1F2937),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   SizedBox(height: 24.h),
@@ -187,7 +187,7 @@ class _SettingsPageState extends State<SettingsPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
         return Padding(
           padding: EdgeInsets.all(24.0.w),
@@ -199,7 +199,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   width: 40.w,
                   height: 4.h,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                     borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
@@ -210,9 +210,9 @@ class _SettingsPageState extends State<SettingsPage> {
               Container(
                 padding: EdgeInsets.all(16.w),
                 decoration: BoxDecoration(
-                  color: Colors.grey[50],
+                  color: Theme.of(context).colorScheme.surfaceContainer,
                   borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: Colors.grey[200]!),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
                 child: Row(
                   children: [
@@ -239,7 +239,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14.sp,
-                              color: const Color(0xFF1F2937),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -248,7 +248,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           Text(
                             'saku.app',
                             style: TextStyle(
-                              color: Colors.grey[500],
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               fontSize: 12.sp,
                             ),
                           ),
@@ -286,8 +286,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   _buildShareAppItem(
                     Icons.link,
                     'Copy Link',
-                    Colors.grey[200]!,
-                    Colors.black,
+                    Theme.of(context).brightness == Brightness.dark ? const Color(0xFF333333) : Colors.grey[200]!,
+                    Theme.of(context).colorScheme.onSurface,
                   ),
                   _buildShareAppItem(
                     Icons.chat_bubble,
@@ -339,8 +339,8 @@ class _SettingsPageState extends State<SettingsPage> {
               bottom: 0,
               child: Container(
                 padding: EdgeInsets.all(4.w),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -355,7 +355,7 @@ class _SettingsPageState extends State<SettingsPage> {
         SizedBox(height: 8.h),
         Text(
           name,
-          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF4B5563)),
+          style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -381,7 +381,7 @@ class _SettingsPageState extends State<SettingsPage> {
         SizedBox(height: 8.h),
         Text(
           label,
-          style: TextStyle(fontSize: 12.sp, color: const Color(0xFF4B5563)),
+          style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
         ),
       ],
     );
@@ -400,11 +400,11 @@ class _SettingsPageState extends State<SettingsPage> {
         padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFFF3F4F6)
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
               : Colors.transparent, // Light Gray
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isSelected ? const Color(0xFF111111) : Colors.transparent,
+            color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
           ),
         ),
         child: Row(
@@ -416,7 +416,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 title,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1F2937),
+                  color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 14.sp,
                 ),
               ),
@@ -424,13 +424,13 @@ class _SettingsPageState extends State<SettingsPage> {
             if (isSelected)
               Icon(
                 Icons.radio_button_checked,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.primary,
                 size: 24.sp,
               )
             else
               Icon(
                 Icons.radio_button_unchecked,
-                color: const Color(0xFF9CA3AF),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
                 size: 24.sp,
               ),
           ],
@@ -441,17 +441,18 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         title: Text(
           'Pengaturan',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: colorScheme.onSurface,
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
           ),
@@ -472,17 +473,18 @@ class _SettingsPageState extends State<SettingsPage> {
                     .where((w) => !w.isHidden)
                     .fold<double>(0, (sum, w) => sum + w.currentBalance);
 
+                final isDark = Theme.of(context).brightness == Brightness.dark;
                 return Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: 14.w,
                     vertical: 12.h,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: colorScheme.surfaceContainerLow,
                     borderRadius: BorderRadius.circular(12.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
                         spreadRadius: 1,
                         blurRadius: 8,
                         offset: Offset(0, 4.h),
@@ -510,7 +512,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 Text(
                                   'Wallet',
                                   style: TextStyle(
-                                    color: const Color(0xFF333333),
+                                    color: colorScheme.onSurface,
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -519,7 +521,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 Text(
                                   'Total Balance',
                                   style: TextStyle(
-                                    color: const Color(0xFF666666),
+                                    color: colorScheme.onSurfaceVariant,
                                     fontSize: 11.sp,
                                   ),
                                 ),
@@ -530,7 +532,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 Text(
                                   'Rp ${_formatCurrency(totalBalance)}',
                                   style: TextStyle(
-                                    color: const Color(0xFF333333),
+                                    color: colorScheme.onSurface,
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -538,7 +540,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 SizedBox(width: 6.w),
                                 Icon(
                                   Icons.arrow_forward_ios,
-                                  color: const Color(0xFF999999),
+                                  color: colorScheme.onSurfaceVariant,
                                   size: 12.sp,
                                 ),
                               ],
@@ -577,7 +579,6 @@ class _SettingsPageState extends State<SettingsPage> {
               (item) => InkWell(
                 onTap: () {
                   if (item.id == '1') {
-                    // Categories
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -585,7 +586,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   } else if (item.id == '2') {
-                    // Security
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -600,7 +600,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   } else if (item.id == '3') {
-                    // Export
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -608,7 +607,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   } else if (item.id == '4') {
-                    // Backup & Sync
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -616,15 +614,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   } else if (item.id == '5') {
-                    // Language
                     _showLanguageBottomSheet();
                   } else if (item.id == '6') {
-                    // Theme - handled by toggle, but just in case
+                    // Theme — handled by toggle switch
                   } else if (item.id == '7') {
-                    // Share
                     _showShareBottomSheet();
                   } else if (item.id == 'about') {
-                    // About
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -661,6 +656,18 @@ class _SettingsPageState extends State<SettingsPage> {
                             );
                           },
                         ),
+                      )
+                    : item.id == '6'
+                    ? BlocBuilder<ThemeCubit, ThemeMode>(
+                        builder: (context, themeMode) {
+                          final isDark = themeMode == ThemeMode.dark;
+                          return SettingsItemWidget(
+                            item: item.copyWith(toggleValue: isDark),
+                            onToggleChanged: (_) {
+                              context.read<ThemeCubit>().toggleTheme();
+                            },
+                          );
+                        },
                       )
                     : SettingsItemWidget(item: item),
               ),

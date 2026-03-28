@@ -70,7 +70,7 @@ class LoanPage extends StatelessWidget {
               // Scrollable content
               Expanded(
                 child: allLoans.isEmpty
-                    ? _buildEmptyState()
+                    ? _buildEmptyState(context)
                     : SingleChildScrollView(
                         padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 120.h),
                         child: Column(
@@ -78,6 +78,7 @@ class LoanPage extends StatelessWidget {
                           children: [
                             if (unpaidLoans.isNotEmpty) ...[
                               _buildSectionHeader(
+                                context,
                                 'Belum Diterima',
                                 unpaidLoans.length,
                                 const Color(0xFFF3F4F6),
@@ -90,12 +91,14 @@ class LoanPage extends StatelessWidget {
                                   personName:
                                       state.persons[loan.personId]?.name ??
                                       'Unknown',
+                                  phone: state.persons[loan.personId]?.phone,
                                 ),
                               ),
                               SizedBox(height: 16.h),
                             ],
                             if (paidLoans.isNotEmpty) ...[
                               _buildSectionHeader(
+                                context,
                                 'Sudah Diterima',
                                 paidLoans.length,
                                 const Color(0xFFDCFCE7),
@@ -108,6 +111,7 @@ class LoanPage extends StatelessWidget {
                                   personName:
                                       state.persons[loan.personId]?.name ??
                                       'Unknown',
+                                  phone: state.persons[loan.personId]?.phone,
                                 ),
                               ),
                             ],
@@ -125,6 +129,7 @@ class LoanPage extends StatelessWidget {
   }
 
   Widget _buildSectionHeader(
+    BuildContext context,
     String title,
     int count,
     Color badgeBg,
@@ -135,7 +140,7 @@ class LoanPage extends StatelessWidget {
         Text(
           title,
           style: TextStyle(
-            color: Colors.grey[700],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -160,7 +165,7 @@ class LoanPage extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -168,13 +173,13 @@ class LoanPage extends StatelessWidget {
           Icon(
             Icons.receipt_long_outlined,
             size: 48.sp,
-            color: Colors.grey[400],
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
           ),
           SizedBox(height: 12.h),
           Text(
             'Belum ada piutang',
             style: TextStyle(
-              color: Colors.grey[500],
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),

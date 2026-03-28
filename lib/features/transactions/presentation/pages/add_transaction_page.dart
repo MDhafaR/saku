@@ -317,7 +317,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               )
             : Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.surfaceContainerLow
+                      : const Color(0xFFF3F4F6),
                   borderRadius: BorderRadius.circular(24.r),
                 ),
                 padding: EdgeInsets.all(3.w),
@@ -336,11 +338,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           width: tabWidth,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(20.r),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.05),
+                                  color: Colors.black.withValues(alpha: 0.05),
                                   blurRadius: 4,
                                   offset: const Offset(0, 2),
                                 ),
@@ -582,10 +584,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   vertical: 8.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF9FAFB),
+                                  color: Theme.of(context).brightness == Brightness.dark
+                                      ? Theme.of(context).colorScheme.surfaceContainerLow
+                                      : const Color(0xFFF9FAFB),
                                   borderRadius: BorderRadius.circular(12.r),
                                   border: Border.all(
-                                    color: const Color(0xFFE5E7EB),
+                                    color: Theme.of(context).brightness == Brightness.dark
+                                        ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)
+                                        : const Color(0xFFE5E7EB),
                                   ),
                                 ),
                                 child: Row(
@@ -653,10 +659,17 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               MediaQuery.of(context).padding.bottom + 20.h,
             ),
             decoration: BoxDecoration(
-              color: const Color(0xFFF9FAFB),
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerLow
+                  : const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-              border: const Border(
-                top: BorderSide(color: Color(0xFFE5E7EB), width: 1),
+              border: Border(
+                top: BorderSide(
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)
+                      : const Color(0xFFE5E7EB),
+                  width: 1,
+                ),
               ),
             ),
             child: Column(
@@ -706,26 +719,30 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     required String label,
     required VoidCallback onTap,
   }) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
+          color: isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          border: Border.all(
+            color: isDark ? cs.outline.withValues(alpha: 0.3) : const Color(0xFFE5E7EB),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 18.sp, color: AppTheme.darkBackground),
+            Icon(icon, size: 18.sp, color: cs.onSurface),
             SizedBox(width: 6.w),
             Text(
               label,
               style: TextStyle(
                 fontWeight: FontWeight.w500,
                 fontSize: 13.sp,
-                color: const Color(0xFF1F2937),
+                color: cs.onSurface,
               ),
             ),
           ],
@@ -742,20 +759,24 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     bool isPlaceholder = false,
     required VoidCallback onTap,
   }) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
+          color: isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB),
           borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
+          border: Border.all(
+            color: isDark ? cs.outline.withValues(alpha: 0.3) : const Color(0xFFE5E7EB),
+          ),
         ),
         child: Row(
           children: [
             Icon(
               icon,
-              color: iconColor ?? AppTheme.lightTextSecondary,
+              color: iconColor ?? cs.onSurface.withValues(alpha: 0.5),
               size: 18.sp,
             ),
             SizedBox(width: 10.w),
@@ -767,7 +788,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     label,
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: AppTheme.lightTextSecondary,
+                      color: cs.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(height: 2.h),
@@ -777,8 +798,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: isPlaceholder
-                          ? AppTheme.lightTextSecondary
-                          : const Color(0xFF1F2937),
+                          ? cs.onSurface.withValues(alpha: 0.4)
+                          : cs.onSurface,
                     ),
                   ),
                 ],
@@ -786,7 +807,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ),
             Icon(
               Icons.chevron_right,
-              color: AppTheme.lightTextSecondary,
+              color: cs.onSurface.withValues(alpha: 0.4),
               size: 20.sp,
             ),
           ],

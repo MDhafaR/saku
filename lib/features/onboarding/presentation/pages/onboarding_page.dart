@@ -54,7 +54,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA), // Design system background
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -68,12 +68,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Container(
                     padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Theme.of(context).colorScheme.surfaceContainerLow
+                          : const Color(0xFFF3F4F6),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: Icon(
                       Icons.account_balance_wallet,
-                      color: const Color(0xFF111111),
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 24.sp,
                     ),
                   ),
@@ -85,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Text(
                       'Lewati',
                       style: TextStyle(
-                        color: const Color(0xFF9CA3AF), // Muted Gray
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -127,8 +129,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(4.r),
                           color: index == _currentPage
-                              ? const Color(0xFF111111) // Primary Dark
-                              : const Color(0xFFE5E7EB), // Light border
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.15),
                         ),
                       ),
                     ),
@@ -150,9 +152,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(
-                          0xFF111111,
-                        ), // Primary Dark
+                        backgroundColor: Theme.of(context).colorScheme.onSurface,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(
                             24.r,
@@ -202,7 +202,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             data.title,
             style: TextStyle(
-              color: const Color(0xFF111111), // Primary Dark
+              color: Theme.of(context).colorScheme.onSurface,
               fontSize: 28.sp,
               fontWeight: FontWeight.w800,
               letterSpacing: -0.5,
@@ -214,7 +214,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Text(
             data.description,
             style: TextStyle(
-              color: const Color(0xFF6B7280), // Dark Muted
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 16.sp,
               height: 1.6,
             ),

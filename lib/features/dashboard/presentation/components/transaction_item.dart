@@ -123,7 +123,7 @@ class TransactionItem extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -156,9 +156,11 @@ class TransactionItem extends StatelessWidget {
   }
 
   Widget _buildBottomSheet(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cs.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       padding: EdgeInsets.all(16.w),
@@ -207,7 +209,7 @@ class TransactionItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
-                            color: const Color(0xFF111111),
+                            color: cs.onSurface,
                           ),
                         ),
                         Text(
@@ -280,15 +282,17 @@ class TransactionItem extends StatelessWidget {
               padding: EdgeInsets.all(14.w),
               margin: EdgeInsets.only(bottom: 12.h),
               decoration: BoxDecoration(
-                color: const Color(0xFFFAFAFA),
+                color: isDark ? cs.surfaceContainerLow : const Color(0xFFFAFAFA),
                 borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: const Color(0xFFF0F0F0)),
+                border: Border.all(
+                  color: isDark ? cs.outline.withValues(alpha: 0.3) : const Color(0xFFF0F0F0),
+                ),
               ),
               child: Text(
                 transaction.note ?? transaction.description,
                 style: TextStyle(
                   fontSize: 13.sp,
-                  color: const Color(0xFF444444),
+                  color: cs.onSurface.withValues(alpha: 0.8),
                   height: 1.5,
                   fontWeight: FontWeight.w400,
                 ),
@@ -318,14 +322,17 @@ class TransactionItem extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14.r),
-                      side: BorderSide(color: Colors.grey[200]!, width: 1.5),
+                      side: BorderSide(
+                        color: cs.outline.withValues(alpha: 0.4),
+                        width: 1.5,
+                      ),
                     ),
-                    overlayColor: Colors.grey[100],
+                    overlayColor: cs.onSurface.withValues(alpha: 0.05),
                   ),
                   child: Text(
                     "Edit",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: cs.onSurface,
                       fontWeight: FontWeight.w600,
                       fontSize: 13.sp,
                     ),

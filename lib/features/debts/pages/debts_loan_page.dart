@@ -22,7 +22,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
     return BlocProvider<DebtCubit>(
       create: (_) => locator<DebtCubit>()..start(),
       child: Scaffold(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,7 +35,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -43,13 +43,16 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
               // Tab Selector - Sliding Pill style
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Container(
-                  padding: EdgeInsets.all(3.w),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                  child: LayoutBuilder(
+                child: Builder(builder: (context) {
+                  final cs = Theme.of(context).colorScheme;
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
+                  return Container(
+                    padding: EdgeInsets.all(3.w),
+                    decoration: BoxDecoration(
+                      color: isDark ? cs.surfaceContainerLow : const Color(0xFFF3F4F6),
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
+                    child: LayoutBuilder(
                     builder: (context, constraints) {
                       final tabWidth = constraints.maxWidth / 2;
                       return Stack(
@@ -64,11 +67,11 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                             width: tabWidth,
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: cs.surface,
                                 borderRadius: BorderRadius.circular(20.r),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                     blurRadius: 4.r,
                                     offset: Offset(0, 2.h),
                                   ),
@@ -163,7 +166,8 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                       );
                     },
                   ),
-                ),
+                );
+                }),
               ),
               SizedBox(height: 8.h),
               // Tab Content

@@ -143,16 +143,16 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
@@ -160,7 +160,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
         title: Text(
           _isEdit ? 'Edit Wallet' : 'Tambah Wallet',
           style: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -171,13 +171,13 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             PopupMenuButton<String>(
               icon: Icon(
                 Icons.more_horiz,
-                color: const Color(0xFF111111),
+                color: Theme.of(context).colorScheme.onSurface,
                 size: 24.sp,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               elevation: 4,
               offset: Offset(0, 40.h),
               onSelected: (value) {
@@ -308,7 +308,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(16.r),
                 boxShadow: [
                   BoxShadow(
@@ -326,7 +326,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF6B7280),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -369,7 +369,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             SizedBox(height: 4.h),
@@ -377,7 +377,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                               'Jika aktif, nomor akan disensor dan membutuhkan PIN/FaceID untuk menyalin.',
                               style: TextStyle(
                                 fontSize: 11.sp,
-                                color: const Color(0xFF9CA3AF),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                                 height: 1.4,
                               ),
                             ),
@@ -426,7 +426,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -459,7 +459,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                 Text(
                   name,
                   style: TextStyle(
-                    color: const Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -478,7 +478,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
       style: TextStyle(
         fontSize: 13.sp,
         fontWeight: FontWeight.w600,
-        color: const Color(0xFF111111),
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
@@ -492,7 +492,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -506,17 +506,17 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
         controller: controller,
         keyboardType: keyboardType,
         onChanged: onChanged,
-        style: TextStyle(fontSize: 14.sp, color: const Color(0xFF111111)),
+        style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: const Color(0xFF9CA3AF), fontSize: 14.sp),
+          hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 14.sp),
           prefixIcon: prefix != null
               ? Padding(
                   padding: EdgeInsets.only(left: 16.w, right: 8.w),
                   child: Text(
                     prefix,
                     style: TextStyle(
-                      color: const Color(0xFF111111),
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                     ),
@@ -525,7 +525,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
               : null,
           prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
           prefixStyle: TextStyle(
-            color: const Color(0xFF111111),
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14.sp,
             fontWeight: FontWeight.w600,
           ),
@@ -534,7 +534,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             borderSide: BorderSide.none,
           ),
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Theme.of(context).colorScheme.surface,
           contentPadding: EdgeInsets.symmetric(
             horizontal: 16.w,
             vertical: 14.h,
@@ -549,7 +549,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -582,16 +582,17 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             child: Container(
               decoration: BoxDecoration(
                 color: isSelected
-                    ? const Color(0xFF111111)
-                    : const Color(0xFFF3F4F6),
+                    ? Theme.of(context).colorScheme.onSurface
+                    : (Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).colorScheme.surfaceContainerLow
+                        : const Color(0xFFF3F4F6)),
                 borderRadius: BorderRadius.circular(12.r),
-                border: isSelected
-                    ? Border.all(color: const Color(0xFF111111), width: 2)
-                    : null,
               ),
               child: Icon(
                 entry.value,
-                color: isSelected ? Colors.white : const Color(0xFF6B7280),
+                color: isSelected
+                    ? Theme.of(context).colorScheme.surface
+                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 size: 24.sp,
               ),
             ),
@@ -606,7 +607,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
       width: double.infinity,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
@@ -659,7 +660,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Theme.of(context).colorScheme.surfaceContainerLow
+            : const Color(0xFFF3F4F6),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Row(
@@ -670,7 +673,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
-              color: const Color(0xFF111111),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           Transform.scale(

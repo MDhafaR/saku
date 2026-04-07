@@ -24,12 +24,8 @@ void main() async {
   runApp(
     MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => locator<SecurityCubit>(),
-        ),
-        BlocProvider(
-          create: (context) => locator<ThemeCubit>(),
-        ),
+        BlocProvider(create: (context) => locator<SecurityCubit>()),
+        BlocProvider(create: (context) => locator<ThemeCubit>()),
       ],
       child: const AppLifecycleObserver(child: SakuApp()),
     ),

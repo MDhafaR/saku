@@ -268,7 +268,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                         child: Text(
                           'Reset',
                           style: TextStyle(
-                            color: AppTheme.primaryBlue,
+                            color: Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white.withValues(alpha: 0.45)
+                                : AppTheme.primaryBlue,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                           ),
@@ -321,28 +323,37 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                     ],
                   ),
-                  SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      activeTrackColor: AppTheme.primaryBlue,
-                      inactiveTrackColor: Colors.grey[200],
-                      thumbColor: Colors.white,
-                      thumbShape: RoundSliderThumbShape(
-                        enabledThumbRadius: 12.r,
-                        elevation: 2,
+                  Builder(builder: (context) {
+                    final isDarkSlider = Theme.of(context).brightness == Brightness.dark;
+                    return SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        activeTrackColor: isDarkSlider
+                            ? Colors.white.withValues(alpha: 0.7)
+                            : AppTheme.primaryBlue,
+                        inactiveTrackColor: isDarkSlider
+                            ? Colors.white.withValues(alpha: 0.12)
+                            : Colors.grey[200],
+                        thumbColor: Colors.white,
+                        thumbShape: RoundSliderThumbShape(
+                          enabledThumbRadius: 12.r,
+                          elevation: 2,
+                        ),
+                        overlayColor: isDarkSlider
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : AppTheme.primaryBlue.withValues(alpha: 0.1),
                       ),
-                      overlayColor: AppTheme.primaryBlue.withValues(alpha: 0.1),
-                    ),
-                    child: RangeSlider(
-                      values: _currentRangeValues,
-                      min: 0,
-                      max: _amountUpperBound,
-                      onChanged: (RangeValues values) {
-                        setState(() {
-                          _currentRangeValues = values;
-                        });
-                      },
-                    ),
-                  ),
+                      child: RangeSlider(
+                        values: _currentRangeValues,
+                        min: 0,
+                        max: _amountUpperBound,
+                        onChanged: (RangeValues values) {
+                          setState(() {
+                            _currentRangeValues = values;
+                          });
+                        },
+                      ),
+                    );
+                  }),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -367,53 +378,85 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               ),
             ),
           ),
-          Container(
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              border: Border(top: BorderSide(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3))),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 1,
-                  child: TextButton(
-                    onPressed: _resetFilter,
-                    child: Text(
-                      'Reset',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
+          Builder(builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final cs = Theme.of(context).colorScheme;
+            return Container(
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 20.h),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.transparent : cs.surface,
+                border: isDark
+                    ? null // tidak ada divider di dark — terasa lebih ringan
+                    : Border(
+                        top: BorderSide(
+                          color: cs.outlineVariant.withValues(alpha: 0.3),
+                        ),
+                      ),
+              ),
+              child: Row(
+                children: [
+                  // Reset — outline pill subtle
+                  Expanded(
+                    flex: 1,
+                    child: OutlinedButton(
+                      onPressed: _resetFilter,
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        side: BorderSide(
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.18)
+                              : cs.outlineVariant,
+                          width: 1,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
+                        foregroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.55)
+                            : cs.onSurfaceVariant,
+                      ),
+                      child: Text(
+                        'Reset',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _applyFilter,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.primaryBlue,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
+                  SizedBox(width: 12.w),
+                  // Apply — solid putih di dark, solid biru di light
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: _applyFilter,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isDark
+                            ? Colors.white.withValues(alpha: 0.92)
+                            : AppTheme.primaryBlue,
+                        foregroundColor: isDark
+                            ? const Color(0xFF111111)
+                            : Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14.r),
+                        ),
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      'Terapkan Filter',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                      child: Text(
+                        'Terapkan',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              ),
+            );
+          }),
+
         ],
       ),
     );
@@ -563,13 +606,26 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     bool isSelected = false,
     VoidCallback? onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
+
+    // Dark mode: glassy white untuk selected, subtle border untuk unselected
+    // Light mode: tetap biru sebagai aksen
     final textColor = isSelected
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.onSurface;
+        ? (isDark ? Colors.white.withValues(alpha: 0.9) : cs.primary)
+        : cs.onSurface.withValues(alpha: isDark ? 0.45 : 0.7);
+
     final borderColor = isSelected
-        ? Theme.of(context).colorScheme.primary
-        : Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5);
-    final bgColor = isSelected ? Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3) : Colors.transparent;
+        ? (isDark ? Colors.white.withValues(alpha: 0.40) : cs.primary)
+        : (isDark
+            ? Colors.white.withValues(alpha: 0.12)
+            : cs.outlineVariant.withValues(alpha: 0.5));
+
+    final bgColor = isSelected
+        ? (isDark
+            ? Colors.white.withValues(alpha: 0.08) // frosted glass
+            : cs.primaryContainer.withValues(alpha: 0.3))
+        : Colors.transparent;
 
     return GestureDetector(
       onTap: onTap,

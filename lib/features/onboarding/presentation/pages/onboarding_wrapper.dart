@@ -50,6 +50,8 @@ class _MainAppContentState extends State<MainAppContent> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     return Scaffold(
       body: Stack(
         children: [
@@ -60,7 +62,7 @@ class _MainAppContentState extends State<MainAppContent> {
             onPressed: _showAddTransactionBottomSheet,
             onShowAddTransaction: _showAddTransactionBottomSheet,
           ),
-          // Curved Navigation Bar - Dark theme
+          // Curved Navigation Bar — adaptive per theme
           Positioned(
             left: 0,
             right: 0,
@@ -73,12 +75,11 @@ class _MainAppContentState extends State<MainAppContent> {
                 });
               },
               backgroundColor: Colors.transparent,
-              color: const Color(
-                0xFF1F2937,
-              ).withOpacity(0.85), // Dark gray bar with slight transparency
-              buttonBackgroundColor: const Color(
-                0xFF111111,
-              ), // Darker button for selected
+              // Bar gelap di kedua mode agar icon putih tetap terbaca
+              color: isDark
+                  ? const Color(0xFF1E293B) // Dark slate — seragam dengan FAB
+                  : const Color(0xFF1E293B), // Dark slate — light mode
+              buttonBackgroundColor: cs.primary, // Biru aksen untuk item aktif
               height: 65.h.clamp(0.0, 75.0),
               animationDuration: const Duration(milliseconds: 300),
               animationCurve: Curves.easeInOut,
@@ -91,7 +92,7 @@ class _MainAppContentState extends State<MainAppContent> {
                 ];
                 return Icon(
                   icons[index],
-                  color: Colors.white, // All icons white
+                  color: Colors.white, // Putih kontras di atas bar gelap
                   size: 24.sp,
                 );
               }),

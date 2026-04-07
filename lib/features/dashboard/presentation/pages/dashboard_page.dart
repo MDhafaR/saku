@@ -413,7 +413,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         },
                         icon: Icon(
                           Icons.chevron_left,
-                          color: const Color(0xFF111111),
+                          color: cs.onSurface,
                           size: 24.sp,
                         ),
                       ),
@@ -442,7 +442,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                       height: 4.h,
                                       margin: EdgeInsets.only(bottom: 16.h),
                                       decoration: BoxDecoration(
-                                        color: Colors.grey[300],
+                                        color: cs.onSurface.withValues(alpha: 0.2),
                                         borderRadius: BorderRadius.circular(
                                           2.r,
                                         ),
@@ -525,13 +525,13 @@ class _DashboardPageState extends State<DashboardPage> {
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF111111),
+                                color: cs.onSurface,
                               ),
                             ),
                             SizedBox(width: 4.w),
                             Icon(
                               Icons.arrow_drop_down,
-                              color: const Color(0xFF111111),
+                              color: cs.onSurface,
                               size: 20.sp,
                             ),
                           ],
@@ -548,7 +548,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         },
                         icon: Icon(
                           Icons.chevron_right,
-                          color: const Color(0xFF111111),
+                          color: cs.onSurface,
                           size: 24.sp,
                         ),
                       ),
@@ -708,7 +708,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   // Fixed header section
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    color: Theme.of(context).colorScheme.surface,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                     child: Column(
                       children: [
                         SizedBox(height: 16.h),

@@ -19,18 +19,42 @@ class SearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Glassy dark: putih 6% opacity + border putih halus
+    // Light: solid abu‑abu netral + border subtle
+    final bgColor = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : const Color(0xFFF1F5F9);
+
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : const Color(0xFFCBD5E1);
+
+    // Warna filter aktif: putih lembut di dark, biru di light
+    final activeFilterColor = isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : const Color(0xFF2563EB);
+
+    // Dot indikator filter aktif
+    final activeDotColor = isDark
+        ? const Color(0xFF94A3B8) // Slate‑400 — subtle, tidak teriak
+        : const Color(0xFF2563EB);
+
     return Container(
       height: 40.h,
       decoration: BoxDecoration(
+        color: bgColor,
         borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(
-          color: isDark ? cs.outline.withValues(alpha: 0.4) : const Color(0xFFD1D5DB),
-        ),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Row(
         children: [
           SizedBox(width: 12.w),
-          Icon(Icons.search, color: cs.onSurface.withValues(alpha: 0.4), size: 18.sp),
+          Icon(
+            Icons.search,
+            color: cs.onSurface.withValues(alpha: 0.35),
+            size: 18.sp,
+          ),
           SizedBox(width: 10.w),
           Expanded(
             child: TextField(
@@ -39,7 +63,7 @@ class SearchBar extends StatelessWidget {
               decoration: InputDecoration(
                 hintText: hintText,
                 hintStyle: TextStyle(
-                  color: cs.onSurface.withValues(alpha: 0.4),
+                  color: cs.onSurface.withValues(alpha: 0.35),
                   fontSize: 13.sp,
                 ),
                 border: InputBorder.none,
@@ -61,8 +85,8 @@ class SearchBar extends StatelessWidget {
                     Icon(
                       Icons.tune_rounded,
                       color: hasActiveFilter
-                          ? const Color(0xFF2563EB)
-                          : cs.onSurface.withValues(alpha: 0.4),
+                          ? activeFilterColor
+                          : cs.onSurface.withValues(alpha: 0.35),
                       size: 18.sp,
                     ),
                     if (hasActiveFilter)
@@ -70,10 +94,10 @@ class SearchBar extends StatelessWidget {
                         right: -2.w,
                         top: -2.h,
                         child: Container(
-                          width: 8.w,
-                          height: 8.h,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF2563EB),
+                          width: 7.w,
+                          height: 7.h,
+                          decoration: BoxDecoration(
+                            color: activeDotColor,
                             shape: BoxShape.circle,
                           ),
                         ),

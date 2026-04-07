@@ -61,7 +61,6 @@ class _AnimatedFabState extends State<AnimatedFab> {
       _animationKey++;
     });
 
-    // Delay untuk animasi sederhana
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         setState(() {
@@ -75,13 +74,11 @@ class _AnimatedFabState extends State<AnimatedFab> {
 
   void _toggleFabExpansion() {
     if (_isFabExpanded) {
-      // Menutup dengan animasi kebalikan
       setState(() {
         _isFabExpanded = false;
         _animationKey++;
       });
 
-      // Delay untuk animasi menutup
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) {
           setState(() {
@@ -91,7 +88,6 @@ class _AnimatedFabState extends State<AnimatedFab> {
         }
       });
     } else {
-      // Membuka
       setState(() {
         _isFabExpanded = true;
         _animationKey++;
@@ -101,85 +97,125 @@ class _AnimatedFabState extends State<AnimatedFab> {
   }
 
   Widget _buildExpandedButton({
+    required BuildContext context,
     required IconData icon,
+    required Color iconColor,
     required String label,
     required VoidCallback onTap,
     required int delay,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Dark: card-style gelap dengan icon berwarna (seperti card income/expense)
+    // Light: putih solid seperti sebelumnya
+    final bgColor = isDark
+        ? const Color(0xFF1E293B) // dark slate — mirip tone card dark
+        : Colors.white;
+
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.10)
+        : Colors.transparent;
+
+    final textColor = isDark
+        ? Colors.white.withValues(alpha: 0.85)
+        : const Color(0xFF333333);
+
+    final shadowColor = isDark
+        ? Colors.black.withValues(alpha: 0.4)
+        : Colors.black.withValues(alpha: 0.10);
+
     return GestureDetector(
       onTap: onTap,
-      child:
-          Container(
-                key: ValueKey('expanded_${icon}_$_animationKey'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
+      child: Container(
+            key: ValueKey('expanded_${icon}_$_animationKey'),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(25),
+              border: Border.all(color: borderColor, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: shadowColor,
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon container bergaya card summary (warna + opacity 15%)
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 16),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, color: AppTheme.darkBackground, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        color: Color(0xFF333333),
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 10),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              )
-              .animate()
-              .slideY(
-                begin: _isFabExpanded ? 1.0 : 0.0,
-                end: _isFabExpanded ? 0.0 : 1.0,
-                duration: 300.ms,
-                delay: _isFabExpanded ? delay.ms : (200 - delay).ms,
-                curve: Curves.easeOutBack,
-              )
-              .fadeIn(
-                duration: 200.ms,
-                delay: _isFabExpanded ? delay.ms : (200 - delay).ms,
-              )
-              .scale(
-                begin: _isFabExpanded
-                    ? const Offset(0.8, 0.8)
-                    : const Offset(1.0, 1.0),
-                end: _isFabExpanded
-                    ? const Offset(1.0, 1.0)
-                    : const Offset(0.8, 0.8),
-                duration: 300.ms,
-                delay: _isFabExpanded ? delay.ms : (200 - delay).ms,
-                curve: Curves.easeOutBack,
-              ),
+              ],
+            ),
+          )
+          .animate()
+          .slideY(
+            begin: _isFabExpanded ? 1.0 : 0.0,
+            end: _isFabExpanded ? 0.0 : 1.0,
+            duration: 300.ms,
+            delay: _isFabExpanded ? delay.ms : (200 - delay).ms,
+            curve: Curves.easeOutBack,
+          )
+          .fadeIn(
+            duration: 200.ms,
+            delay: _isFabExpanded ? delay.ms : (200 - delay).ms,
+          )
+          .scale(
+            begin: _isFabExpanded
+                ? const Offset(0.8, 0.8)
+                : const Offset(1.0, 1.0),
+            end: _isFabExpanded
+                ? const Offset(1.0, 1.0)
+                : const Offset(0.8, 0.8),
+            duration: 300.ms,
+            delay: _isFabExpanded ? delay.ms : (200 - delay).ms,
+            curve: Curves.easeOutBack,
+          ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // FAB utama — putih di light, dark slate di dark
+    final fabBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final fabIconColor = isDark ? Colors.white : Colors.black;
+
+    // Arrow indicator — adaptif
+    final arrowColor = isDark
+        ? Colors.white.withValues(alpha: 0.55)
+        : AppTheme.darkBackground;
+
     return Stack(
       children: [
         // Expanded Buttons
         if (_isFabExpanded) ...[
-          // Add Transaction Button
+          // Transaction
           Positioned(
             right: 20,
-            bottom: 280,
+            bottom: 292,
             child: _buildExpandedButton(
+              context: context,
               icon: Icons.add,
+              iconColor: const Color(0xFF10B981), // hijau seperti income card
               label: 'Transaction',
               onTap: () {
                 _toggleFabExpansion();
@@ -188,12 +224,14 @@ class _AnimatedFabState extends State<AnimatedFab> {
               delay: 0,
             ),
           ),
-          // Transfer Button
+          // Transfer
           Positioned(
             right: 20,
             bottom: 230,
             child: _buildExpandedButton(
+              context: context,
               icon: Icons.swap_horiz,
+              iconColor: const Color(0xFF6366F1), // ungu seperti total card
               label: 'Transfer',
               onTap: () async {
                 _toggleFabExpansion();
@@ -225,14 +263,15 @@ class _AnimatedFabState extends State<AnimatedFab> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const AddEditWalletPage(),
+                                builder: (context) =>
+                                    const AddEditWalletPage(),
                               ),
                             );
                           },
                           child: Text(
                             'Tambah Wallet',
                             style: TextStyle(
-                              color: const Color(0xFF111111),
+                              color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -252,18 +291,21 @@ class _AnimatedFabState extends State<AnimatedFab> {
               delay: 100,
             ),
           ),
-          // Loan Button
+          // Loan
           Positioned(
             right: 20,
-            bottom: 180,
+            bottom: 168,
             child: _buildExpandedButton(
+              context: context,
               icon: Icons.account_balance_wallet,
+              iconColor: const Color(0xFFEF4444), // merah seperti expense card
               label: 'Loan',
               onTap: () {
                 _toggleFabExpansion();
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const AddLoanPage()),
+                  MaterialPageRoute(
+                      builder: (context) => const AddLoanPage()),
                 );
               },
               delay: 200,
@@ -271,77 +313,76 @@ class _AnimatedFabState extends State<AnimatedFab> {
           ),
         ],
 
-        // FAB
+        // FAB Utama
         if (_isFabVisible)
           Positioned(
             right: 20,
             bottom: 100,
             child: GestureDetector(
               onTap: _toggleFabExpansion,
-              child:
-                  FloatingActionButton(
-                        key: ValueKey('fab_$_animationKey'),
-                        onPressed: _toggleFabExpansion,
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          _isFabExpanded ? Icons.close : Icons.add,
-                          color: Colors.black,
-                        ),
-                      )
-                      .animate()
-                      .slideX(
-                        begin: 0.3, // Mulai dari sedikit ke kanan
-                        end: 0.0,
-                        duration: 400.ms,
-                        curve: Curves.easeOutBack,
-                      )
-                      .scale(
-                        begin: const Offset(0.8, 0.8),
-                        end: const Offset(1.0, 1.0),
-                        duration: 400.ms,
-                        curve: Curves.easeOutBack,
-                      )
-                      .rotate(
-                        begin: _isFabExpanded ? 0 : 0.5,
-                        end: _isFabExpanded ? 0.5 : 0,
-                        duration: 300.ms,
-                        curve: Curves.easeInOut,
-                      ),
+              child: FloatingActionButton(
+                    key: ValueKey('fab_$_animationKey'),
+                    onPressed: _toggleFabExpansion,
+                    backgroundColor: fabBg,
+                    elevation: isDark ? 0 : 4,
+                    child: Icon(
+                      _isFabExpanded ? Icons.close : Icons.add,
+                      color: fabIconColor,
+                    ),
+                  )
+                  .animate()
+                  .slideX(
+                    begin: 0.3,
+                    end: 0.0,
+                    duration: 400.ms,
+                    curve: Curves.easeOutBack,
+                  )
+                  .scale(
+                    begin: const Offset(0.8, 0.8),
+                    end: const Offset(1.0, 1.0),
+                    duration: 400.ms,
+                    curve: Curves.easeOutBack,
+                  )
+                  .rotate(
+                    begin: _isFabExpanded ? 0 : 0.5,
+                    end: _isFabExpanded ? 0.5 : 0,
+                    duration: 300.ms,
+                    curve: Curves.easeInOut,
+                  ),
             ),
           ),
 
-        // Arrow Button - Small icon without background
+        // Arrow Button — kecil, adaptif theme
         if (_isArrowVisible)
           Positioned(
             right: 20,
             bottom: 100,
             child: GestureDetector(
               onTap: _showFab,
-              child:
-                  Container(
-                        key: ValueKey('arrow_$_animationKey'),
-                        width: 24,
-                        height: 56,
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_outlined,
-                          color: AppTheme.darkBackground,
-                          size: 24,
-                        ),
-                      )
-                      .animate()
-                      .slideX(
-                        begin: 0.3, // Mulai dari sedikit ke kanan
-                        end: 0.0,
-                        duration: 300.ms,
-                        curve: Curves.easeOutBack,
-                      )
-                      .scale(
-                        begin: const Offset(0.8, 0.8),
-                        end: const Offset(1.0, 1.0),
-                        duration: 300.ms,
-                        curve: Curves.easeOutBack,
-                      ),
+              child: Container(
+                    key: ValueKey('arrow_$_animationKey'),
+                    width: 24,
+                    height: 56,
+                    alignment: Alignment.center,
+                    child: Icon(
+                      Icons.arrow_back_ios_new_outlined,
+                      color: arrowColor,
+                      size: 24,
+                    ),
+                  )
+                  .animate()
+                  .slideX(
+                    begin: 0.3,
+                    end: 0.0,
+                    duration: 300.ms,
+                    curve: Curves.easeOutBack,
+                  )
+                  .scale(
+                    begin: const Offset(0.8, 0.8),
+                    end: const Offset(1.0, 1.0),
+                    duration: 300.ms,
+                    curve: Curves.easeOutBack,
+                  ),
             ),
           ),
       ],

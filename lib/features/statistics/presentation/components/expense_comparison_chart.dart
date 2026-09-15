@@ -11,29 +11,43 @@ class ExpenseComparisonChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return SakuCard(
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.all(14.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Komparasi Pengeluaran',
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111111),
+              color: cs.onSurface,
+              letterSpacing: -0.5,
             ),
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
           if (categories.isEmpty)
             SizedBox(
-              height: 100.h,
-              child: const Center(child: Text('Tidak ada data komparasi')),
+              height: 80.h,
+              child: Center(
+                child: Text(
+                  'Tidak ada data komparasi',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ),
             )
           else
             ...categories.map(
               (item) => Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.only(bottom: 8.h),
                 child: _buildComparisonRow(
+                  context,
                   item.name,
                   item.amount,
                   item.percentage / 100, // percentage is 0-100
@@ -47,22 +61,25 @@ class ExpenseComparisonChart extends StatelessWidget {
   }
 
   Widget _buildComparisonRow(
+    BuildContext context,
     String label,
     double amount,
     double percentage,
     Color color,
   ) {
+    final cs = Theme.of(context).colorScheme;
+
     return Row(
       children: [
         SizedBox(
-          width: 80.w,
+          width: 75.w,
           child: Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 13.sp,
-              color: const Color(0xFF4B5563),
+              fontSize: 12.sp,
+              color: cs.onSurfaceVariant,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -72,32 +89,32 @@ class ExpenseComparisonChart extends StatelessWidget {
           child: Stack(
             children: [
               Container(
-                height: 8.h,
+                height: 6.h,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(4.r),
+                  color: cs.outlineVariant.withValues(alpha: 0.25),
+                  borderRadius: BorderRadius.circular(3.r),
                 ),
               ),
               FractionallySizedBox(
                 widthFactor: percentage.clamp(0.0, 1.0),
                 child: Container(
-                  height: 8.h,
+                  height: 6.h,
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(4.r),
+                    borderRadius: BorderRadius.circular(3.r),
                   ),
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(width: 12.w),
+        SizedBox(width: 10.w),
         Text(
           CurrencyFormatter.format(amount),
           style: TextStyle(
             fontSize: 12.sp,
             fontWeight: FontWeight.w600,
-            color: const Color(0xFF111111),
+            color: cs.onSurface,
           ),
         ),
       ],

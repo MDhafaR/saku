@@ -45,12 +45,28 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
             ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]))
           .get();
 
-  /// Get transactions for a specific category
-  Future<List<Transaction>> getTransactionsByCategory(int categoryId) =>
-      (select(transactions)
-            ..where((tbl) => tbl.categoryId.equals(categoryId))
-            ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]))
-          .get();
+  /// Get transactions for a specific category, optionally filtered by date range
+  Future<List<Transaction>> getTransactionsByCategory(
+    int categoryId, [
+    DateTime? start,
+    DateTime? end,
+  ]) {
+    final query = select(transactions)
+      ..where((tbl) {
+        var predicate = tbl.categoryId.equals(categoryId);
+        if (start != null) {
+          predicate =
+              predicate & tbl.transactionDate.isBiggerOrEqualValue(start);
+        }
+        if (end != null) {
+          predicate =
+              predicate & tbl.transactionDate.isSmallerOrEqualValue(end);
+        }
+        return predicate;
+      })
+      ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]);
+    return query.get();
+  }
 
   /// Watch all transactions for real-time updates
   Stream<List<Transaction>> watchAllTransactions() => (select(

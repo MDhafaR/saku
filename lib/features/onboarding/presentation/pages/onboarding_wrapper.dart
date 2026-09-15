@@ -85,9 +85,9 @@ class _MainAppContentState extends State<MainAppContent> {
               animationCurve: Curves.easeInOut,
               items: List.generate(4, (index) {
                 final icons = [
-                  Icons.dashboard_rounded,
+                  Icons.home_rounded,
                   Icons.bar_chart_rounded,
-                  Icons.account_balance_wallet_rounded,
+                  Icons.menu_book_rounded,
                   Icons.settings_rounded,
                 ];
                 return Icon(

@@ -5,7 +5,9 @@ import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../settings/presentation/cubit/security_cubit.dart';
 import '../../../settings/presentation/cubit/security_state.dart';
+import '../../../statistics/presentation/cubit/statistics_state.dart';
 import '../../../../core/presentation/components/financial_summary_card.dart';
+import 'financial_metric_info_modal.dart';
 
 class FinancialDashboardSummary extends StatelessWidget {
   final double income;
@@ -15,6 +17,9 @@ class FinancialDashboardSummary extends StatelessWidget {
   final double prevExpense;
   final double prevTotal;
   final bool isLoading;
+  final String period;
+  final DateTime? targetDate;
+  final AppDateTimeRange? customRange;
 
   const FinancialDashboardSummary({
     super.key,
@@ -25,6 +30,9 @@ class FinancialDashboardSummary extends StatelessWidget {
     required this.prevExpense,
     required this.prevTotal,
     this.isLoading = false,
+    this.period = 'Monthly',
+    this.targetDate,
+    this.customRange,
   });
 
   String _formatPercentage(double current, double previous) {
@@ -63,6 +71,19 @@ class FinancialDashboardSummary extends StatelessWidget {
       builder: (context, state) {
         final isMasked = state.isBalanceSensorEnabled;
 
+        final incomePercentageStr = _formatPercentage(income, prevIncome);
+        final incomePercentageColor = _getPercentageColor(income, prevIncome);
+
+        final expensePercentageStr = _formatPercentage(expense, prevExpense);
+        final expensePercentageColor = _getPercentageColor(
+          expense,
+          prevExpense,
+          invert: true,
+        );
+
+        final totalPercentageStr = _formatPercentage(total, prevTotal);
+        final totalPercentageColor = _getPercentageColor(total, prevTotal);
+
         return Skeletonizer(
           enabled: isLoading,
           child: Row(
@@ -73,11 +94,25 @@ class FinancialDashboardSummary extends StatelessWidget {
                   amount: isMasked
                       ? '••••••'
                       : 'Rp ${CurrencyFormatter.format(income.toStringAsFixed(0))}',
-                  percentage: _formatPercentage(income, prevIncome),
-                  percentageColor: _getPercentageColor(income, prevIncome),
+                  percentage: incomePercentageStr,
+                  percentageColor: incomePercentageColor,
                   icon: Icons.trending_up,
                   iconColor: const Color(0xFF10B981),
                   backgroundColor: const Color(0xFF10B981),
+                  onTap: () {
+                    FinancialMetricInfoModal.show(
+                      context,
+                      metricType: 'income',
+                      currentAmount: income,
+                      prevAmount: prevIncome,
+                      percentageStr: incomePercentageStr,
+                      percentageColor: incomePercentageColor,
+                      isMasked: isMasked,
+                      period: period,
+                      targetDate: targetDate,
+                      customRange: customRange,
+                    );
+                  },
                 ),
               ),
               SizedBox(width: 8.w),
@@ -87,15 +122,25 @@ class FinancialDashboardSummary extends StatelessWidget {
                   amount: isMasked
                       ? '••••••'
                       : 'Rp ${CurrencyFormatter.format(expense.toStringAsFixed(0))}',
-                  percentage: _formatPercentage(expense, prevExpense),
-                  percentageColor: _getPercentageColor(
-                    expense,
-                    prevExpense,
-                    invert: true,
-                  ),
+                  percentage: expensePercentageStr,
+                  percentageColor: expensePercentageColor,
                   icon: Icons.trending_down,
                   iconColor: const Color(0xFFEF4444),
                   backgroundColor: const Color(0xFFEF4444),
+                  onTap: () {
+                    FinancialMetricInfoModal.show(
+                      context,
+                      metricType: 'expense',
+                      currentAmount: expense,
+                      prevAmount: prevExpense,
+                      percentageStr: expensePercentageStr,
+                      percentageColor: expensePercentageColor,
+                      isMasked: isMasked,
+                      period: period,
+                      targetDate: targetDate,
+                      customRange: customRange,
+                    );
+                  },
                 ),
               ),
               SizedBox(width: 8.w),
@@ -105,14 +150,28 @@ class FinancialDashboardSummary extends StatelessWidget {
                   amount: isMasked
                       ? '••••••'
                       : 'Rp ${CurrencyFormatter.format(total.abs().toStringAsFixed(0))}',
-                  percentage: _formatPercentage(total, prevTotal),
-                  percentageColor: _getPercentageColor(total, prevTotal),
+                  percentage: totalPercentageStr,
+                  percentageColor: totalPercentageColor,
                   icon: Icons.account_balance_wallet,
                   iconColor: const Color(0xFF6366F1),
                   backgroundColor: const Color(0xFF6366F1),
                   amountColor: total >= 0
                       ? const Color(0xFF10B981)
                       : const Color(0xFFEF4444),
+                  onTap: () {
+                    FinancialMetricInfoModal.show(
+                      context,
+                      metricType: 'total',
+                      currentAmount: total,
+                      prevAmount: prevTotal,
+                      percentageStr: totalPercentageStr,
+                      percentageColor: totalPercentageColor,
+                      isMasked: isMasked,
+                      period: period,
+                      targetDate: targetDate,
+                      customRange: customRange,
+                    );
+                  },
                 ),
               ),
             ],

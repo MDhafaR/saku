@@ -11,20 +11,132 @@ import '../cubit/statistics_cubit.dart';
 import '../cubit/statistics_state.dart';
 
 class CategoryDetailPage extends StatefulWidget {
-  const CategoryDetailPage({super.key});
+  final String period;
+  final DateTime? targetDate;
+  final AppDateTimeRange? customRange;
+
+  const CategoryDetailPage({
+    super.key,
+    this.period = 'Monthly',
+    this.targetDate,
+    this.customRange,
+  });
 
   @override
   State<CategoryDetailPage> createState() => _CategoryDetailPageState();
 }
 
 class _CategoryDetailPageState extends State<CategoryDetailPage> {
-  DateTime selectedDate = DateTime.now();
+  late String currentPeriod;
+  late DateTime selectedDate;
+  AppDateTimeRange? currentCustomRange;
   int? _expandedIndex =
       0; // Default: first card is expanded, null = all collapsed
 
-  String get selectedMonth => DateFormat('MMM yyyy').format(selectedDate);
+  @override
+  void initState() {
+    super.initState();
+    currentPeriod = widget.period;
+    selectedDate = widget.targetDate ?? DateTime.now();
+    currentCustomRange = widget.customRange;
+  }
+
+  String _formatPeriodBadge(String period, DateTime date, AppDateTimeRange? range) {
+    switch (period.toLowerCase()) {
+      case 'daily':
+        return DateFormat('d MMM yyyy', 'id_ID').format(date);
+      case 'monthly':
+        return DateFormat('MMM yyyy', 'id_ID').format(date);
+      case 'yearly':
+        return DateFormat('yyyy', 'id_ID').format(date);
+      case 'custom':
+        if (range != null) {
+          final s = DateFormat('dd/MM', 'id_ID').format(range.start);
+          final e = DateFormat('dd/MM', 'id_ID').format(range.end);
+          return '$s - $e';
+        }
+        return 'Kustom';
+      case 'all':
+      default:
+        return 'Semua Waktu';
+    }
+  }
+
+  Future<void> _handleDateSelectorTap(BuildContext context) async {
+    final cubit = context.read<StatisticsCubit>();
+
+    switch (currentPeriod.toLowerCase()) {
+      case 'daily':
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: selectedDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+        );
+        if (picked != null && mounted) {
+          setState(() {
+            selectedDate = picked;
+          });
+          cubit.loadStatistics(
+            'Daily',
+            targetDate: picked,
+          );
+        }
+        break;
+
+      case 'monthly':
+        await _selectMonthYear(context);
+        break;
+
+      case 'yearly':
+        final pickedYear = await _showYearPicker(context, selectedDate);
+        if (pickedYear != null && mounted) {
+          final newDate = DateTime(pickedYear, selectedDate.month, selectedDate.day);
+          setState(() {
+            selectedDate = newDate;
+          });
+          cubit.loadStatistics(
+            'Yearly',
+            targetDate: newDate,
+          );
+        }
+        break;
+
+      case 'custom':
+        final pickedRange = await showDateRangePicker(
+          context: context,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+          initialDateRange: currentCustomRange != null
+              ? DateTimeRange(
+                  start: currentCustomRange!.start,
+                  end: currentCustomRange!.end,
+                )
+              : null,
+        );
+        if (pickedRange != null && mounted) {
+          final appRange = AppDateTimeRange(
+            start: pickedRange.start,
+            end: pickedRange.end,
+          );
+          setState(() {
+            currentCustomRange = appRange;
+          });
+          cubit.loadStatistics(
+            'Custom',
+            customRange: appRange,
+          );
+        }
+        break;
+
+      case 'all':
+      default:
+        break;
+    }
+  }
 
   Future<void> _selectMonthYear(BuildContext context) async {
+    final cubit = context.read<StatisticsCubit>();
     DateTime tempDate = DateTime(selectedDate.year, selectedDate.month);
 
     final DateTime? picked = await showModalBottomSheet<DateTime>(
@@ -164,8 +276,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                             tempDate = DateTime(tempDate.year, month);
                           });
                         },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
+                        child: Container(
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? Theme.of(context).colorScheme.primary
@@ -192,7 +303,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
 
                   SizedBox(height: 16.h),
 
-                  // Confirm button
+                  // Select button
                   SizedBox(
                     width: double.infinity,
                     child: TextButton(
@@ -227,18 +338,14 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     );
 
     if (picked != null) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       setState(() {
         selectedDate = picked;
       });
 
-      // Load statistics for the selected month
-      final start = DateTime(picked.year, picked.month, 1);
-      final end = DateTime(picked.year, picked.month + 1, 0, 23, 59, 59);
-
-      context.read<StatisticsCubit>().loadStatistics(
-        'Custom',
-        customRange: AppDateTimeRange(start: start, end: end),
+      cubit.loadStatistics(
+        'Monthly',
+        targetDate: picked,
       );
     }
   }
@@ -337,19 +444,12 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) {
-        final start = DateTime(selectedDate.year, selectedDate.month, 1);
-        final end = DateTime(
-          selectedDate.year,
-          selectedDate.month + 1,
-          0,
-          23,
-          59,
-          59,
-        );
-        return locator<StatisticsCubit>()..loadStatistics(
-          'Custom',
-          customRange: AppDateTimeRange(start: start, end: end),
-        );
+        return locator<StatisticsCubit>()
+          ..loadStatistics(
+            currentPeriod,
+            targetDate: selectedDate,
+            customRange: currentCustomRange,
+          );
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -380,7 +480,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
               icon: Icon(
                 Icons.share_outlined,
                 color: Theme.of(context).colorScheme.onSurface,
-                size: 24.sp,
+                size: 20.sp,
               ),
               onPressed: () {},
             ),
@@ -399,11 +499,11 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
 
             if (state is StatisticsLoaded) {
               return SingleChildScrollView(
-                padding: EdgeInsets.all(16.w),
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Section: Total & Month
+                    // Top Section: Total & Month/Period
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -434,7 +534,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                           ],
                         ),
                         GestureDetector(
-                          onTap: () => _selectMonthYear(context),
+                          onTap: currentPeriod.toLowerCase() == 'all'
+                              ? null
+                              : () => _handleDateSelectorTap(context),
                           child: Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 10.w,
@@ -447,30 +549,36 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                             child: Row(
                               children: [
                                 Text(
-                                  selectedMonth,
+                                  _formatPeriodBadge(
+                                    currentPeriod,
+                                    selectedDate,
+                                    currentCustomRange,
+                                  ),
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w600,
                                     color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                 ),
-                                SizedBox(width: 2.w),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  size: 14.sp,
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                ),
+                                if (currentPeriod.toLowerCase() != 'all') ...[
+                                  SizedBox(width: 2.w),
+                                  Icon(
+                                    Icons.keyboard_arrow_down,
+                                    size: 14.sp,
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                  ),
+                                ],
                               ],
                             ),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 10.h),
 
                     // Comparison Chart
                     ExpenseComparisonChart(categories: state.categoryBreakdown),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 10.h),
 
                     // Category Cards with expand/collapse
                     if (state.categoryBreakdown.isEmpty)
@@ -489,10 +597,13 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                             item: item,
                             isExpanded: _expandedIndex == index,
                             onTap: () => _onCardTap(index),
+                            period: currentPeriod,
+                            targetDate: selectedDate,
+                            customRange: currentCustomRange,
                           ),
                         );
                       }),
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 10.h),
                   ],
                 ),
               );

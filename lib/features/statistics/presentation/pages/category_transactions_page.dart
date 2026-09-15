@@ -1,191 +1,609 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/injection.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../components/category_transactions_info_modal.dart';
+import '../components/description_transactions_info_modal.dart';
+import '../cubit/statistics_state.dart';
 
-class CategoryTransactionsPage extends StatelessWidget {
+enum CategorySortOption {
+  dateDesc,
+  dateAsc,
+  amountDesc,
+  amountAsc,
+}
+
+extension CategorySortOptionExt on CategorySortOption {
+  String get label {
+    switch (this) {
+      case CategorySortOption.dateDesc:
+        return 'Terbaru';
+      case CategorySortOption.dateAsc:
+        return 'Terlama';
+      case CategorySortOption.amountDesc:
+        return 'Terbesar';
+      case CategorySortOption.amountAsc:
+        return 'Terkecil';
+    }
+  }
+
+  String get description {
+    switch (this) {
+      case CategorySortOption.dateDesc:
+        return 'Tanggal terbaru ke terlama';
+      case CategorySortOption.dateAsc:
+        return 'Tanggal terlama ke terbaru';
+      case CategorySortOption.amountDesc:
+        return 'Nominal pengeluaran tertinggi';
+      case CategorySortOption.amountAsc:
+        return 'Nominal pengeluaran terendah';
+    }
+  }
+
+  IconData get icon {
+    switch (this) {
+      case CategorySortOption.dateDesc:
+        return Icons.calendar_today_rounded;
+      case CategorySortOption.dateAsc:
+        return Icons.history_rounded;
+      case CategorySortOption.amountDesc:
+        return Icons.trending_up_rounded;
+      case CategorySortOption.amountAsc:
+        return Icons.trending_down_rounded;
+    }
+  }
+}
+
+class CategoryTransactionsPage extends StatefulWidget {
+  final int categoryId;
   final String categoryName;
-  final IconData? icon;
-  final String? iconName;
+  final String iconName;
   final Color color;
-  final List<Transaction> transactions;
-  final String? totalAmount;
+  final double totalAmount;
+  final double percentage;
+  final String? trendValue;
+  final bool isTrendUp;
+  final String period;
+  final DateTime targetDate;
+  final AppDateTimeRange? customRange;
+  final List<Transaction> initialTransactions;
 
   const CategoryTransactionsPage({
     super.key,
+    required this.categoryId,
     required this.categoryName,
-    this.icon,
-    this.iconName,
+    required this.iconName,
     required this.color,
-    required this.transactions,
-    this.totalAmount,
+    required this.totalAmount,
+    this.percentage = 0.0,
+    this.trendValue,
+    this.isTrendUp = false,
+    this.period = 'Monthly',
+    required this.targetDate,
+    this.customRange,
+    this.initialTransactions = const [],
   });
 
-  String _calculateTotal() {
-    if (totalAmount != null) return totalAmount!;
+  @override
+  State<CategoryTransactionsPage> createState() =>
+      _CategoryTransactionsPageState();
+}
 
-    double total = 0;
-    for (final tx in transactions) {
-      total += tx.amount;
+class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
+  late Future<List<Transaction>> _transactionsFuture;
+  CategorySortOption _selectedSort = CategorySortOption.dateDesc;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTransactions();
+  }
+
+  DateTimeRange _computeRange(
+    String period,
+    DateTime anchor,
+    AppDateTimeRange? customRange,
+  ) {
+    DateTime start;
+    DateTime end;
+    switch (period.toLowerCase()) {
+      case 'daily':
+        start = DateTime(anchor.year, anchor.month, anchor.day);
+        end = DateTime(anchor.year, anchor.month, anchor.day, 23, 59, 59);
+        break;
+      case 'monthly':
+        start = DateTime(anchor.year, anchor.month, 1);
+        final daysInMonth = DateTime(anchor.year, anchor.month + 1, 0).day;
+        end = DateTime(anchor.year, anchor.month, daysInMonth, 23, 59, 59);
+        break;
+      case 'yearly':
+        start = DateTime(anchor.year, 1, 1);
+        end = DateTime(anchor.year, 12, 31, 23, 59, 59);
+        break;
+      case 'custom':
+        if (customRange != null) {
+          start = customRange.start;
+          end = DateTime(
+            customRange.end.year,
+            customRange.end.month,
+            customRange.end.day,
+            23,
+            59,
+            59,
+          );
+        } else {
+          start = DateTime(anchor.year, anchor.month, 1);
+          end = DateTime.now();
+        }
+        break;
+      case 'all':
+      default:
+        start = DateTime(2000);
+        end = DateTime.now();
+        break;
     }
+    return DateTimeRange(start: start, end: end);
+  }
 
-    return CurrencyFormatter.formatRupiah(total);
+  void _loadTransactions() {
+    final range = _computeRange(
+      widget.period,
+      widget.targetDate,
+      widget.customRange,
+    );
+    _transactionsFuture = locator<AppDatabase>()
+        .transactionDao
+        .getTransactionsByCategory(
+          widget.categoryId,
+          range.start,
+          range.end,
+        )
+        .then((list) {
+          if (list.isEmpty && widget.initialTransactions.isNotEmpty) {
+            return widget.initialTransactions;
+          }
+          return list;
+        });
+  }
+
+  List<Transaction> _sortTransactions(List<Transaction> txList) {
+    final list = List<Transaction>.from(txList);
+    switch (_selectedSort) {
+      case CategorySortOption.dateDesc:
+        list.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
+        break;
+      case CategorySortOption.dateAsc:
+        list.sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
+        break;
+      case CategorySortOption.amountDesc:
+        list.sort((a, b) => b.amount.compareTo(a.amount));
+        break;
+      case CategorySortOption.amountAsc:
+        list.sort((a, b) => a.amount.compareTo(b.amount));
+        break;
+    }
+    return list;
+  }
+
+  void _showSortBottomSheet(BuildContext context, ColorScheme cs) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36.w,
+                    height: 4.h,
+                    margin: EdgeInsets.only(bottom: 16.h),
+                    decoration: BoxDecoration(
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                ),
+                Text(
+                  'Urutkan Riwayat Transaksi',
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    fontWeight: FontWeight.w700,
+                    color: cs.onSurface,
+                  ),
+                ),
+                SizedBox(height: 4.h),
+                Text(
+                  'Pilih prioritas tampilan data riwayat kategori ini',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+                SizedBox(height: 14.h),
+                ...CategorySortOption.values.map((option) {
+                  final isSelected = _selectedSort == option;
+                  return Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedSort = option;
+                        });
+                        Navigator.pop(ctx);
+                      },
+                      borderRadius: BorderRadius.circular(14.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                          vertical: 11.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? widget.color.withValues(alpha: 0.12)
+                              : cs.surfaceContainerHighest.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(
+                            color: isSelected
+                                ? widget.color
+                                : cs.outlineVariant.withValues(alpha: 0.4),
+                            width: isSelected ? 1.5 : 1,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(8.w),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? widget.color.withValues(alpha: 0.2)
+                                    : cs.surfaceContainerHighest,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                option.icon,
+                                size: 16.sp,
+                                color: isSelected ? widget.color : cs.onSurfaceVariant,
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    option.label,
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w600,
+                                      color: isSelected
+                                          ? cs.onSurface
+                                          : cs.onSurface,
+                                    ),
+                                  ),
+                                  SizedBox(height: 1.h),
+                                  Text(
+                                    option.description,
+                                    style: TextStyle(
+                                      fontSize: 10.sp,
+                                      color: cs.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (isSelected)
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: widget.color,
+                                size: 20.sp,
+                              )
+                            else
+                              Container(
+                                width: 18.w,
+                                height: 18.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: cs.outlineVariant.withValues(alpha: 0.6),
+                                    width: 1.5,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+                SizedBox(height: 8.h),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
-            color: const Color(0xFF1F2937),
+            color: cs.onSurface,
             size: 20.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          categoryName,
+          widget.categoryName,
           style: TextStyle(
-            fontSize: 18.sp,
+            fontSize: 15.sp,
             fontWeight: FontWeight.w700,
-            color: const Color(0xFF111111),
+            color: cs.onSurface,
           ),
         ),
         centerTitle: true,
+        actions: [
+          FutureBuilder<List<Transaction>>(
+            future: _transactionsFuture,
+            builder: (context, snapshot) {
+              final txs = snapshot.data ?? widget.initialTransactions;
+              return IconButton(
+                icon: Icon(
+                  Icons.info_outline_rounded,
+                  color: cs.onSurface,
+                  size: 20.sp,
+                ),
+                onPressed: () {
+                  CategoryTransactionsInfoModal.show(
+                    context,
+                    categoryName: widget.categoryName,
+                    iconName: widget.iconName,
+                    categoryColor: widget.color,
+                    totalAmount: widget.totalAmount,
+                    percentage: widget.percentage,
+                    trendValue: widget.trendValue,
+                    isTrendUp: widget.isTrendUp,
+                    transactions: txs,
+                    period: widget.period,
+                    targetDate: widget.targetDate,
+                    customRange: widget.customRange,
+                  );
+                },
+              );
+            },
+          ),
+          SizedBox(width: 8.w),
+        ],
       ),
-      body: transactions.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              itemCount: transactions.length + 1, // +1 for header
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return _buildHeader();
-                }
-                final tx = transactions[index - 1];
-                return _buildTransactionItem(
-                  context,
-                  tx,
-                  index == transactions.length,
-                );
-              },
-            ),
+      body: FutureBuilder<List<Transaction>>(
+        future: _transactionsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final rawTxList = snapshot.data ?? widget.initialTransactions;
+
+          if (rawTxList.isEmpty) {
+            return _buildEmptyState(cs);
+          }
+
+          final txList = _sortTransactions(rawTxList);
+
+          return ListView.builder(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+            itemCount: txList.length + 1, // +1 for header
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return _buildHeader(cs, rawTxList.length);
+              }
+              final tx = txList[index - 1];
+              return _buildTransactionItem(cs, tx, rawTxList);
+            },
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(ColorScheme cs, int totalCount) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Total Summary Card
         SakuCard(
-          padding: EdgeInsets.all(20.w),
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.all(14.w),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(14.w),
+                padding: EdgeInsets.all(10.w),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.15),
+                  color: widget.color.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: color, size: 28.sp),
+                child: CategoryIcon(
+                  iconName: widget.iconName,
+                  color: widget.color,
+                  size: 22.sp,
+                ),
               ),
-              SizedBox(width: 16.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total $categoryName',
+                      'Total ${widget.categoryName}',
                       style: TextStyle(
-                        fontSize: 13.sp,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w500,
-                        color: Colors.grey[600],
+                        color: cs.onSurfaceVariant,
                       ),
                     ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      _calculateTotal(),
-                      style: TextStyle(
-                        fontSize: 24.sp,
-                        fontWeight: FontWeight.w800,
-                        color: const Color(0xFF111111),
-                        letterSpacing: -0.5,
+                    SizedBox(height: 2.h),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        CurrencyFormatter.formatRupiah(widget.totalAmount),
+                        style: TextStyle(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                          color: cs.onSurface,
+                          letterSpacing: -0.5,
+                        ),
+                        maxLines: 1,
                       ),
                     ),
                   ],
                 ),
               ),
+              SizedBox(width: 8.w),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(20.r),
+                  color: cs.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(14.r),
                 ),
                 child: Text(
-                  '${transactions.length} Transaksi',
+                  '$totalCount Transaksi',
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF6B7280),
+                    color: cs.onSurface,
                   ),
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 20.h),
-        // Section Title
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            'Riwayat Transaksi',
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[700],
-            ),
-          ),
-        ),
         SizedBox(height: 12.h),
+
+        // Section Title with Filter/Sort button opposite to it
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Riwayat Transaksi',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
+            ),
+            _buildSortFilterButton(cs),
+          ],
+        ),
+        SizedBox(height: 8.h),
       ],
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildSortFilterButton(ColorScheme cs) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showSortBottomSheet(context, cs),
+        borderRadius: BorderRadius.circular(20.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+          decoration: BoxDecoration(
+            color: cs.surfaceContainerHighest.withValues(alpha: 0.7),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: cs.outlineVariant.withValues(alpha: 0.5),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _selectedSort.icon,
+                size: 13.sp,
+                color: widget.color,
+              ),
+              SizedBox(width: 5.w),
+              Text(
+                _selectedSort.label,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurface,
+                ),
+              ),
+              SizedBox(width: 3.w),
+              Icon(
+                Icons.keyboard_arrow_down_rounded,
+                size: 14.sp,
+                color: cs.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(ColorScheme cs) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.all(24.w),
+            padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: widget.color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, size: 48.sp, color: color),
+            child: CategoryIcon(
+              iconName: widget.iconName,
+              size: 40.sp,
+              color: widget.color,
+            ),
           ),
-          SizedBox(height: 24.h),
+          SizedBox(height: 16.h),
           Text(
             'Belum ada transaksi',
             style: TextStyle(
-              fontSize: 18.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w700,
-              color: const Color(0xFF111111),
+              color: cs.onSurface,
             ),
           ),
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
           Text(
-            'Transaksi untuk kategori $categoryName\nakan muncul di sini',
+            'Transaksi untuk kategori ${widget.categoryName}\nakan muncul di sini',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.sp, color: const Color(0xFF6B7280)),
+            style: TextStyle(fontSize: 12.sp, color: cs.onSurfaceVariant),
           ),
         ],
       ),
@@ -193,274 +611,90 @@ class CategoryTransactionsPage extends StatelessWidget {
   }
 
   Widget _buildTransactionItem(
-    BuildContext context,
+    ColorScheme cs,
     Transaction tx,
-    bool isLast,
+    List<Transaction> allCategoryTransactions,
   ) {
+    final formattedDate =
+        DateFormat('d MMMM yyyy', 'id_ID').format(tx.transactionDate);
+    final targetDescription = tx.description.isNotEmpty
+        ? tx.description
+        : 'Transaksi ${widget.categoryName}';
+
     return Padding(
-      padding: EdgeInsets.only(bottom: isLast ? 0 : 8.h),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: SakuCard(
-        onTap: () => _showTransactionBottomSheet(context, tx),
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+        margin: EdgeInsets.zero,
+        onTap: () {
+          DescriptionTransactionsInfoModal.show(
+            context,
+            description: targetDescription,
+            categoryId: widget.categoryId,
+            categoryName: widget.categoryName,
+            iconName: widget.iconName,
+            categoryColor: widget.color,
+            categoryTotalAmount: widget.totalAmount,
+            allCategoryTransactions: allCategoryTransactions,
+            period: widget.period,
+            targetDate: widget.targetDate,
+            customRange: widget.customRange,
+          );
+        },
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: cs.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(
+                  color: cs.outlineVariant.withValues(alpha: 0.4),
+                ),
               ),
-              child: iconName != null
-                  ? CategoryIcon(iconName: iconName!, color: color, size: 18.sp)
-                  : Icon(icon ?? Icons.category, color: color, size: 18.sp),
+              child: CategoryIcon(
+                iconName: widget.iconName,
+                color: cs.onSurfaceVariant,
+                size: 16.sp,
+              ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(width: 10.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    tx.description,
+                    tx.description.isNotEmpty
+                        ? tx.description
+                        : 'Transaksi ${widget.categoryName}',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF111111),
+                      color: cs.onSurface,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 2.h),
                   Text(
-                    tx.transactionDate.toString().split(' ')[0],
+                    formattedDate,
                     style: TextStyle(
-                      fontSize: 12.sp,
-                      color: const Color(0xFF9CA3AF),
+                      fontSize: 10.sp,
+                      color: cs.onSurfaceVariant,
                     ),
                   ),
                 ],
               ),
             ),
+            SizedBox(width: 8.w),
             Text(
               '-${CurrencyFormatter.formatRupiah(tx.amount)}',
               style: TextStyle(
-                fontSize: 14.sp,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
                 color: const Color(0xFFEF4444),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showTransactionBottomSheet(BuildContext context, Transaction tx) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
-        ),
-        padding: EdgeInsets.all(12.w),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Drag Handle
-            Center(
-              child: Container(
-                width: 48.w,
-                height: 5.h,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(100.r),
-                ),
-              ),
-            ),
-            SizedBox(height: 24.h),
-
-            // Icon
-            Container(
-              width: 88.w,
-              height: 88.w,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.15),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 40.sp),
-            ),
-            SizedBox(height: 16.h),
-
-            // Transaction Description
-            Text(
-              tx.description,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF111111),
-              ),
-            ),
-            SizedBox(height: 8.h),
-
-            // Amount
-            Text(
-              '-${CurrencyFormatter.formatRupiah(tx.amount)}',
-              style: TextStyle(
-                fontSize: 36.sp,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFFEF4444),
-                letterSpacing: -1.0,
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Info Row (Date & Category)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  tx.transactionDate.toString().split(' ')[0],
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    color: Colors.grey[400],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                Container(
-                  margin: EdgeInsets.symmetric(horizontal: 12.w),
-                  width: 4.w,
-                  height: 4.w,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                Text(
-                  categoryName,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24.h),
-
-            // Description Box
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFAFAFA),
-                borderRadius: BorderRadius.circular(24.r),
-                border: Border.all(color: const Color(0xFFF0F0F0)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(icon, color: color, size: 16.sp),
-                      ),
-                      SizedBox(width: 12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Kategori',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                            Text(
-                              categoryName,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF111111),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.h),
-                  Divider(color: Colors.grey[200], height: 1.h),
-                  SizedBox(height: 16.h),
-                  Text(
-                    'Transaksi ${tx.description} pada tanggal ${tx.transactionDate.toString().split(' ')[0]} untuk kategori $categoryName.',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: const Color(0xFF6B7280),
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 16.h),
-
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 18.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
-                        side: BorderSide(
-                          color: Colors.grey[200]!,
-                          width: 1.5.w,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      'Edit',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15.sp,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16.w),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF111111),
-                      elevation: 0,
-                      padding: EdgeInsets.symmetric(vertical: 18.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                    ),
-                    child: Text(
-                      'Delete',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 15.sp,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16.h),
           ],
         ),
       ),

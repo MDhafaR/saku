@@ -9,6 +9,9 @@ import '../components/line_chart_widget.dart';
 import '../components/bar_chart_widget.dart';
 import '../components/donut_chart_widget.dart';
 import '../components/top_categories_widget.dart';
+import '../components/income_expense_chart_info_modal.dart';
+import '../components/category_breakdown_info_modal.dart';
+import '../components/top_categories_info_modal.dart';
 import '../cubit/statistics_cubit.dart';
 import '../cubit/statistics_state.dart' as state;
 import '../../../dashboard/presentation/widgets/financial_dashboard_summary.dart';
@@ -190,6 +193,9 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         prevIncome: s.prevIncome,
                         prevExpense: s.prevExpense,
                         prevTotal: s.prevTotal,
+                        period: s.period,
+                        targetDate: s.targetDate,
+                        customRange: s.customRange,
                       ),
                       SizedBox(height: 10.h),
 
@@ -291,6 +297,41 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                         ),
                                       ),
                                     ),
+                                    SizedBox(width: 6.w),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          IncomeExpenseChartInfoModal.show(
+                                        context,
+                                        chartData: s.chartData,
+                                        period: s.period,
+                                        targetDate: s.targetDate,
+                                        customRange: s.customRange,
+                                        totalIncome: s.totalIncome,
+                                        totalExpense: s.totalExpense,
+                                      ),
+                                      child: Container(
+                                        padding: EdgeInsets.all(6.w),
+                                        decoration: BoxDecoration(
+                                          color: Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Theme.of(context)
+                                                    .colorScheme
+                                                    .surfaceContainerLow
+                                              : const Color(0xFFF3F4F6),
+                                          borderRadius: BorderRadius.circular(
+                                            6.r,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.info_outline_rounded,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurface
+                                              .withValues(alpha: 0.65),
+                                          size: 14.sp,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ],
@@ -314,16 +355,45 @@ class _StatisticsPageState extends State<StatisticsPage> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Category Breakdown',
-                                  style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface,
-                                    letterSpacing: -0.5,
-                                  ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Category Breakdown',
+                                      style: TextStyle(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurface,
+                                        letterSpacing: -0.5,
+                                      ),
+                                    ),
+                                    SizedBox(width: 6.w),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          CategoryBreakdownInfoModal.show(
+                                        context,
+                                        categories: s.categoryBreakdown,
+                                        period: s.period,
+                                        targetDate: s.targetDate,
+                                        customRange: s.customRange,
+                                        totalExpense: s.totalExpense,
+                                      ),
+                                      behavior: HitTestBehavior.opaque,
+                                      child: Padding(
+                                        padding: EdgeInsets.all(2.w),
+                                        child: Icon(
+                                          Icons.info_outline_rounded,
+                                          size: 15.sp,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                              .withValues(alpha: 0.65),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 InkWell(
                                   onTap: () {
@@ -331,7 +401,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const CategoryDetailPage(),
+                                            CategoryDetailPage(
+                                          period: s.period,
+                                          targetDate: s.targetDate,
+                                          customRange: s.customRange,
+                                        ),
                                       ),
                                     );
                                   },
@@ -362,14 +436,42 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Top Categories',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
-                                color: Theme.of(context).colorScheme.onSurface,
-                                letterSpacing: -0.5,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  'Top Categories',
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                SizedBox(width: 6.w),
+                                GestureDetector(
+                                  onTap: () => TopCategoriesInfoModal.show(
+                                    context,
+                                    categories: s.categoryBreakdown,
+                                    period: s.period,
+                                    targetDate: s.targetDate,
+                                    customRange: s.customRange,
+                                    totalExpense: s.totalExpense,
+                                  ),
+                                  behavior: HitTestBehavior.opaque,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(2.w),
+                                    child: Icon(
+                                      Icons.info_outline_rounded,
+                                      size: 15.sp,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withValues(alpha: 0.65),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             SizedBox(height: 10.h),
                             TopCategoriesWidget(

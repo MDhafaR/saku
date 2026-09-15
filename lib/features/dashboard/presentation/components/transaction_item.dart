@@ -39,7 +39,7 @@ class TransactionItem extends StatelessWidget {
   }
 
   Color get _backgroundColor {
-    return _iconColor.withOpacity(0.15);
+    return _iconColor.withValues(alpha: 0.15);
   }
 
   String _formatDateTime() {

@@ -11,12 +11,18 @@ class CategoryDetailCard extends StatelessWidget {
   final CategoryBreakdownItem item;
   final bool isExpanded;
   final VoidCallback? onTap;
+  final String period;
+  final DateTime? targetDate;
+  final AppDateTimeRange? customRange;
 
   const CategoryDetailCard({
     super.key,
     required this.item,
     this.isExpanded = true,
     this.onTap,
+    this.period = 'Monthly',
+    this.targetDate,
+    this.customRange,
   });
 
   @override
@@ -26,6 +32,7 @@ class CategoryDetailCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: SakuCard(
+        margin: EdgeInsets.zero,
         padding: EdgeInsets.all(14.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +100,7 @@ class CategoryDetailCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.h),
+                      SizedBox(height: 6.h),
                       // Progress bar line
                       Stack(
                         children: [
@@ -163,18 +170,18 @@ class CategoryDetailCard extends StatelessWidget {
         Align(
           alignment: Alignment.centerRight,
           child: Container(
-            margin: EdgeInsets.only(top: 8.h),
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+            margin: EdgeInsets.only(top: 6.h),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
             decoration: BoxDecoration(
               color: item.isTrendUp
                   ? const Color(0xFFFEE2E2) // Red bg (increase in expense)
                   : const Color(0xFFDCFCE7), // Green bg (decrease)
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(6.r),
             ),
             child: Text(
               item.isTrendUp ? '↑ ${item.trendValue}' : '↓ ${item.trendValue}',
               style: TextStyle(
-                fontSize: 11.sp,
+                fontSize: 10.sp,
                 fontWeight: FontWeight.w700,
                 color: item.isTrendUp
                     ? const Color(0xFFEF4444)
@@ -185,33 +192,40 @@ class CategoryDetailCard extends StatelessWidget {
         ),
 
         if (item.topTransactions.isNotEmpty) ...[
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Divider(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3), height: 1.h),
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
           Text(
             'Top 3 Transaksi Terbesar',
             style: TextStyle(
               fontSize: 10.sp,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
           ...item.topTransactions.map(
             (tx) => _buildTransactionItem(tx, color, item.icon),
           ),
-          SizedBox(height: 4.h),
+          SizedBox(height: 2.h),
           TextButton(
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => CategoryTransactionsPage(
+                    categoryId: item.id,
                     categoryName: item.name,
                     iconName: item.icon,
                     color: color,
-                    transactions: item.topTransactions,
-                    totalAmount: CurrencyFormatter.formatRupiah(item.amount),
+                    totalAmount: item.amount,
+                    percentage: item.percentage,
+                    trendValue: item.trendValue,
+                    isTrendUp: item.isTrendUp,
+                    period: period,
+                    targetDate: targetDate ?? DateTime.now(),
+                    customRange: customRange,
+                    initialTransactions: item.topTransactions,
                   ),
                 ),
               );
@@ -239,15 +253,15 @@ class CategoryDetailCard extends StatelessWidget {
     return Builder(
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.only(bottom: 10.h),
+          padding: EdgeInsets.only(bottom: 8.h),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(8.w),
+                padding: EdgeInsets.all(6.w),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5)),
                 ),
                 child: CategoryIcon(
                   iconName: iconName,

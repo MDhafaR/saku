@@ -12,6 +12,7 @@ class FinancialSummaryCard extends StatelessWidget {
   final Color backgroundColor;
   final Color? percentageColor;
   final Color? amountColor;
+  final VoidCallback? onTap;
 
   const FinancialSummaryCard({
     super.key,
@@ -23,11 +24,13 @@ class FinancialSummaryCard extends StatelessWidget {
     required this.backgroundColor,
     this.percentageColor,
     this.amountColor,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return SakuCard(
+      onTap: onTap,
       margin: EdgeInsets.zero,
       padding: EdgeInsets.all(10.w),
       borderRadius: 20.r,

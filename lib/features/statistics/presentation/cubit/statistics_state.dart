@@ -57,11 +57,13 @@ class ChartDataPoint {
   final DateTime date;
   final double income;
   final double expense;
+  final String? customLabel;
 
   const ChartDataPoint({
     required this.date,
     required this.income,
     required this.expense,
+    this.customLabel,
   });
 }
 

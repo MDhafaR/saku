@@ -258,6 +258,32 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     return row.read(amountSum) ?? 0.0;
   }
 
+  /// Get the earliest transaction date in the database
+  Future<DateTime?> getEarliestTransactionDate() async {
+    final query = select(transactions)
+      ..orderBy([(t) => OrderingTerm.asc(t.transactionDate)])
+      ..limit(1);
+    final result = await query.getSingleOrNull();
+    return result?.transactionDate;
+  }
+
+  /// Get hourly income/expense totals for a date range (used in Daily filter)
+  Future<List<TypedResult>> getHourlyStats(DateTime start, DateTime end) {
+    final amountSum = transactions.amount.sum();
+    final hourExpr = transactions.transactionDate.strftime('%H');
+
+    final query = select(transactions).join([]);
+    query.where(
+      transactions.transactionDate.isBiggerOrEqualValue(start) &
+          transactions.transactionDate.isSmallerOrEqualValue(end),
+    );
+
+    query.addColumns([amountSum, transactions.type, hourExpr]);
+    query.groupBy([hourExpr, transactions.type]);
+
+    return query.get();
+  }
+
   /// Get daily income/expense totals for a date range
   Future<List<TypedResult>> getDailyStats(DateTime start, DateTime end) {
     final amountSum = transactions.amount.sum();
@@ -290,6 +316,23 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
 
     query.addColumns([amountSum, transactions.type, monthExpr]);
     query.groupBy([monthExpr, transactions.type]);
+
+    return query.get();
+  }
+
+  /// Get yearly income/expense totals for a date range
+  Future<List<TypedResult>> getYearlyStats(DateTime start, DateTime end) {
+    final amountSum = transactions.amount.sum();
+    final yearExpr = transactions.transactionDate.strftime('%Y');
+
+    final query = select(transactions).join([]);
+    query.where(
+      transactions.transactionDate.isBiggerOrEqualValue(start) &
+          transactions.transactionDate.isSmallerOrEqualValue(end),
+    );
+
+    query.addColumns([amountSum, transactions.type, yearExpr]);
+    query.groupBy([yearExpr, transactions.type]);
 
     return query.get();
   }

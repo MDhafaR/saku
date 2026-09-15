@@ -71,12 +71,12 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
   String _formatPointDate(DateTime date, String period) {
     switch (period.toLowerCase()) {
       case 'yearly':
+      case 'all':
         return DateFormat('MMMM yyyy', 'id_ID').format(date);
       case 'daily':
-        return DateFormat('d MMM yyyy, HH:mm', 'id_ID').format(date);
+        return DateFormat('HH:mm', 'id_ID').format(date);
       case 'monthly':
       case 'custom':
-      case 'all':
       default:
         return DateFormat('d MMMM yyyy', 'id_ID').format(date);
     }
@@ -85,12 +85,12 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
   String _formatPointDateBadge(DateTime date, String period) {
     switch (period.toLowerCase()) {
       case 'yearly':
-        return DateFormat('MMMM yyyy', 'id_ID').format(date);
+      case 'all':
+        return DateFormat('MMM yyyy', 'id_ID').format(date);
       case 'daily':
         return DateFormat('HH:mm', 'id_ID').format(date);
       case 'monthly':
       case 'custom':
-      case 'all':
       default:
         return DateFormat('d MMM yyyy', 'id_ID').format(date);
     }
@@ -99,12 +99,12 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
   String _getTemporalPreposition(String period) {
     switch (period.toLowerCase()) {
       case 'yearly':
+      case 'all':
         return 'pada bulan';
       case 'daily':
         return 'pada pukul';
       case 'monthly':
       case 'custom':
-      case 'all':
       default:
         return 'pada tanggal';
     }

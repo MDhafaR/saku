@@ -73,7 +73,7 @@ class TransferDao extends DatabaseAccessor<AppDatabase>
     )..where((tbl) => tbl.id.equals(entry.toWalletId.value))).getSingle();
 
     // Calculate new balances
-    final totalDeduction = entry.amount.value + (entry.fee.value ?? 0);
+    final totalDeduction = entry.amount.value + entry.fee.value;
     final newFromBalance = fromWallet.currentBalance - totalDeduction;
     final newToBalance = toWallet.currentBalance + entry.amount.value;
 

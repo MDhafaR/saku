@@ -47,8 +47,9 @@ class AppDatabase extends _$AppDatabase {
     return MigrationStrategy(
       onCreate: (Migrator m) async {
         await m.createAll();
-        // Seed default categories
-        await _seedDefaultCategories();
+        // Seed default categories & wallet
+        await seedDefaultCategories();
+        await seedDefaultWallet();
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 3) {
@@ -75,7 +76,7 @@ class AppDatabase extends _$AppDatabase {
   DebtDao get debtDao => DebtDao(this);
 
   /// Seeds the database with default expense and income categories
-  Future<void> _seedDefaultCategories() async {
+  Future<void> seedDefaultCategories() async {
     final defaultExpenseCategories = [
       CategoriesCompanion.insert(
         name: 'Food & Drinks',
@@ -182,6 +183,21 @@ class AppDatabase extends _$AppDatabase {
       batch.insertAll(categories, defaultExpenseCategories);
       batch.insertAll(categories, defaultIncomeCategories);
     });
+  }
+
+  /// Seeds default main wallet if none exists
+  Future<int> seedDefaultWallet() async {
+    return into(wallets).insert(
+      WalletsCompanion.insert(
+        name: 'Dompet Utama',
+        type: 'cash',
+        initialBalance: const Value(0.0),
+        currentBalance: const Value(0.0),
+        icon: const Value('wallet'),
+        iconColor: const Value(0xFF4CAF50),
+        isMain: const Value(true),
+      ),
+    );
   }
 }
 

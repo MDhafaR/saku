@@ -9,6 +9,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../data/local/database/app_database.dart';
 import 'services/google_drive_service.dart';
 import 'services/backup_service.dart';
+import 'services/smart_transaction_parser.dart';
+import 'services/sharing_intent_service.dart';
 
 final GetIt locator = GetIt.instance;
 
@@ -50,4 +52,10 @@ Future<void> setupLocator() async {
   );
 
   locator.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
+
+  // Mind Space & External Sharing Intent Services
+  locator.registerLazySingleton<SmartTransactionParser>(() => SmartTransactionParser());
+  locator.registerLazySingleton<SharingIntentService>(
+    () => SharingIntentService(locator<SmartTransactionParser>()),
+  );
 }

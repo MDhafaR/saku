@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../cubit/statistics_state.dart';
 
@@ -28,9 +29,11 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
       );
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
-      height: 160,
-      padding: const EdgeInsets.all(12),
+      height: 150.h,
+      padding: EdgeInsets.zero,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -51,7 +54,7 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                 },
               ),
               sectionsSpace: 2,
-              centerSpaceRadius: 45,
+              centerSpaceRadius: 42.r,
               sections: List.generate(widget.categories.length, (index) {
                 final isTouched = index == touchedIndex;
                 final category = widget.categories[index];
@@ -59,9 +62,9 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                   color: Color(category.color),
                   value: category.amount,
                   title: '',
-                  radius: isTouched ? 48 : 40,
+                  radius: isTouched ? 44.r : 36.r,
                   borderSide: isTouched
-                      ? const BorderSide(color: Colors.white, width: 3)
+                      ? BorderSide(color: colorScheme.surface, width: 2.5)
                       : BorderSide.none,
                 );
               }),
@@ -77,42 +80,42 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
                     children: [
                       Text(
                         widget.categories[touchedIndex].name,
-                        style: const TextStyle(
-                          fontSize: 12,
+                        style: TextStyle(
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF111111),
+                          color: colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2.h),
                       Text(
                         '${widget.categories[touchedIndex].percentage.toStringAsFixed(1)}%',
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF111111),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],
                   )
-                : const Column(
+                : Column(
                     mainAxisSize: MainAxisSize.min,
-                    key: ValueKey('default'),
+                    key: const ValueKey('default'),
                     children: [
                       Text(
                         'Total',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 11.sp,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF6B7280),
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
-                      const SizedBox(height: 2),
+                      SizedBox(height: 2.h),
                       Text(
                         '100%',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 15.sp,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF111111),
+                          color: colorScheme.onSurface,
                         ),
                       ),
                     ],

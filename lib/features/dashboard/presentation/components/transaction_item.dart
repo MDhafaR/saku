@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -31,11 +32,7 @@ class TransactionItem extends StatelessWidget {
     return isIncome ? '+Rp $formatted' : '-Rp $formatted';
   }
 
-  IconData get _icon {
-    // Map category icon name to IconData
-    final iconName = category?.icon ?? 'category';
-    return _iconFromName(iconName);
-  }
+  String get _iconName => category?.icon ?? 'category';
 
   Color get _iconColor {
     return Color(category?.iconColor ?? 0xFF2196F3);
@@ -43,25 +40,6 @@ class TransactionItem extends StatelessWidget {
 
   Color get _backgroundColor {
     return _iconColor.withOpacity(0.15);
-  }
-
-  static IconData _iconFromName(String name) {
-    const iconMap = {
-      'restaurant': Icons.restaurant,
-      'directions_car': Icons.directions_car,
-      'shopping_cart': Icons.shopping_cart,
-      'receipt': Icons.receipt,
-      'movie': Icons.movie,
-      'medical_services': Icons.medical_services,
-      'school': Icons.school,
-      'flight': Icons.flight,
-      'payments': Icons.payments,
-      'business': Icons.business,
-      'card_giftcard': Icons.card_giftcard,
-      'trending_up': Icons.trending_up,
-      'category': Icons.category,
-    };
-    return iconMap[name] ?? Icons.category;
   }
 
   String _formatDateTime() {
@@ -90,9 +68,20 @@ class TransactionItem extends StatelessWidget {
     return '$dateLabel, $timeLabel';
   }
 
+  String? get _noteText {
+    if (transaction.description.trim().isNotEmpty) {
+      return transaction.description.trim();
+    }
+    if (transaction.note != null && transaction.note!.trim().isNotEmpty) {
+      return transaction.note!.trim();
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SakuCard(
+      margin: EdgeInsets.only(bottom: 8.h),
       onTap: () {
         showModalBottomSheet(
           context: context,
@@ -105,13 +94,18 @@ class TransactionItem extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36.w,
-            height: 36.w,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: _backgroundColor,
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(_icon, color: _iconColor, size: 18.sp),
+            alignment: Alignment.center,
+            child: CategoryIcon(
+              iconName: _iconName,
+              color: _iconColor,
+              size: 20.sp,
+            ),
           ),
           SizedBox(width: 10.w),
           Expanded(
@@ -126,7 +120,22 @@ class TransactionItem extends StatelessWidget {
                     color: Theme.of(context).colorScheme.onSurface,
                     letterSpacing: -0.3,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
+                if (_noteText != null) ...[
+                  SizedBox(height: 2.h),
+                  Text(
+                    _noteText!,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
                 SizedBox(height: 2.h),
                 Text(
                   wallet?.name ?? 'Unknown Wallet',
@@ -135,6 +144,8 @@ class TransactionItem extends StatelessWidget {
                     color: Colors.grey[500],
                     fontWeight: FontWeight.w500,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -192,7 +203,11 @@ class TransactionItem extends StatelessWidget {
                   color: _backgroundColor,
                   borderRadius: BorderRadius.circular(16.r),
                 ),
-                child: Icon(_icon, color: _iconColor, size: 26.sp),
+                child: CategoryIcon(
+                  iconName: _iconName,
+                  color: _iconColor,
+                  size: 26.sp,
+                ),
               ),
               SizedBox(width: 14.w),
               // Details

@@ -35,40 +35,50 @@ class StatisticsSummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(6.w),
+                padding: EdgeInsets.all(5.w),
                 decoration: BoxDecoration(
-                  color: backgroundColor.withOpacity(0.15),
+                  color: backgroundColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Icon(icon, color: backgroundColor, size: 16.sp),
+                child: Icon(icon, color: backgroundColor, size: 15.sp),
               ),
               SizedBox(width: 4.w),
-              Flexible(
+              Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: 4.h),
-                  child: Text(
-                    percentage,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: percentageColor,
+                  padding: EdgeInsets.only(top: 2.h),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        percentage,
+                        style: TextStyle(
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: percentageColor,
+                        ),
+                        maxLines: 1,
+                      ),
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
             ],
           ),
           SizedBox(height: 8.h),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 11.sp,
-              color: const Color(0xFF6B7280),
-              fontWeight: FontWeight.w500,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              title,
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: const Color(0xFF6B7280),
+                fontWeight: FontWeight.w500,
+              ),
+              maxLines: 1,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
           SizedBox(height: 2.h),
           FittedBox(

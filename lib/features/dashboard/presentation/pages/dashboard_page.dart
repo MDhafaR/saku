@@ -14,7 +14,6 @@ import '../components/filter_bottom_sheet.dart';
 import '../components/transaction_section.dart';
 import '../cubit/transaction_cubit.dart';
 import '../cubit/transaction_state.dart';
-import '../widgets/financial_dashboard_summary.dart';
 import '../../../settings/presentation/cubit/theme_cubit.dart';
 
 /// Dashboard page showing recent transactions and summary information.
@@ -159,23 +158,13 @@ class _DashboardPageState extends State<DashboardPage> {
     await _cubit.deleteTransaction(id);
   }
 
-  double _calculateIncome(List<Transaction> transactions) {
-    return transactions
-        .where((t) => t.type == 'income')
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
-  }
-
-  double _calculateExpense(List<Transaction> transactions) {
-    return transactions
-        .where((t) => t.type == 'expense')
-        .fold<double>(0.0, (sum, t) => sum + t.amount);
-  }
-
   bool _isSameMonth(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.month == date2.month;
   }
 
-  List<Transaction> _getFilteredTransactions(List<Transaction> allTransactions) {
+  List<Transaction> _getFilteredTransactions(
+    List<Transaction> allTransactions,
+  ) {
     final now = DateTime.now();
     final minimumDate = DateTime(
       now.year,
@@ -230,7 +219,8 @@ class _DashboardPageState extends State<DashboardPage> {
           !_activeFilter.categoryIds.contains(transaction.categoryId)) {
         return false;
       }
-      final hasAmountFilter = _activeFilter.amountUpperBound > 0 &&
+      final hasAmountFilter =
+          _activeFilter.amountUpperBound > 0 &&
           (_activeFilter.amountRange.start > 0 ||
               _activeFilter.amountRange.end < _activeFilter.amountUpperBound);
       if (hasAmountFilter &&
@@ -348,7 +338,11 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       child: Row(
         children: [
-          Icon(Icons.filter_alt_outlined, size: 14.sp, color: cs.onSurface.withValues(alpha: 0.6)),
+          Icon(
+            Icons.filter_alt_outlined,
+            size: 14.sp,
+            color: cs.onSurface.withValues(alpha: 0.6),
+          ),
           SizedBox(width: 6.w),
           Expanded(
             child: Text(
@@ -442,7 +436,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                       height: 4.h,
                                       margin: EdgeInsets.only(bottom: 16.h),
                                       decoration: BoxDecoration(
-                                        color: cs.onSurface.withValues(alpha: 0.2),
+                                        color: cs.onSurface.withValues(
+                                          alpha: 0.2,
+                                        ),
                                         borderRadius: BorderRadius.circular(
                                           2.r,
                                         ),
@@ -494,7 +490,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                                     : FontWeight.w500,
                                                 color: isYearSelected
                                                     ? cs.surface
-                                                    : cs.onSurface.withValues(alpha: 0.6),
+                                                    : cs.onSurface.withValues(
+                                                        alpha: 0.6,
+                                                      ),
                                               ),
                                             ),
                                           ),
@@ -678,30 +676,9 @@ class _DashboardPageState extends State<DashboardPage> {
               }
               _allTransactions = allTransactions;
 
-              // Base for summary cards (month focused)
-              final currentTransactions = allTransactions
-                  .where((t) => _isSameMonth(t.transactionDate, _selectedDate))
-                  .toList();
               final filteredTransactions = _getFilteredTransactions(
                 allTransactions,
               );
-
-              // Filter for previous month
-              final prevDate = DateTime(
-                _selectedDate.year,
-                _selectedDate.month - 1,
-              );
-              final prevTransactions = allTransactions
-                  .where((t) => _isSameMonth(t.transactionDate, prevDate))
-                  .toList();
-
-              final income = _calculateIncome(currentTransactions);
-              final expense = _calculateExpense(currentTransactions);
-              final total = income - expense;
-
-              final prevIncome = _calculateIncome(prevTransactions);
-              final prevExpense = _calculateExpense(prevTransactions);
-              final prevTotal = prevIncome - prevExpense;
 
               return Column(
                 children: [
@@ -711,7 +688,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     color: Theme.of(context).scaffoldBackgroundColor,
                     child: Column(
                       children: [
-                        SizedBox(height: 16.h),
+                        SizedBox(height: 8.h),
                         _buildHeader(),
 
                         // Month navigation
@@ -721,17 +698,6 @@ class _DashboardPageState extends State<DashboardPage> {
                           onPreviousMonth: _onPreviousMonth,
                           onNextMonth: _onNextMonth,
                           onMonthTap: _selectMonthYear,
-                        ),
-
-                        // Summary cards with real data
-                        FinancialDashboardSummary(
-                          income: income,
-                          expense: expense,
-                          total: total,
-                          prevIncome: prevIncome,
-                          prevExpense: prevExpense,
-                          prevTotal: prevTotal,
-                          isLoading: _isLoading,
                         ),
 
                         // Search bar
@@ -763,7 +729,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildHeader() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -782,7 +748,9 @@ class _DashboardPageState extends State<DashboardPage> {
           child: Container(
             padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
-              color: isDark ? colorScheme.surfaceContainerHighest : Colors.grey[100],
+              color: isDark
+                  ? colorScheme.surfaceContainerHighest
+                  : Colors.grey[100],
               borderRadius: BorderRadius.circular(20.r),
             ),
             child: Icon(
@@ -830,28 +798,28 @@ class _DashboardPageState extends State<DashboardPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-              Icons.receipt_long_outlined,
-              size: 64.sp,
-              color: Colors.grey[300],
-            ),
-            SizedBox(height: 16.h),
-            Text(
-              'Belum ada transaksi',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey[500],
+                Icons.receipt_long_outlined,
+                size: 64.sp,
+                color: Colors.grey[300],
               ),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Tap tombol + untuk menambah transaksi',
-              style: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
-            ),
-          ],
+              SizedBox(height: 16.h),
+              Text(
+                'Belum ada transaksi',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[500],
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'Tap tombol + untuk menambah transaksi',
+                style: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
     }
 
     // Convert transactions to TransactionWithDetails
@@ -869,7 +837,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 24.h),
+      padding: EdgeInsets.only(left: 16.w, right: 16.w, top: 12.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -881,7 +849,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
           // Bottom padding for FAB
-          SizedBox(height: 140.h),
+          SizedBox(height: 120.h),
         ],
       ),
     );

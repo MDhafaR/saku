@@ -2,7 +2,9 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../components/category_icon_picker_modal.dart';
 
 class AddEditCategoryPage extends StatefulWidget {
   final Category? category;
@@ -82,52 +84,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     super.dispose();
   }
 
-  IconData _getIconData(String name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'directions_car':
-        return Icons.directions_car;
-      case 'shopping_cart':
-        return Icons.shopping_cart;
-      case 'receipt':
-        return Icons.receipt;
-      case 'movie':
-        return Icons.movie;
-      case 'medical_services':
-        return Icons.medical_services;
-      case 'school':
-        return Icons.school;
-      case 'flight':
-        return Icons.flight;
-      case 'payments':
-        return Icons.payments;
-      case 'business':
-        return Icons.business;
-      case 'card_giftcard':
-        return Icons.card_giftcard;
-      case 'trending_up':
-        return Icons.trending_up;
-      case 'home':
-        return Icons.home;
-      case 'pets':
-        return Icons.pets;
-      case 'fitness_center':
-        return Icons.fitness_center;
-      case 'work':
-        return Icons.work;
-      case 'child_care':
-        return Icons.child_care;
-      case 'sports_esports':
-        return Icons.sports_esports;
-      case 'local_cafe':
-        return Icons.local_cafe;
-      case 'local_bar':
-        return Icons.local_bar;
-      default:
-        return Icons.category;
-    }
-  }
+
 
   void _save() async {
     final name = _nameController.text.trim();
@@ -359,10 +316,12 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                                     ).withOpacity(0.15),
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Icon(
-                                    _getIconData(cat.icon),
-                                    color: Color(cat.iconColor),
-                                    size: 14.sp,
+                                  child: Center(
+                                    child: CategoryIcon(
+                                      iconName: cat.icon,
+                                      color: Color(cat.iconColor),
+                                      size: 14.sp,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(width: 10.w),
@@ -567,15 +526,43 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             SizedBox(height: 24.h),
 
             // Icon Selector
-            Text(
-              'Ikon',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Ikon',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () async {
+                    final picked = await CategoryIconPickerModal.show(
+                      context,
+                      currentIcon: _selectedIcon,
+                      activeColor: Color(_selectedColor),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _selectedIcon = picked;
+                        if (!_icons.contains(picked)) {
+                          _icons.insert(0, picked);
+                        }
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.grid_view_rounded, size: 16),
+                  label: const Text('Katalog Lengkap (4.000+)'),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 8.h),
             Container(
               padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
@@ -611,12 +598,13 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                             ? Border.all(color: Color(_selectedColor), width: 2)
                             : null,
                       ),
-                      child: Icon(
-                        _getIconData(iconName),
+                      alignment: Alignment.center,
+                      child: CategoryIcon(
+                        iconName: iconName,
                         color: isSelected
                             ? Color(_selectedColor)
-                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                        size: 24.sp,
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        size: 20.sp,
                       ),
                     ),
                   );

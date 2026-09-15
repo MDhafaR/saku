@@ -38,21 +38,26 @@ class AboutPage extends StatelessWidget {
             Container(
               width: 100.w,
               height: 100.w,
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: const Color(0xFF111111), // Primary Dark
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Theme.of(context).colorScheme.surfaceContainerHighest
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(24.r),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF111111).withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.08),
                     blurRadius: 20.r,
                     offset: Offset(0, 10.h),
                   ),
                 ],
               ),
-              child: Icon(
-                Icons.account_balance_wallet,
-                color: Colors.white,
-                size: 48.sp,
+              clipBehavior: Clip.antiAlias,
+              child: Image.asset(
+                Theme.of(context).brightness == Brightness.dark
+                    ? 'assets/splash/splash_logo_dark.png'
+                    : 'assets/icons/foreground.png',
+                fit: BoxFit.contain,
               ),
             ),
             SizedBox(height: 24.h),

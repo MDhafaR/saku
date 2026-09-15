@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -107,29 +108,6 @@ class _TransferPageState extends State<TransferPage> {
     });
   }
 
-  IconData _getIconData(String iconPath) {
-    switch (iconPath) {
-      case 'wallet':
-        return Icons.account_balance_wallet;
-      case 'bank':
-        return Icons.account_balance;
-      case 'payment':
-        return Icons.payment;
-      case 'mobile':
-        return Icons.mobile_friendly;
-      case 'credit_card':
-        return Icons.credit_card;
-      case 'savings':
-        return Icons.savings;
-      case 'money':
-        return Icons.monetization_on;
-      case 'store':
-        return Icons.store;
-      default:
-        return Icons.account_balance_wallet;
-    }
-  }
-
   double get _totalAssets {
     return widget.wallets.fold<double>(
       0.0,
@@ -165,15 +143,6 @@ class _TransferPageState extends State<TransferPage> {
     if (_isCustomAdminFee && _adminFeeController.text.isNotEmpty) {
       final feeStr = CurrencyFormatter.parse(_adminFeeController.text);
       fee = double.tryParse(feeStr) ?? 0;
-    }
-
-    // Validate sufficient balance (amount + fee)
-    final totalDeduction = amount + fee;
-    if (totalDeduction > sourceWallet!.currentBalance) {
-      _showError(
-        'Saldo tidak cukup. Saldo tersedia: Rp ${CurrencyFormatter.format(sourceWallet!.currentBalance.toStringAsFixed(0))}',
-      );
-      return;
     }
 
     setState(() => _isSubmitting = true);
@@ -252,12 +221,12 @@ class _TransferPageState extends State<TransferPage> {
           width: 36.w,
           height: 36.w,
           decoration: BoxDecoration(
-            color: Color(wallet.iconColor).withOpacity(0.15),
+            color: Color(wallet.iconColor).withValues(alpha: 0.15),
             borderRadius: BorderRadius.circular(10.r),
           ),
           alignment: Alignment.center,
-          child: Icon(
-            _getIconData(wallet.icon),
+          child: CategoryIcon(
+            iconName: wallet.icon,
             color: Color(wallet.iconColor),
             size: 18.sp,
           ),
@@ -318,11 +287,12 @@ class _TransferPageState extends State<TransferPage> {
                         width: 36.w,
                         height: 36.w,
                         decoration: BoxDecoration(
-                          color: Color(wallet.iconColor).withOpacity(0.15),
+                          color: Color(wallet.iconColor).withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(10.r),
                         ),
-                        child: Icon(
-                          _getIconData(wallet.icon),
+                        alignment: Alignment.center,
+                        child: CategoryIcon(
+                          iconName: wallet.icon,
                           color: Color(wallet.iconColor),
                           size: 18.sp,
                         ),

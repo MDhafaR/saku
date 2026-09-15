@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import 'transaction_item.dart';
 
@@ -17,33 +18,75 @@ class TransactionSection extends StatelessWidget {
     this.onDeleteTransaction,
   });
 
+  double get _dailyTotal {
+    double total = 0.0;
+    for (final item in transactions) {
+      if (item.transaction.type == 'income') {
+        total += item.transaction.amount;
+      } else {
+        total -= item.transaction.amount;
+      }
+    }
+    return total;
+  }
+
+  String get _formattedDailyTotal {
+    final total = _dailyTotal;
+    final formatted = CurrencyFormatter.format(total.abs().toStringAsFixed(0));
+    if (total < 0) {
+      return '-Rp $formatted';
+    } else if (total > 0) {
+      return 'Rp $formatted';
+    } else {
+      return 'Rp 0';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (transactions.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: EdgeInsets.only(bottom: 10.h),
-          child: Text(
-            sectionTitle,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+    return Padding(
+      padding: EdgeInsets.only(bottom: 6.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(top: 4.h, bottom: 6.h),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  sectionTitle,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                Text(
+                  _formattedDailyTotal,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    letterSpacing: -0.2,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        ...transactions.map(
-          (item) => TransactionItem(
-            transaction: item.transaction,
-            category: item.category,
-            wallet: item.wallet,
-            onDelete: () => onDeleteTransaction?.call(item.transaction.id),
+          ...transactions.map(
+            (item) => TransactionItem(
+              transaction: item.transaction,
+              category: item.category,
+              wallet: item.wallet,
+              onDelete: () => onDeleteTransaction?.call(item.transaction.id),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

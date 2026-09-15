@@ -21,17 +21,21 @@ class TopCategoriesWidget extends StatelessWidget {
       );
     }
 
-    return Container(
-      padding: EdgeInsets.all(12.w),
+    final colorScheme = Theme.of(context).colorScheme;
+    final topList = categories.take(5).toList();
+
+    return Padding(
+      padding: EdgeInsets.only(top: 2.h),
       child: Column(
-        children: categories.take(5).map((category) {
+        children: topList.map((category) {
+          final isLast = topList.last == category;
           return Padding(
-            padding: EdgeInsets.only(bottom: 10.h),
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 8.h),
             child: Row(
               children: [
                 Container(
-                  width: 10.w,
-                  height: 10.w,
+                  width: 8.w,
+                  height: 8.w,
                   decoration: BoxDecoration(
                     color: Color(category.color),
                     shape: BoxShape.circle,
@@ -42,7 +46,7 @@ class TopCategoriesWidget extends StatelessWidget {
                   child: Text(
                     category.name,
                     style: TextStyle(
-                      color: const Color(0xFF1F2937),
+                      color: colorScheme.onSurface,
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                     ),
@@ -53,7 +57,7 @@ class TopCategoriesWidget extends StatelessWidget {
                     category.amount.toStringAsFixed(0),
                   ),
                   style: TextStyle(
-                    color: const Color(0xFF1F2937),
+                    color: colorScheme.onSurface,
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                   ),
@@ -62,8 +66,8 @@ class TopCategoriesWidget extends StatelessWidget {
                 Text(
                   '${category.percentage.toStringAsFixed(1)}%',
                   style: TextStyle(
-                    color: const Color(0xFF6B7280),
-                    fontSize: 12.sp,
+                    color: colorScheme.onSurfaceVariant,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

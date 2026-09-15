@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../data/local/database/app_database.dart';
 
 class AccountCard extends StatelessWidget {
@@ -21,8 +23,8 @@ class AccountCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isDark
-                ? Colors.black.withOpacity(0.3)
-                : Colors.grey.withOpacity(0.1),
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.grey.withValues(alpha: 0.1),
             spreadRadius: 1,
             blurRadius: 4,
             offset: Offset(0, 2.h),
@@ -33,19 +35,20 @@ class AccountCard extends StatelessWidget {
         children: [
           // Icon
           Container(
-            width: 32.w,
-            height: 32.w,
+            width: 40.w,
+            height: 40.w,
             decoration: BoxDecoration(
               color: Color(wallet.iconColor),
-              borderRadius: BorderRadius.circular(8.r),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(
-              _getIconData(wallet.icon),
+            alignment: Alignment.center,
+            child: CategoryIcon(
+              iconName: wallet.icon,
               color: Colors.white,
-              size: 16.sp,
+              size: 20.sp,
             ),
           ),
-          SizedBox(width: 10.w),
+          SizedBox(width: 12.w),
           // Account info
           Expanded(
             child: Column(
@@ -60,7 +63,7 @@ class AccountCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp ${_formatCurrency(wallet.currentBalance)}',
+                  'Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
                   style: TextStyle(
                     color: colorScheme.onSurfaceVariant,
                     fontSize: 11.sp,
@@ -78,30 +81,5 @@ class AccountCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  IconData _getIconData(String iconPath) {
-    switch (iconPath) {
-      case 'wallet':
-        return Icons.account_balance_wallet;
-      case 'bank':
-        return Icons.account_balance;
-      case 'payment':
-        return Icons.payment;
-      case 'mobile':
-        return Icons.mobile_friendly;
-      default:
-        return Icons.account_balance_wallet;
-    }
-  }
-
-  String _formatCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(0)}K';
-    } else {
-      return amount.toStringAsFixed(0);
-    }
   }
 }

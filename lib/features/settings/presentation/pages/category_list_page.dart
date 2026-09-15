@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
 import 'add_edit_category_page.dart';
 
@@ -19,53 +20,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
   void initState() {
     super.initState();
     _db = locator<AppDatabase>();
-  }
-
-  IconData _getIconData(String name) {
-    switch (name) {
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'directions_car':
-        return Icons.directions_car;
-      case 'shopping_cart':
-        return Icons.shopping_cart;
-      case 'receipt':
-        return Icons.receipt;
-      case 'movie':
-        return Icons.movie;
-      case 'medical_services':
-        return Icons.medical_services;
-      case 'school':
-        return Icons.school;
-      case 'flight':
-        return Icons.flight;
-      case 'payments':
-        return Icons.payments;
-      case 'business':
-        return Icons.business;
-      case 'card_giftcard':
-        return Icons.card_giftcard;
-      case 'trending_up':
-        return Icons.trending_up;
-      case 'home':
-        return Icons.home;
-      case 'pets':
-        return Icons.pets;
-      case 'fitness_center':
-        return Icons.fitness_center;
-      case 'work':
-        return Icons.work;
-      case 'child_care':
-        return Icons.child_care;
-      case 'sports_esports':
-        return Icons.sports_esports;
-      case 'local_cafe':
-        return Icons.local_cafe;
-      case 'local_bar':
-        return Icons.local_bar;
-      default:
-        return Icons.category;
-    }
   }
 
   void _onReorder(List<Category> categories, int oldIndex, int newIndex) async {
@@ -322,8 +276,9 @@ class _CategoryListPageState extends State<CategoryListPage> {
                               color: Color(category.iconColor).withValues(alpha: 0.15),
                               shape: BoxShape.circle,
                             ),
-                            child: Icon(
-                              _getIconData(category.icon),
+                            alignment: Alignment.center,
+                            child: CategoryIcon(
+                              iconName: category.icon,
                               color: Color(category.iconColor),
                               size: 20.sp,
                             ),

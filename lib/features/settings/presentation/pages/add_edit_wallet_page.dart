@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:drift/drift.dart' show Value;
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../components/category_icon_picker_modal.dart';
 
 class AddEditWalletPage extends StatefulWidget {
   /// If non-null, we're in edit mode; otherwise add mode.
@@ -29,16 +31,18 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
 
   bool get _isEdit => widget.wallet != null;
 
-  final _icons = {
-    'wallet': Icons.account_balance_wallet,
-    'bank': Icons.account_balance,
-    'payment': Icons.payment,
-    'mobile': Icons.mobile_friendly,
-    'savings': Icons.savings,
-    'credit_card': Icons.credit_card,
-    'money': Icons.money,
-    'investment': Icons.trending_up,
-  };
+  final List<String> _icons = [
+    'wallet',
+    'bank',
+    'credit_card',
+    'cash',
+    'savings',
+    'money',
+    'investment',
+    'mobile',
+    'store',
+    'coins',
+  ];
 
   final _colors = [
     0xFF10B981,
@@ -56,17 +60,6 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     super.initState();
     final w = widget.wallet;
     _nameController = TextEditingController(text: w?.name ?? '');
-    // Initial balance is only relevant for new wallets or displaying current balance for existing (though we might not want to edit it easily)
-    // For this task, we add "Saldo Awal" which maps to initialBalance.
-    // However, the previous code used _balanceController for currentBalance.
-    // The requirement is "add field saldo awal".
-    // If it's a new wallet, we show 0. If it's edit, we probably shouldn't show "Initial Balance" as editable, or maybe show it as "Saldo Saat Ini".
-    // But the request says "pada add wallet", so let's focus on that.
-
-    // Valid logic:
-    // New Wallet: Show "Saldo Awal" field (empty or 0).
-    // Edit Wallet: Maybe hide it, or show "Saldo Saat Ini".
-    // The plan said: "Only show this field (or make it editable) when adding a new wallet".
 
     _initialBalanceController = TextEditingController(
       text: w != null
@@ -78,6 +71,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     );
     _selectedType = w?.type ?? 'cash';
     _selectedIcon = w?.icon ?? 'wallet';
+    if (!_icons.contains(_selectedIcon)) {
+      _icons.insert(0, _selectedIcon);
+    }
     _selectedColor = w?.iconColor ?? 0xFF10B981;
     _isMain = w?.isMain ?? false;
     _isHidden = w?.isHidden ?? false;
@@ -281,9 +277,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             ],
             SizedBox(height: 20.h),
 
-            // Category (Type)
-            _buildSectionLabel('Ikon'),
-            SizedBox(height: 8.h),
+            // Icon Selector
             _buildIconSelector(),
             SizedBox(height: 24.h),
 
@@ -326,7 +320,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(height: 8.h),
@@ -377,7 +373,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                               'Jika aktif, nomor akan disensor dan membutuhkan PIN/FaceID untuk menyalin.',
                               style: TextStyle(
                                 fontSize: 11.sp,
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.4),
                                 height: 1.4,
                               ),
                             ),
@@ -391,7 +389,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                           value: _isNumberMasked,
                           onChanged: (val) =>
                               setState(() => _isNumberMasked = val),
-                          activeColor: Colors.white,
+                          activeThumbColor: Colors.white,
                           activeTrackColor: const Color(0xFF111111),
                           inactiveThumbColor: Colors.white,
                           inactiveTrackColor: const Color(0xFFE5E7EB),
@@ -445,10 +443,12 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
               color: Color(_selectedColor),
               borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Icon(
-              _icons[_selectedIcon] ?? Icons.account_balance_wallet,
-              color: Colors.white,
-              size: 22.sp,
+            child: Center(
+              child: CategoryIcon(
+                iconName: _selectedIcon,
+                color: Colors.white,
+                size: 22.sp,
+              ),
             ),
           ),
           SizedBox(width: 14.w),
@@ -506,10 +506,18 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
         controller: controller,
         keyboardType: keyboardType,
         onChanged: onChanged,
-        style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface),
+        style: TextStyle(
+          fontSize: 14.sp,
+          color: Theme.of(context).colorScheme.onSurface,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4), fontSize: 14.sp),
+          hintStyle: TextStyle(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.4),
+            fontSize: 14.sp,
+          ),
           prefixIcon: prefix != null
               ? Padding(
                   padding: EdgeInsets.only(left: 16.w, right: 8.w),
@@ -545,60 +553,114 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Widget _buildIconSelector() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 5,
-          mainAxisSpacing: 12.h,
-          crossAxisSpacing: 12.w,
-          childAspectRatio: 1,
-        ),
-        itemCount: _icons.length,
-        itemBuilder: (context, index) {
-          final entry = _icons.entries.elementAt(index);
-          final isSelected = _selectedIcon == entry.key;
-
-          return GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedIcon = entry.key;
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.onSurface
-                    : (Theme.of(context).brightness == Brightness.dark
-                        ? Theme.of(context).colorScheme.surfaceContainerLow
-                        : const Color(0xFFF3F4F6)),
-                borderRadius: BorderRadius.circular(12.r),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _buildSectionLabel('Ikon'),
+            TextButton.icon(
+              onPressed: () async {
+                final selected = await CategoryIconPickerModal.show(
+                  context,
+                  currentIcon: _selectedIcon,
+                  activeColor: Color(_selectedColor),
+                );
+                if (selected != null) {
+                  setState(() {
+                    _selectedIcon = selected;
+                    if (!_icons.contains(selected)) {
+                      _icons.insert(0, selected);
+                    }
+                  });
+                }
+              },
+              icon: Icon(
+                Icons.grid_view_rounded,
+                size: 16.sp,
+                color: Color(_selectedColor),
               ),
-              child: Icon(
-                entry.value,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.surface
-                    : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
-                size: 24.sp,
+              label: Text(
+                'Katalog Lengkap (4.000+)',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Color(_selectedColor),
+                ),
+              ),
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                visualDensity: VisualDensity.compact,
               ),
             ),
-          );
-        },
-      ),
+          ],
+        ),
+        SizedBox(height: 8.h),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(16.r),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 5,
+              mainAxisSpacing: 12.h,
+              crossAxisSpacing: 12.w,
+              childAspectRatio: 1,
+            ),
+            itemCount: _icons.length,
+            itemBuilder: (context, index) {
+              final iconName = _icons[index];
+              final isSelected = _selectedIcon == iconName;
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedIcon = iconName;
+                  });
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? Color(_selectedColor).withValues(alpha: 0.15)
+                        : (Theme.of(context).brightness == Brightness.dark
+                              ? Theme.of(
+                                  context,
+                                ).colorScheme.surfaceContainerLow
+                              : const Color(0xFFF3F4F6)),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: isSelected
+                        ? Border.all(color: Color(_selectedColor), width: 2)
+                        : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: CategoryIcon(
+                    iconName: iconName,
+                    color: isSelected
+                        ? Color(_selectedColor)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
+                    size: 20.sp,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
@@ -681,7 +743,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: Colors.white,
+              activeThumbColor: Colors.white,
               activeTrackColor: const Color(0xFF111111),
               inactiveThumbColor: Colors.white,
               inactiveTrackColor: const Color(0xFFE5E7EB),
@@ -739,7 +801,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                     width: 36.w,
                     height: 36.w,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFEF4444).withOpacity(0.1),
+                      color: const Color(0xFFEF4444).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: Icon(
@@ -1055,12 +1117,14 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                                   width: 28.w,
                                   height: 28.w,
                                   decoration: BoxDecoration(
-                                    color: Color(w.iconColor).withOpacity(0.15),
+                                    color: Color(
+                                      w.iconColor,
+                                    ).withValues(alpha: 0.15),
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
-                                  child: Icon(
-                                    _icons[w.icon] ??
-                                        Icons.account_balance_wallet,
+                                  alignment: Alignment.center,
+                                  child: CategoryIcon(
+                                    iconName: w.icon,
                                     color: Color(w.iconColor),
                                     size: 14.sp,
                                   ),

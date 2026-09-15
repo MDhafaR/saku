@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../../domain/entities/account.dart';
 
@@ -527,10 +528,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ),
                               ],
                             ),
-                            Row(
+                                Row(
                               children: [
                                 Text(
-                                  'Rp ${_formatCurrency(totalBalance)}',
+                                  'Rp ${CurrencyFormatter.format(totalBalance.toStringAsFixed(0))}',
                                   style: TextStyle(
                                     color: colorScheme.onSurface,
                                     fontSize: 16.sp,
@@ -676,15 +677,5 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
-  }
-
-  String _formatCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(0)}K';
-    } else {
-      return amount.toStringAsFixed(0);
-    }
   }
 }

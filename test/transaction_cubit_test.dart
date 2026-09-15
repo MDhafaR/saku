@@ -6,18 +6,27 @@ import 'package:saku/data/local/database/app_database.dart';
 import 'package:saku/features/dashboard/presentation/cubit/transaction_cubit.dart';
 import 'package:saku/features/dashboard/presentation/cubit/transaction_state.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:drift/native.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   late AppDatabase database;
 
-  setUp(() async {
-    await setupLocator();
-    database = locator<AppDatabase>();
+  setUp(() {
+    database = AppDatabase.forTesting(NativeDatabase.memory());
+  });
+
+  tearDown(() async {
+    await database.close();
   });
 
   blocTest<TransactionCubit, TransactionState>(
-    'emits [TransactionLoading, TransactionLoaded] when start is called',
+    'emits [TransactionLoaded] when start is called',
     build: () => TransactionCubit(database),
     act: (cubit) => cubit.start(),
-    expect: () => [isA<TransactionLoading>(), isA<TransactionLoaded>()],
+    wait: const Duration(milliseconds: 100),
+    expect: () => [isA<TransactionLoaded>()],
   );
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/presentation/components/saku_card.dart';
-import '../../../../core/theme/theme_service.dart';
 import '../../../../core/injection.dart';
 import '../components/time_period_selector.dart';
+import '../components/period_date_navigator.dart';
 import '../components/line_chart_widget.dart';
 import '../components/bar_chart_widget.dart';
 import '../components/donut_chart_widget.dart';
@@ -24,17 +24,79 @@ class StatisticsPage extends StatefulWidget {
 class _StatisticsPageState extends State<StatisticsPage> {
   bool isLineChart = true; // true = line chart, false = bar chart
 
+  Future<void> _openCustomDateRangePicker(
+    BuildContext context,
+    state.AppDateTimeRange? currentRange,
+  ) async {
+    final cubit = context.read<StatisticsCubit>();
+    final now = DateTime.now();
+    final result = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: currentRange != null
+          ? DateTimeRange(start: currentRange.start, end: currentRange.end)
+          : DateTimeRange(
+              start: now.subtract(const Duration(days: 30)),
+              end: now,
+            ),
+      initialEntryMode: DatePickerEntryMode.input,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF111111),
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Color(0xFF111111),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (result != null && mounted) {
+      cubit.loadStatistics(
+        'Custom',
+        customRange: state.AppDateTimeRange(
+          start: result.start,
+          end: result.end,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => locator<StatisticsCubit>()..loadStatistics('Daily'),
+      create: (context) =>
+          locator<StatisticsCubit>()..loadStatistics('Monthly'),
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         body: SafeArea(
           child: BlocBuilder<StatisticsCubit, state.StatisticsState>(
             builder: (context, s) {
+              final selectedPeriod = s is state.StatisticsLoaded
+                  ? s.period
+                  : s is state.StatisticsLoading
+                  ? s.period
+                  : 'Monthly';
+
+              final targetDate = s is state.StatisticsLoaded
+                  ? s.targetDate
+                  : s is state.StatisticsLoading && s.targetDate != null
+                  ? s.targetDate!
+                  : DateTime.now();
+
+              final customRange = s is state.StatisticsLoaded
+                  ? s.customRange
+                  : s is state.StatisticsLoading
+                  ? s.customRange
+                  : null;
+
               return SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 140.h),
+                padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 140.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -53,17 +115,20 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 10.h),
 
                     // Time Period Selector
                     TimePeriodSelector(
-                      selectedPeriod: s is state.StatisticsLoaded
-                          ? s.period
-                          : s is state.StatisticsLoading
-                          ? s.period
-                          : 'Daily',
+                      selectedPeriod: selectedPeriod,
                       onPeriodChanged: (period) {
-                        context.read<StatisticsCubit>().loadStatistics(period);
+                        if (period == 'Custom') {
+                          _openCustomDateRangePicker(context, customRange);
+                        } else {
+                          context.read<StatisticsCubit>().loadStatistics(
+                            period,
+                            targetDate: targetDate,
+                          );
+                        }
                       },
                       onCustomDateSelected: (range) {
                         context.read<StatisticsCubit>().loadStatistics(
@@ -75,16 +140,45 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         );
                       },
                     ),
-                    SizedBox(height: 16.h),
+
+                    // Animated Date Navigator below Period Selector
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: selectedPeriod == 'All'
+                          ? const SizedBox.shrink()
+                          : Padding(
+                              padding: EdgeInsets.only(top: 6.h, bottom: 2.h),
+                              child: PeriodDateNavigator(
+                                period: selectedPeriod,
+                                targetDate: targetDate,
+                                customRange: customRange,
+                                onDateChanged: (newDate) {
+                                  context
+                                      .read<StatisticsCubit>()
+                                      .loadStatistics(
+                                        selectedPeriod,
+                                        targetDate: newDate,
+                                      );
+                                },
+                                onCustomTap: () => _openCustomDateRangePicker(
+                                  context,
+                                  customRange,
+                                ),
+                              ),
+                            ),
+                    ),
+                    SizedBox(height: 10.h),
 
                     if (s is state.StatisticsLoading)
                       SizedBox(
-                        height: 400.h,
+                        height: 350.h,
                         child: const Center(child: CircularProgressIndicator()),
                       )
                     else if (s is state.StatisticsError)
                       SizedBox(
-                        height: 400.h,
+                        height: 350.h,
                         child: Center(child: Text(s.message)),
                       )
                     else if (s is state.StatisticsLoaded) ...[
@@ -97,10 +191,12 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         prevExpense: s.prevExpense,
                         prevTotal: s.prevTotal,
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // Income vs Expense Chart
                       SakuCard(
+                        margin: EdgeInsets.zero,
+                        padding: EdgeInsets.all(14.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -199,17 +295,19 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                 ),
                               ],
                             ),
-                            SizedBox(height: 12.h),
+                            SizedBox(height: 10.h),
                             isLineChart
                                 ? LineChartWidget(data: s.chartData)
                                 : BarChartWidget(data: s.chartData),
                           ],
                         ),
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // Category Breakdown
                       SakuCard(
+                        margin: EdgeInsets.zero,
+                        padding: EdgeInsets.all(14.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -242,21 +340,25 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
-                                      color: const Color(0xFF111111),
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
                                     ),
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 12.h),
+                            SizedBox(height: 10.h),
                             DonutChartWidget(categories: s.categoryBreakdown),
                           ],
                         ),
                       ),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // Top Categories
                       SakuCard(
+                        margin: EdgeInsets.zero,
+                        padding: EdgeInsets.all(14.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -265,11 +367,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w700,
-                                color: const Color(0xFF111111),
+                                color: Theme.of(context).colorScheme.onSurface,
                                 letterSpacing: -0.5,
                               ),
                             ),
-                            SizedBox(height: 12.h),
+                            SizedBox(height: 10.h),
                             TopCategoriesWidget(
                               categories: s.categoryBreakdown,
                             ),

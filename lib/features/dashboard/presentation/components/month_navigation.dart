@@ -21,7 +21,7 @@ class MonthNavigation extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final navBtnColor = isDark ? cs.surfaceContainerLow : const Color(0xFFF3F4F6);
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.only(top: 6.h, bottom: 8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

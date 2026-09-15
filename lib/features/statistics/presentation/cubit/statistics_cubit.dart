@@ -10,32 +10,42 @@ class StatisticsCubit extends Cubit<StatisticsState> {
 
   Future<void> loadStatistics(
     String period, {
+    DateTime? targetDate,
     AppDateTimeRange? customRange,
   }) async {
-    emit(StatisticsLoading(period: period));
+    final anchor = targetDate ?? DateTime.now();
+    emit(StatisticsLoading(
+      period: period,
+      targetDate: anchor,
+      customRange: customRange,
+    ));
 
     try {
-      final now = DateTime.now();
       DateTime start;
-      DateTime end = now;
+      DateTime end;
       DateTime prevStart;
       DateTime prevEnd;
 
       switch (period) {
         case 'Daily':
-          start = DateTime(now.year, now.month, now.day);
+          start = DateTime(anchor.year, anchor.month, anchor.day);
+          end = DateTime(anchor.year, anchor.month, anchor.day, 23, 59, 59);
           prevStart = start.subtract(const Duration(days: 1));
-          prevEnd = start.subtract(const Duration(seconds: 1));
+          prevEnd = DateTime(prevStart.year, prevStart.month, prevStart.day, 23, 59, 59);
           break;
         case 'Monthly':
-          start = DateTime(now.year, now.month, 1);
-          prevStart = DateTime(now.year, now.month - 1, 1);
-          prevEnd = start.subtract(const Duration(seconds: 1));
+          start = DateTime(anchor.year, anchor.month, 1);
+          final daysInMonth = DateTime(anchor.year, anchor.month + 1, 0).day;
+          end = DateTime(anchor.year, anchor.month, daysInMonth, 23, 59, 59);
+          prevStart = DateTime(anchor.year, anchor.month - 1, 1);
+          final daysInPrevMonth = DateTime(anchor.year, anchor.month, 0).day;
+          prevEnd = DateTime(prevStart.year, prevStart.month, daysInPrevMonth, 23, 59, 59);
           break;
         case 'Yearly':
-          start = DateTime(now.year, 1, 1);
-          prevStart = DateTime(now.year - 1, 1, 1);
-          prevEnd = start.subtract(const Duration(seconds: 1));
+          start = DateTime(anchor.year, 1, 1);
+          end = DateTime(anchor.year, 12, 31, 23, 59, 59);
+          prevStart = DateTime(anchor.year - 1, 1, 1);
+          prevEnd = DateTime(anchor.year - 1, 12, 31, 23, 59, 59);
           break;
         case 'Custom':
           if (customRange == null) {
@@ -43,7 +53,14 @@ class StatisticsCubit extends Cubit<StatisticsState> {
             return;
           }
           start = customRange.start;
-          end = customRange.end;
+          end = DateTime(
+            customRange.end.year,
+            customRange.end.month,
+            customRange.end.day,
+            23,
+            59,
+            59,
+          );
           final duration = end.difference(start);
           prevEnd = start.subtract(const Duration(seconds: 1));
           prevStart = prevEnd.subtract(duration);
@@ -51,8 +68,9 @@ class StatisticsCubit extends Cubit<StatisticsState> {
         case 'All':
         default:
           start = DateTime(2000);
+          end = DateTime.now();
           prevStart = DateTime(1999);
-          prevEnd = DateTime(1999, 12, 31);
+          prevEnd = DateTime(1999, 12, 31, 23, 59, 59);
           break;
       }
 
@@ -155,6 +173,7 @@ class StatisticsCubit extends Cubit<StatisticsState> {
           chartData: chartData,
           categoryBreakdown: categoryItems,
           period: period,
+          targetDate: anchor,
           customRange: customRange,
         ),
       );

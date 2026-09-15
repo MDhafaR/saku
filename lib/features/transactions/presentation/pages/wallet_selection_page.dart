@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../settings/presentation/pages/add_edit_wallet_page.dart';
@@ -29,36 +30,6 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
       _wallets = wallets;
       _isLoading = false;
     });
-  }
-
-  IconData _getWalletIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'cash':
-        return Icons.account_balance_wallet;
-      case 'bank':
-        return Icons.account_balance;
-      case 'ewallet':
-        return Icons.payment;
-      case 'credit':
-        return Icons.credit_card;
-      default:
-        return Icons.account_balance_wallet;
-    }
-  }
-
-  Color _getWalletColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'cash':
-        return const Color(0xFF10B981);
-      case 'bank':
-        return const Color(0xFF3B82F6);
-      case 'ewallet':
-        return const Color(0xFF8B5CF6);
-      case 'credit':
-        return const Color(0xFFEF4444);
-      default:
-        return const Color(0xFF6B7280);
-    }
   }
 
   @override
@@ -107,8 +78,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                         SizedBox(height: 12.h),
                     itemBuilder: (context, index) {
                       final wallet = _wallets[index];
-                      final icon = _getWalletIcon(wallet.type);
-                      final color = _getWalletColor(wallet.type);
+                      final color = Color(wallet.iconColor);
 
                       return GestureDetector(
                         onTap: () {
@@ -117,7 +87,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                             'name': wallet.name,
                             'type': wallet.type,
                             'balance': wallet.currentBalance,
-                            'icon': icon,
+                            'iconName': wallet.icon,
                             'color': color,
                           });
                         },
@@ -144,10 +114,15 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
                                 width: 44.w,
                                 height: 44.w,
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.15),
+                                  color: color.withValues(alpha: 0.15),
                                   borderRadius: BorderRadius.circular(12.r),
                                 ),
-                                child: Icon(icon, color: color, size: 22.sp),
+                                alignment: Alignment.center,
+                                child: CategoryIcon(
+                                  iconName: wallet.icon,
+                                  color: color,
+                                  size: 22.sp,
+                                ),
                               ),
                               SizedBox(width: 16.w),
                               // Name & Balance

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 
 class CategoryTransactionsPage extends StatelessWidget {
   final String categoryName;
-  final IconData icon;
+  final IconData? icon;
+  final String? iconName;
   final Color color;
   final List<Transaction> transactions;
   final String? totalAmount;
@@ -14,7 +16,8 @@ class CategoryTransactionsPage extends StatelessWidget {
   const CategoryTransactionsPage({
     super.key,
     required this.categoryName,
-    required this.icon,
+    this.icon,
+    this.iconName,
     required this.color,
     required this.transactions,
     this.totalAmount,
@@ -207,7 +210,9 @@ class CategoryTransactionsPage extends StatelessWidget {
                 color: color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10.r),
               ),
-              child: Icon(icon, color: color, size: 18.sp),
+              child: iconName != null
+                  ? CategoryIcon(iconName: iconName!, color: color, size: 18.sp)
+                  : Icon(icon ?? Icons.category, color: color, size: 18.sp),
             ),
             SizedBox(width: 12.w),
             Expanded(

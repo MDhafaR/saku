@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../settings/presentation/pages/add_edit_category_page.dart';
 
@@ -31,31 +32,6 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
       _categories = categories;
       _isLoading = false;
     });
-  }
-
-  IconData _iconFromName(String name) {
-    const iconMap = {
-      'restaurant': Icons.restaurant,
-      'directions_car': Icons.directions_car,
-      'shopping_cart': Icons.shopping_cart,
-      'receipt': Icons.receipt,
-      'movie': Icons.movie,
-      'medical_services': Icons.medical_services,
-      'school': Icons.school,
-      'flight': Icons.flight,
-      'payments': Icons.payments,
-      'business': Icons.business,
-      'card_giftcard': Icons.card_giftcard,
-      'trending_up': Icons.trending_up,
-      'category': Icons.category,
-      'fastfood': Icons.fastfood,
-      'directions_bus': Icons.directions_bus,
-      'shopping_bag': Icons.shopping_bag,
-      'home': Icons.home,
-      'attach_money': Icons.attach_money,
-      'stars': Icons.stars,
-    };
-    return iconMap[name] ?? Icons.category;
   }
 
   @override
@@ -103,7 +79,6 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                     itemBuilder: (context, index) {
                       final category = _categories[index];
                       final color = Color(category.iconColor);
-                      final icon = _iconFromName(category.icon);
 
                       return GestureDetector(
                         onTap: () {
@@ -111,7 +86,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                           Navigator.pop(context, {
                             'id': category.id,
                             'name': category.name,
-                            'icon': icon,
+                            'iconName': category.icon,
                             'color': color,
                             'isExpense': widget.isExpense,
                           });
@@ -142,7 +117,12 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                   color: color.withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
-                                child: Icon(icon, color: color, size: 22.sp),
+                                alignment: Alignment.center,
+                                child: CategoryIcon(
+                                  iconName: category.icon,
+                                  color: color,
+                                  size: 22.sp,
+                                ),
                               ),
                               SizedBox(width: 16.w),
                               // Name

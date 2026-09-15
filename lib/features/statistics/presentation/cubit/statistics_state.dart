@@ -14,10 +14,17 @@ class StatisticsInitial extends StatisticsState {
 
 class StatisticsLoading extends StatisticsState {
   final String period;
-  const StatisticsLoading({this.period = 'Daily'});
+  final DateTime? targetDate;
+  final AppDateTimeRange? customRange;
+
+  const StatisticsLoading({
+    this.period = 'Monthly',
+    this.targetDate,
+    this.customRange,
+  });
 
   @override
-  List<Object?> get props => [period];
+  List<Object?> get props => [period, targetDate, customRange];
 }
 
 class CategoryBreakdownItem {
@@ -71,6 +78,7 @@ class StatisticsLoaded extends StatisticsState {
   final List<ChartDataPoint> chartData;
   final List<CategoryBreakdownItem> categoryBreakdown;
   final String period;
+  final DateTime targetDate;
   final AppDateTimeRange? customRange;
 
   const StatisticsLoaded({
@@ -86,6 +94,7 @@ class StatisticsLoaded extends StatisticsState {
     required this.chartData,
     required this.categoryBreakdown,
     required this.period,
+    required this.targetDate,
     this.customRange,
   });
 
@@ -103,6 +112,7 @@ class StatisticsLoaded extends StatisticsState {
     chartData,
     categoryBreakdown,
     period,
+    targetDate,
     customRange,
   ];
 }

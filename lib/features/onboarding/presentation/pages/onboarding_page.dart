@@ -66,17 +66,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   // App logo/icon
                   Container(
-                    padding: EdgeInsets.all(8.w),
+                    width: 44.w,
+                    height: 44.w,
+                    padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? Theme.of(context).colorScheme.surfaceContainerLow
                           : const Color(0xFFF3F4F6),
                       borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: Icon(
-                      Icons.account_balance_wallet,
-                      color: Theme.of(context).colorScheme.onSurface,
-                      size: 24.sp,
+                    clipBehavior: Clip.antiAlias,
+                    child: Image.asset(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? 'assets/splash/splash_logo_dark.png'
+                          : 'assets/icons/foreground.png',
+                      fit: BoxFit.contain,
                     ),
                   ),
                   // Skip button

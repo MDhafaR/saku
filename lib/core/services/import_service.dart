@@ -5,6 +5,7 @@ import 'package:excel/excel.dart' as xl;
 import 'package:intl/intl.dart';
 
 import '../../data/local/database/app_database.dart';
+import 'xls_decoder.dart';
 
 // ─── Column type enum ────────────────────────────────────────────────────────
 
@@ -172,10 +173,7 @@ class ImportService {
     } else if (ext == 'xlsx') {
       allRows = _parseExcel(file);
     } else if (ext == 'xls') {
-      throw ArgumentError(
-        'Format .xls (Excel lama) tidak didukung.\n'
-        'Silakan buka file di Excel/Google Sheets lalu simpan ulang sebagai .xlsx atau .csv.',
-      );
+      allRows = _parseXls(file);
     } else {
       throw ArgumentError('Format file tidak didukung: .$ext');
     }
@@ -254,6 +252,11 @@ class ImportService {
     }).toList();
   }
 
+  List<List<String>> _parseXls(File file) {
+    final bytes = file.readAsBytesSync();
+    return XlsDecoder.decodeBytes(bytes);
+  }
+
   // ─── 2. Auto-detect columns ─────────────────────────────────────────────
 
   List<ImportColumnType> _autoDetectColumns(List<String> headers) {
@@ -303,12 +306,17 @@ class ImportService {
         return ImportColumnType.deskripsi;
       }
 
+      // Tipe (e.g. Tipe, Type, DB/CR, Debet/Kredit)
+      if (_matchesAny(lower, ['tipe', 'type', 'db/cr', 'debet/kredit'])) {
+        return ImportColumnType.tipe;
+      }
+
       // Kategori
       if (_matchesAny(lower, [
         'kategori',
         'category',
         'jenis',
-        'tipe transaksi',
+        'pos',
       ])) {
         return ImportColumnType.kategori;
       }
@@ -327,17 +335,12 @@ class ImportService {
         return ImportColumnType.wallet;
       }
 
-      // Tipe
-      if (_matchesAny(lower, ['tipe', 'type', 'db/cr', 'debet/kredit'])) {
-        return ImportColumnType.tipe;
-      }
-
       return ImportColumnType.abaikan;
     }).toList();
   }
 
   bool _matchesAny(String value, List<String> candidates) {
-    return candidates.any((c) => value.contains(c) || c.contains(value));
+    return candidates.any((c) => value == c || value.contains(c));
   }
 
   // ─── 3. Category matching ───────────────────────────────────────────────
@@ -512,12 +515,12 @@ class ImportService {
       final existingNames = allCats.map((c) => c.name.toLowerCase()).toSet();
 
       for (final t in parsed) {
-        if (t.categoryName != null) {
+        if (t.categoryName != null && t.categoryName!.trim().isNotEmpty) {
           final key = t.categoryName!.toLowerCase().trim();
           if (!existingNames.contains(key) && !ciCategoryMap.containsKey(key)) {
             final newId = await _db.categoryDao.createCategory(
               CategoriesCompanion(
-                name: Value(t.categoryName!),
+                name: Value(t.categoryName!.trim()),
                 type: Value(t.isIncome ? 'income' : 'expense'),
                 icon: const Value('category'),
               ),
@@ -537,13 +540,13 @@ class ImportService {
           .toSet();
 
       for (final t in parsed) {
-        if (t.walletName != null) {
+        if (t.walletName != null && t.walletName!.trim().isNotEmpty) {
           final key = t.walletName!.toLowerCase().trim();
           if (!existingWalletNames.contains(key) &&
               !ciWalletMap.containsKey(key)) {
             final newId = await _db.walletDao.createWallet(
               WalletsCompanion(
-                name: Value(t.walletName!),
+                name: Value(t.walletName!.trim()),
                 type: const Value('bank'),
               ),
             );
@@ -670,12 +673,15 @@ class ImportService {
           final description = deskripsiIdx >= 0 && deskripsiIdx < row.length
               ? row[deskripsiIdx].trim()
               : '';
-          final categoryName = kategoriIdx >= 0 && kategoriIdx < row.length
+          final rawCat = kategoriIdx >= 0 && kategoriIdx < row.length
               ? row[kategoriIdx].trim()
-              : null;
-          final walletName = walletIdx >= 0 && walletIdx < row.length
+              : '';
+          final categoryName = rawCat.isNotEmpty ? rawCat : null;
+
+          final rawWallet = walletIdx >= 0 && walletIdx < row.length
               ? row[walletIdx].trim()
-              : null;
+              : '';
+          final walletName = rawWallet.isNotEmpty ? rawWallet : null;
 
           // Determine income vs expense
           bool isIncome = amount >= 0;
@@ -713,6 +719,12 @@ class ImportService {
   // ─── Date parsing ──────────────────────────────────────────────────────
 
   static final _dateFormats = [
+    DateFormat('yyyy-MM-dd HH:mm:ss'),
+    DateFormat('yyyy-MM-dd HH:mm'),
+    DateFormat('dd/MM/yyyy HH:mm:ss'),
+    DateFormat('dd/MM/yyyy HH:mm'),
+    DateFormat('dd-MM-yyyy HH:mm:ss'),
+    DateFormat('dd-MM-yyyy HH:mm'),
     DateFormat('dd/MM/yyyy'),
     DateFormat('yyyy-MM-dd'),
     DateFormat('dd-MM-yyyy'),

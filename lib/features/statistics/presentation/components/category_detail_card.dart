@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -21,9 +22,6 @@ class CategoryDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = Color(item.color);
-    // In a real app, we'd have a mapping from icon name to IconData
-    // For now, let's use a simple helper or just fallback
-    final iconData = _getIconData(item.icon);
 
     return GestureDetector(
       onTap: onTap,
@@ -41,7 +39,11 @@ class CategoryDetailCard extends StatelessWidget {
                     color: color.withValues(alpha: 0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(iconData, color: color, size: 18.sp),
+                  child: CategoryIcon(
+                    iconName: item.icon,
+                    color: color,
+                    size: 18.sp,
+                  ),
                 ),
                 SizedBox(width: 10.w),
                 Expanded(
@@ -141,7 +143,7 @@ class CategoryDetailCard extends StatelessWidget {
               curve: Curves.easeInOut,
               alignment: Alignment.topCenter,
               child: isExpanded
-                  ? _buildExpandedContent(context, color, iconData)
+                  ? _buildExpandedContent(context, color)
                   : const SizedBox.shrink(),
             ),
           ],
@@ -153,7 +155,6 @@ class CategoryDetailCard extends StatelessWidget {
   Widget _buildExpandedContent(
     BuildContext context,
     Color color,
-    IconData iconData,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,7 +198,7 @@ class CategoryDetailCard extends StatelessWidget {
           ),
           SizedBox(height: 10.h),
           ...item.topTransactions.map(
-            (tx) => _buildTransactionItem(tx, color, iconData),
+            (tx) => _buildTransactionItem(tx, color, item.icon),
           ),
           SizedBox(height: 4.h),
           TextButton(
@@ -207,7 +208,7 @@ class CategoryDetailCard extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => CategoryTransactionsPage(
                     categoryName: item.name,
-                    icon: iconData,
+                    iconName: item.icon,
                     color: color,
                     transactions: item.topTransactions,
                     totalAmount: CurrencyFormatter.formatRupiah(item.amount),
@@ -234,7 +235,7 @@ class CategoryDetailCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTransactionItem(Transaction tx, Color color, IconData iconData) {
+  Widget _buildTransactionItem(Transaction tx, Color color, String iconName) {
     return Builder(
       builder: (context) {
         return Padding(
@@ -248,7 +249,11 @@ class CategoryDetailCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10.r),
                   border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
                 ),
-                child: Icon(iconData, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 14.sp),
+                child: CategoryIcon(
+                  iconName: iconName,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  size: 14.sp,
+                ),
               ),
               SizedBox(width: 10.w),
               Expanded(
@@ -287,45 +292,7 @@ class CategoryDetailCard extends StatelessWidget {
             ],
           ),
         );
-      }
+      },
     );
-  }
-
-  IconData _getIconData(String iconName) {
-    // This should ideally use the same registry as the rest of the app
-    switch (iconName) {
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'directions_car':
-        return Icons.directions_car;
-      case 'shopping_bag':
-        return Icons.shopping_bag;
-      case 'receipt_long':
-        return Icons.receipt_long;
-      case 'coffee':
-        return Icons.coffee;
-      case 'shopping_basket':
-        return Icons.shopping_basket;
-      case 'set_meal':
-        return Icons.set_meal;
-      case 'local_gas_station':
-        return Icons.local_gas_station;
-      case 'two_wheeler':
-        return Icons.two_wheeler;
-      case 'checkroom':
-        return Icons.checkroom;
-      case 'phone_android':
-        return Icons.phone_android;
-      case 'home':
-        return Icons.home;
-      case 'bolt':
-        return Icons.bolt;
-      case 'wifi':
-        return Icons.wifi;
-      case 'water_drop':
-        return Icons.water_drop;
-      default:
-        return Icons.category;
-    }
   }
 }

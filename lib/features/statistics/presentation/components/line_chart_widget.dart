@@ -27,8 +27,8 @@ class LineChartWidget extends StatelessWidget {
     maxVal = maxVal == 0 ? 10 : maxVal * 1.2;
 
     return Container(
-      height: 200.h,
-      padding: EdgeInsets.all(16.w),
+      height: 185.h,
+      padding: EdgeInsets.only(top: 8.h, right: 8.w),
       child: LineChart(
         LineChartData(
           gridData: const FlGridData(show: false),
@@ -57,7 +57,7 @@ class LineChartWidget extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 30.h,
+                reservedSize: 22.h,
                 getTitlesWidget: (value, meta) {
                   final index = value.toInt();
                   if (index < 0 || index >= data.length) return const Text('');
@@ -78,8 +78,10 @@ class LineChartWidget extends StatelessWidget {
                   String label;
                   if (data.length <= 12) {
                     label = DateFormat('MMM').format(date);
+                  } else if (data.length <= 31) {
+                    label = DateFormat('d').format(date);
                   } else {
-                    label = DateFormat('dd').format(date);
+                    label = DateFormat('MM/yy').format(date);
                   }
 
                   return Text(label, style: style);
@@ -102,7 +104,7 @@ class LineChartWidget extends StatelessWidget {
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: const Color(0xFF10B981).withOpacity(0.1),
+                color: const Color(0xFF10B981).withValues(alpha: 0.1),
               ),
             ),
             LineChartBarData(
@@ -118,7 +120,7 @@ class LineChartWidget extends StatelessWidget {
               dotData: const FlDotData(show: false),
               belowBarData: BarAreaData(
                 show: true,
-                color: const Color(0xFFEF4444).withOpacity(0.1),
+                color: const Color(0xFFEF4444).withValues(alpha: 0.1),
               ),
             ),
           ],

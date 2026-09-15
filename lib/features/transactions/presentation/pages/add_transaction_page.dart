@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -60,7 +61,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         selectedCategory = {
           'id': cat.id,
           'name': cat.name,
-          'icon': _iconFromName(cat.icon),
+          'iconName': cat.icon,
           'color': Color(cat.iconColor),
           'isExpense': cat.type == 'expense',
         };
@@ -73,55 +74,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
           'id': wal.id,
           'name': wal.name,
           'balance': wal.currentBalance,
-          'icon': _getWalletIcon(wal.type),
-          'color': _getWalletColor(wal.type),
+          'iconName': wal.icon,
+          'color': Color(wal.iconColor),
         };
       }
-    }
-  }
-
-  IconData _iconFromName(String name) {
-    const iconMap = {
-      'restaurant': Icons.restaurant,
-      'directions_car': Icons.directions_car,
-      'shopping_cart': Icons.shopping_cart,
-      'receipt': Icons.receipt,
-      'movie': Icons.movie,
-      'medical_services': Icons.medical_services,
-      'school': Icons.school,
-      'flight': Icons.flight,
-      'payments': Icons.payments,
-      'business': Icons.business,
-      'card_giftcard': Icons.card_giftcard,
-      'trending_up': Icons.trending_up,
-      'category': Icons.category,
-    };
-    return iconMap[name] ?? Icons.category;
-  }
-
-  IconData _getWalletIcon(String type) {
-    switch (type.toLowerCase()) {
-      case 'cash':
-        return Icons.account_balance_wallet;
-      case 'bank':
-        return Icons.account_balance;
-      case 'ewallet':
-        return Icons.payment;
-      default:
-        return Icons.account_balance_wallet;
-    }
-  }
-
-  Color _getWalletColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'cash':
-        return const Color(0xFF10B981);
-      case 'bank':
-        return const Color(0xFF3B82F6);
-      case 'ewallet':
-        return const Color(0xFF8B5CF6);
-      default:
-        return const Color(0xFF6B7280);
     }
   }
 
@@ -508,12 +464,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
                               // Category
                               _buildSelectionField(
-                                icon: selectedCategory != null
-                                    ? selectedCategory!['icon'] as IconData
-                                    : Icons.category_outlined,
-                                iconColor: selectedCategory != null
-                                    ? selectedCategory!['color'] as Color
+                                leadingWidget: selectedCategory != null
+                                    ? CategoryIcon(
+                                        iconName: selectedCategory!['iconName'] ?? selectedCategory!['icon']?.toString() ?? 'category',
+                                        color: selectedCategory!['color'] as Color?,
+                                        size: 18.sp,
+                                      )
                                     : null,
+                                icon: Icons.category_outlined,
                                 label: 'Kategori',
                                 value: selectedCategory != null
                                     ? selectedCategory!['name'] as String
@@ -546,12 +504,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
                               // Wallet
                               _buildSelectionField(
-                                icon: selectedWallet != null
-                                    ? selectedWallet!['icon'] as IconData
-                                    : Icons.account_balance_wallet_outlined,
-                                iconColor: selectedWallet != null
-                                    ? selectedWallet!['color'] as Color
+                                leadingWidget: selectedWallet != null
+                                    ? CategoryIcon(
+                                        iconName: selectedWallet!['iconName'] ?? selectedWallet!['icon']?.toString() ?? 'wallet',
+                                        color: selectedWallet!['color'] as Color?,
+                                        size: 18.sp,
+                                      )
                                     : null,
+                                icon: Icons.account_balance_wallet_outlined,
                                 label: 'Wallet',
                                 value: selectedWallet != null
                                     ? '${selectedWallet!['name']} (Rp ${CurrencyFormatter.format((selectedWallet!['balance'] as double).toStringAsFixed(0))})'
@@ -752,7 +712,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 
   Widget _buildSelectionField({
-    required IconData icon,
+    IconData? icon,
+    Widget? leadingWidget,
     Color? iconColor,
     required String label,
     required String value,
@@ -774,11 +735,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         ),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: iconColor ?? cs.onSurface.withValues(alpha: 0.5),
-              size: 18.sp,
-            ),
+            leadingWidget ??
+                Icon(
+                  icon ?? Icons.category_outlined,
+                  color: iconColor ?? cs.onSurface.withValues(alpha: 0.5),
+                  size: 18.sp,
+                ),
             SizedBox(width: 10.w),
             Expanded(
               child: Column(

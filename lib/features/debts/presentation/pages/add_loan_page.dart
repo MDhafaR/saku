@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../transactions/presentation/components/custom_numpad.dart';
@@ -665,12 +666,12 @@ class _AddLoanPageState extends State<AddLoanPage> {
                     decoration: BoxDecoration(
                       color: (Color(
                         _selectedWallet?.iconColor ?? 0xFFE8F0FE,
-                      )).withOpacity(0.15),
+                      )).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     alignment: Alignment.center,
-                    child: Icon(
-                      _getIconData(_selectedWallet?.icon ?? 'wallet'),
+                    child: CategoryIcon(
+                      iconName: _selectedWallet?.icon ?? 'wallet',
                       color: Color(_selectedWallet?.iconColor ?? 0xFF1976D2),
                       size: 16.sp,
                     ),
@@ -759,12 +760,12 @@ class _AddLoanPageState extends State<AddLoanPage> {
                               decoration: BoxDecoration(
                                 color: Color(
                                   wallet.iconColor,
-                                ).withOpacity(0.15),
+                                ).withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
                               alignment: Alignment.center,
-                              child: Icon(
-                                _getIconData(wallet.icon),
+                              child: CategoryIcon(
+                                iconName: wallet.icon,
                                 color: Color(wallet.iconColor),
                                 size: 16.sp,
                               ),
@@ -805,20 +806,5 @@ class _AddLoanPageState extends State<AddLoanPage> {
         ],
       ),
     );
-  }
-
-  IconData _getIconData(String iconName) {
-    switch (iconName) {
-      case 'wallet':
-        return Icons.account_balance_wallet;
-      case 'bank':
-        return Icons.account_balance;
-      case 'payment':
-        return Icons.payment;
-      case 'mobile':
-        return Icons.mobile_friendly;
-      default:
-        return Icons.account_balance_wallet;
-    }
   }
 }

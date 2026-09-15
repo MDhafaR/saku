@@ -30,6 +30,9 @@ class FinancialDashboardSummary extends StatelessWidget {
   String _formatPercentage(double current, double previous) {
     if (previous == 0) return current > 0 ? '+100%' : '0%';
     final change = ((current - previous) / previous) * 100;
+    if (change.abs() >= 100 || change == change.roundToDouble()) {
+      return '${change >= 0 ? '+' : ''}${change.toStringAsFixed(0)}%';
+    }
     return '${change >= 0 ? '+' : ''}${change.toStringAsFixed(1)}%';
   }
 
@@ -77,7 +80,7 @@ class FinancialDashboardSummary extends StatelessWidget {
                   backgroundColor: const Color(0xFF10B981),
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 8.w),
               Expanded(
                 child: FinancialSummaryCard(
                   title: 'Expense',
@@ -95,7 +98,7 @@ class FinancialDashboardSummary extends StatelessWidget {
                   backgroundColor: const Color(0xFFEF4444),
                 ),
               ),
-              SizedBox(width: 12.w),
+              SizedBox(width: 8.w),
               Expanded(
                 child: FinancialSummaryCard(
                   title: 'Total',

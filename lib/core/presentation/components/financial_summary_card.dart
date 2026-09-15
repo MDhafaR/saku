@@ -28,6 +28,7 @@ class FinancialSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SakuCard(
+      margin: EdgeInsets.zero,
       padding: EdgeInsets.all(10.w),
       borderRadius: 20.r,
       child: Column(
@@ -39,27 +40,34 @@ class FinancialSummaryCard extends StatelessWidget {
             children: [
               Skeleton.ignore(
                 child: Container(
-                  padding: EdgeInsets.all(6.w),
+                  padding: EdgeInsets.all(5.w),
                   decoration: BoxDecoration(
-                    color: backgroundColor.withOpacity(0.15),
+                    color: backgroundColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: Icon(icon, color: iconColor, size: 16.sp),
+                  child: Icon(icon, color: iconColor, size: 15.sp),
                 ),
               ),
               if (percentage != null) ...[
                 SizedBox(width: 4.w),
-                Flexible(
+                Expanded(
                   child: Padding(
-                    padding: EdgeInsets.only(top: 4.h),
-                    child: Text(
-                      percentage!,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w700,
-                        color: percentageColor ?? Colors.grey,
+                    padding: EdgeInsets.only(top: 2.h),
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          percentage!,
+                          style: TextStyle(
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w700,
+                            color: percentageColor ?? Colors.grey,
+                          ),
+                          maxLines: 1,
+                        ),
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),
@@ -68,15 +76,18 @@ class FinancialSummaryCard extends StatelessWidget {
           ),
           SizedBox(height: 8.h),
           Skeleton.ignore(
-            child: Text(
-              title,
-              style: TextStyle(
-                fontSize: 11.sp,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                fontWeight: FontWeight.w500,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           SizedBox(height: 2.h),

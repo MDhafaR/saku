@@ -82,7 +82,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                     borderRadius: BorderRadius.circular(20.r),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 4.r,
                         offset: Offset(0, 2.h),
                       ),
@@ -105,7 +105,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
-                          vertical: 8.h,
+                          vertical: 6.h,
                           horizontal: 3.w,
                         ),
                         child: Text(

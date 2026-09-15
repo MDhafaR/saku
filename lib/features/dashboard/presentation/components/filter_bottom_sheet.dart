@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -164,6 +165,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                       _buildChip(
                         'Pemasukan',
+                        icon: Icons.south_west_rounded,
                         isSelected:
                             _selectedTransactionType ==
                             DashboardTransactionType.income,
@@ -175,6 +177,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                       _buildChip(
                         'Pengeluaran',
+                        icon: Icons.north_east_rounded,
                         isSelected:
                             _selectedTransactionType ==
                             DashboardTransactionType.expense,
@@ -195,6 +198,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     children: [
                       _buildChip(
                         'Bulan Dipilih',
+                        icon: Icons.calendar_month_outlined,
                         isSelected:
                             _selectedDateRange ==
                             DashboardDateRange.selectedMonth,
@@ -206,6 +210,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                       _buildChip(
                         '30 Hari Terakhir',
+                        icon: Icons.history_rounded,
                         isSelected:
                             _selectedDateRange == DashboardDateRange.last30Days,
                         onTap: () => setState(
@@ -245,6 +250,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ...widget.wallets.map(
                         (wallet) => _buildChip(
                           wallet.name,
+                          iconName: wallet.icon,
+                          iconColor: wallet.iconColor,
                           isSelected: _selectedWalletId == wallet.id,
                           onTap: () =>
                               setState(() => _selectedWalletId = wallet.id),
@@ -286,6 +293,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       final selected = _selectedCategoryIds.contains(category.id);
                       return _buildChip(
                         category.name,
+                        iconName: category.icon,
+                        iconColor: category.iconColor,
                         isSelected: selected,
                         onTap: () {
                           setState(() {
@@ -373,7 +382,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 100.h),
+                  SizedBox(height: 16.h),
                 ],
               ),
             ),
@@ -603,6 +612,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   Widget _buildChip(
     String label, {
     IconData? icon,
+    String? iconName,
+    int? iconColor,
     bool isSelected = false,
     VoidCallback? onTap,
   }) {
@@ -612,8 +623,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     // Dark mode: glassy white untuk selected, subtle border untuk unselected
     // Light mode: tetap biru sebagai aksen
     final textColor = isSelected
-        ? (isDark ? Colors.white.withValues(alpha: 0.9) : cs.primary)
-        : cs.onSurface.withValues(alpha: isDark ? 0.45 : 0.7);
+        ? (isDark ? Colors.white.withValues(alpha: 0.95) : cs.primary)
+        : cs.onSurface.withValues(alpha: isDark ? 0.7 : 0.85);
 
     final borderColor = isSelected
         ? (isDark ? Colors.white.withValues(alpha: 0.40) : cs.primary)
@@ -627,10 +638,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
             : cs.primaryContainer.withValues(alpha: 0.3))
         : Colors.transparent;
 
+    final hasIcon = icon != null || iconName != null;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+        padding: EdgeInsets.only(
+          left: hasIcon ? 8.w : 14.w,
+          right: 14.w,
+          top: 6.h,
+          bottom: 6.h,
+        ),
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(20.r),
@@ -639,16 +657,36 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
+            if (iconName != null) ...[
+              Container(
+                width: 22.w,
+                height: 22.w,
+                decoration: BoxDecoration(
+                  color: iconColor != null
+                      ? Color(iconColor).withValues(alpha: isSelected ? 0.25 : 0.15)
+                      : (isSelected
+                          ? cs.primary.withValues(alpha: 0.2)
+                          : cs.surfaceContainerHighest),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: CategoryIcon(
+                  iconName: iconName,
+                  color: iconColor != null ? Color(iconColor) : textColor,
+                  size: 13.sp,
+                ),
+              ),
+              SizedBox(width: 6.w),
+            ] else if (icon != null) ...[
               Icon(icon, size: 16.sp, color: textColor),
-              SizedBox(width: 8.w),
+              SizedBox(width: 6.w),
             ],
             Text(
               label,
               style: TextStyle(
                 color: textColor,
                 fontSize: 12.sp,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
             ),
           ],

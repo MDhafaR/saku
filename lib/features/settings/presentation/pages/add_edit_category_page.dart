@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/presentation/components/custom_color_picker_dialog.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../../../statistics/presentation/pages/category_transactions_page.dart';
 import '../components/category_icon_picker_modal.dart';
 
 class AddEditCategoryPage extends StatefulWidget {
@@ -36,7 +39,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     'card_giftcard',
     'trending_up',
     'home',
-    'pets',
+    'favorite',
     'fitness_center',
     'work',
     'child_care',
@@ -313,7 +316,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                                   decoration: BoxDecoration(
                                     color: Color(
                                       cat.iconColor,
-                                    ).withOpacity(0.15),
+                                    ).withValues(alpha: 0.15),
                                     shape: BoxShape.circle,
                                   ),
                                   child: Center(
@@ -402,7 +405,9 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -433,6 +438,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                 borderRadius: BorderRadius.circular(12.r),
               ),
               color: Theme.of(context).colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
               elevation: 4,
               offset: Offset(0, 40.h),
               onSelected: (value) {
@@ -440,9 +446,66 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   _showDeleteDialog();
                 } else if (value == 'move') {
                   _showMoveDialog();
+                } else if (value == 'history') {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CategoryTransactionsPage(
+                        categoryId: widget.category!.id,
+                        categoryName: widget.category!.name,
+                        iconName: widget.category!.icon,
+                        color: Color(widget.category!.iconColor),
+                        totalAmount: 0.0,
+                        period: 'Monthly',
+                        targetDate: DateTime.now(),
+                      ),
+                    ),
+                  );
                 }
               },
               itemBuilder: (context) => [
+                PopupMenuItem<String>(
+                  value: 'history',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.history_rounded,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Riwayat Transaksi',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  value: 'move',
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.drive_file_move_outline,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 12.w),
+                      Text(
+                        'Pindahkan Kategori',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 PopupMenuItem<String>(
                   value: 'delete',
                   child: Row(
@@ -464,34 +527,13 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                     ],
                   ),
                 ),
-                PopupMenuItem<String>(
-                  value: 'move',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.drive_file_move_outline,
-                        color: const Color(0xFF111111),
-                        size: 20.sp,
-                      ),
-                      SizedBox(width: 12.w),
-                      Text(
-                        'Pindahkan Kategori',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF111111),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
           SizedBox(width: 8.w),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -499,41 +541,51 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             Text(
               'Nama Kategori',
               style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF111111),
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            SizedBox(height: 8.h),
-            TextField(
-              controller: _nameController,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
-              decoration: InputDecoration(
-                hintText: 'Contoh: Makanan, Transportasi',
-                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
+            SizedBox(height: 6.h),
+            SakuCard(
+              borderRadius: 14,
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
+              child: TextField(
+                controller: _nameController,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)),
+                decoration: InputDecoration(
+                  hintText: 'Contoh: Makanan, Transportasi',
+                  hintStyle: TextStyle(
+                    fontSize: 13.sp,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.35),
+                  ),
+                  filled: false,
+                  fillColor: Colors.transparent,
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 10.h),
                 ),
               ),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
-            // Icon Selector
+            // Icon Selector Header
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Ikon',
                   style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
@@ -553,30 +605,40 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                       });
                     }
                   },
-                  icon: const Icon(Icons.grid_view_rounded, size: 16),
-                  label: const Text('Katalog Lengkap (4.000+)'),
+                  icon: Icon(
+                    Icons.grid_view_rounded,
+                    size: 15.sp,
+                    color: Color(_selectedColor),
+                  ),
+                  label: Text(
+                    'Katalog Lengkap (4.000+)',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Color(_selectedColor),
+                    ),
+                  ),
                   style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    foregroundColor: Color(_selectedColor),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8.h),
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
-              ),
+            SizedBox(height: 4.h),
+            SakuCard(
+              borderRadius: 14,
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.all(10.w),
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 5,
-                  mainAxisSpacing: 16.h,
-                  crossAxisSpacing: 16.w,
+                  mainAxisSpacing: 8.h,
+                  crossAxisSpacing: 8.w,
                 ),
                 itemCount: _icons.length,
                 itemBuilder: (context, index) {
@@ -591,8 +653,11 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                     child: Container(
                       decoration: BoxDecoration(
                         color: isSelected
-                            ? Color(_selectedColor).withValues(alpha: 0.1)
-                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                            ? Color(_selectedColor).withValues(alpha: 0.12)
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.04),
                         shape: BoxShape.circle,
                         border: isSelected
                             ? Border.all(color: Color(_selectedColor), width: 2)
@@ -603,43 +668,111 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                         iconName: iconName,
                         color: isSelected
                             ? Color(_selectedColor)
-                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                        size: 20.sp,
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                        size: 19.sp,
                       ),
                     ),
                   );
                 },
               ),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
-            // Color Selector
+            // Color Selector Header
             Text(
               'Warna',
               style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
-            SizedBox(height: 12.h),
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2)),
-              ),
+            SizedBox(height: 6.h),
+            SakuCard(
+              borderRadius: 14,
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.all(10.w),
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 6,
-                  mainAxisSpacing: 16.h,
-                  crossAxisSpacing: 16.w,
+                  mainAxisSpacing: 8.h,
+                  crossAxisSpacing: 8.w,
                 ),
-                itemCount: _colors.length,
+                itemCount: _colors.length + 1,
                 itemBuilder: (context, index) {
+                  // Custom Color Picker Button (The 16th item)
+                  if (index == _colors.length) {
+                    final isCustomSelected = !_colors.contains(_selectedColor);
+                    return GestureDetector(
+                      onTap: () async {
+                        final picked = await showCustomColorPickerDialog(
+                          context,
+                          initialColor: Color(_selectedColor),
+                        );
+                        if (picked != null) {
+                          setState(() {
+                            _selectedColor = picked.toARGB32();
+                          });
+                        }
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: isCustomSelected
+                              ? null
+                              : const SweepGradient(
+                                  colors: [
+                                    Colors.red,
+                                    Colors.amber,
+                                    Colors.green,
+                                    Colors.cyan,
+                                    Colors.blue,
+                                    Colors.purple,
+                                    Colors.red,
+                                  ],
+                                ),
+                          color: isCustomSelected ? Color(_selectedColor) : null,
+                          border: isCustomSelected
+                              ? Border.all(color: Colors.white, width: 2.5)
+                              : Border.all(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .outline
+                                      .withValues(alpha: 0.2),
+                                  width: 1,
+                                ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isCustomSelected
+                                  ? Color(_selectedColor).withValues(alpha: 0.35)
+                                  : Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 3,
+                            ),
+                          ],
+                        ),
+                        child: isCustomSelected
+                            ? Icon(Icons.check, color: Colors.white, size: 15.sp)
+                            : Container(
+                                margin: EdgeInsets.all(2.w),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surface,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.add_rounded,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                  size: 16.sp,
+                                ),
+                              ),
+                      ),
+                    );
+                  }
+
                   final colorValue = _colors[index];
                   final isSelected = _selectedColor == colorValue;
                   return GestureDetector(
@@ -653,31 +786,31 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                         color: Color(colorValue),
                         shape: BoxShape.circle,
                         border: isSelected
-                            ? Border.all(color: Colors.white, width: 3)
+                            ? Border.all(color: Colors.white, width: 2.5)
                             : null,
                         boxShadow: isSelected
                             ? [
                                 BoxShadow(
                                   color: Colors.black.withValues(alpha: 0.2),
-                                  blurRadius: 4,
+                                  blurRadius: 3,
                                 ),
                               ]
                             : null,
                       ),
                       child: isSelected
-                          ? Icon(Icons.check, color: Colors.white, size: 16.sp)
+                          ? Icon(Icons.check, color: Colors.white, size: 15.sp)
                           : null,
                     ),
                   );
                 },
               ),
             ),
-            SizedBox(height: 40.h),
+            SizedBox(height: 18.h),
 
             // Save Button
             SizedBox(
               width: double.infinity,
-              height: 50.h,
+              height: 46.h,
               child: ElevatedButton(
                 onPressed: _save,
                 style: ElevatedButton.styleFrom(
@@ -691,7 +824,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   'Simpan',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 16.sp,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

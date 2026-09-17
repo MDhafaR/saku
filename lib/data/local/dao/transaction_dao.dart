@@ -17,12 +17,28 @@ class TransactionDao extends DatabaseAccessor<AppDatabase>
     transactions,
   )..orderBy([(t) => OrderingTerm.desc(t.transactionDate)])).get();
 
-  /// Get transactions for a specific wallet
-  Future<List<Transaction>> getTransactionsByWallet(int walletId) =>
-      (select(transactions)
-            ..where((tbl) => tbl.walletId.equals(walletId))
-            ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]))
-          .get();
+  /// Get transactions for a specific wallet, optionally filtered by date range
+  Future<List<Transaction>> getTransactionsByWallet(
+    int walletId, [
+    DateTime? start,
+    DateTime? end,
+  ]) {
+    final query = select(transactions)
+      ..where((tbl) {
+        var predicate = tbl.walletId.equals(walletId);
+        if (start != null) {
+          predicate =
+              predicate & tbl.transactionDate.isBiggerOrEqualValue(start);
+        }
+        if (end != null) {
+          predicate =
+              predicate & tbl.transactionDate.isSmallerOrEqualValue(end);
+        }
+        return predicate;
+      })
+      ..orderBy([(t) => OrderingTerm.desc(t.transactionDate)]);
+    return query.get();
+  }
 
   /// Get transactions by type (income/expense)
   Future<List<Transaction>> getTransactionsByType(String type) =>

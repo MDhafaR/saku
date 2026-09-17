@@ -30,7 +30,7 @@ class _DashboardPageState extends State<DashboardPage> {
   bool _isLoading = true;
   String _searchQuery = '';
   DashboardFilterResult _activeFilter = const DashboardFilterResult();
-  List<Transaction> _allTransactions = const [];
+  List<TransactionWithDetails> _allItems = const [];
 
   // Cache for categories and wallets
   Map<int, Category> _categoriesCache = {};
@@ -125,7 +125,7 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _onFilterTap() {
-    final maxSelectableAmount = _computeAmountUpperBound(_allTransactions);
+    final maxSelectableAmount = _computeAmountUpperBound(_allItems);
     showModalBottomSheet<DashboardFilterResult>(
       context: context,
       isScrollControlled: true,
@@ -158,12 +158,16 @@ class _DashboardPageState extends State<DashboardPage> {
     await _cubit.deleteTransaction(id);
   }
 
+  void _deleteTransfer(int id) async {
+    await _cubit.deleteTransfer(id);
+  }
+
   bool _isSameMonth(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.month == date2.month;
   }
 
-  List<Transaction> _getFilteredTransactions(
-    List<Transaction> allTransactions,
+  List<TransactionWithDetails> _getFilteredItems(
+    List<TransactionWithDetails> allItems,
   ) {
     final now = DateTime.now();
     final minimumDate = DateTime(
@@ -172,19 +176,19 @@ class _DashboardPageState extends State<DashboardPage> {
       now.day,
     ).subtract(const Duration(days: 29));
 
-    final filteredByDate = allTransactions.where((transaction) {
+    final filteredByDate = allItems.where((item) {
       switch (_activeFilter.dateRange) {
         case DashboardDateRange.last30Days:
-          return !transaction.transactionDate.isBefore(minimumDate);
+          return !item.date.isBefore(minimumDate);
         case DashboardDateRange.customRange:
           if (_activeFilter.customStartDate == null ||
               _activeFilter.customEndDate == null) {
             return true;
           }
-          final txDate = DateTime(
-            transaction.transactionDate.year,
-            transaction.transactionDate.month,
-            transaction.transactionDate.day,
+          final itemDate = DateTime(
+            item.date.year,
+            item.date.month,
+            item.date.day,
           );
           final startDate = DateTime(
             _activeFilter.customStartDate!.year,
@@ -196,59 +200,89 @@ class _DashboardPageState extends State<DashboardPage> {
             _activeFilter.customEndDate!.month,
             _activeFilter.customEndDate!.day,
           );
-          return !txDate.isBefore(startDate) && !txDate.isAfter(endDate);
+          return !itemDate.isBefore(startDate) && !itemDate.isAfter(endDate);
         case DashboardDateRange.selectedMonth:
-          return _isSameMonth(transaction.transactionDate, _selectedDate);
+          return _isSameMonth(item.date, _selectedDate);
       }
     });
 
-    return filteredByDate.where((transaction) {
-      if (_activeFilter.transactionType == DashboardTransactionType.income &&
-          transaction.type != 'income') {
+    return filteredByDate.where((item) {
+      if (_activeFilter.transactionTypes.isNotEmpty &&
+          _activeFilter.transactionTypes.length < 3 &&
+          !_activeFilter.transactionTypes.contains(item.type)) {
         return false;
       }
-      if (_activeFilter.transactionType == DashboardTransactionType.expense &&
-          transaction.type != 'expense') {
-        return false;
+      if (_activeFilter.walletIds.isNotEmpty) {
+        if (item.isTransfer) {
+          final fromId = item.transfer?.fromWalletId;
+          final toId = item.transfer?.toWalletId;
+          final matchesFrom =
+              fromId != null && _activeFilter.walletIds.contains(fromId);
+          final matchesTo =
+              toId != null && _activeFilter.walletIds.contains(toId);
+          if (!matchesFrom && !matchesTo) return false;
+        } else {
+          final wId = item.transaction?.walletId;
+          if (wId == null || !_activeFilter.walletIds.contains(wId)) {
+            return false;
+          }
+        }
       }
-      if (_activeFilter.walletId != null &&
-          transaction.walletId != _activeFilter.walletId) {
-        return false;
-      }
-      if (_activeFilter.categoryIds.isNotEmpty &&
-          !_activeFilter.categoryIds.contains(transaction.categoryId)) {
-        return false;
+      if (_activeFilter.categoryIds.isNotEmpty) {
+        if (item.isTransfer) return false;
+        final cId = item.transaction?.categoryId;
+        if (cId == null || !_activeFilter.categoryIds.contains(cId)) {
+          return false;
+        }
       }
       final hasAmountFilter =
           _activeFilter.amountUpperBound > 0 &&
           (_activeFilter.amountRange.start > 0 ||
               _activeFilter.amountRange.end < _activeFilter.amountUpperBound);
       if (hasAmountFilter &&
-          (transaction.amount < _activeFilter.amountRange.start ||
-              transaction.amount > _activeFilter.amountRange.end)) {
+          (item.amount < _activeFilter.amountRange.start ||
+              item.amount > _activeFilter.amountRange.end)) {
         return false;
       }
 
       if (_searchQuery.isEmpty) return true;
 
-      final categoryName =
-          _categoriesCache[transaction.categoryId]?.name.toLowerCase() ?? '';
-      final walletName =
-          _walletsCache[transaction.walletId]?.name.toLowerCase() ?? '';
-      final description = transaction.description.toLowerCase();
-      final note = (transaction.note ?? '').toLowerCase();
-      final amountText = transaction.amount.toStringAsFixed(0);
+      if (item.isTransfer) {
+        final transfer = item.transfer!;
+        final fromWalletName =
+            _walletsCache[transfer.fromWalletId]?.name.toLowerCase() ?? '';
+        final toWalletName =
+            _walletsCache[transfer.toWalletId]?.name.toLowerCase() ?? '';
+        final desc = transfer.description.toLowerCase();
+        final amountText = transfer.amount.toStringAsFixed(0);
 
-      return categoryName.contains(_searchQuery) ||
-          walletName.contains(_searchQuery) ||
-          description.contains(_searchQuery) ||
-          note.contains(_searchQuery) ||
-          amountText.contains(_searchQuery);
+        return 'transfer'.contains(_searchQuery) ||
+            'pindah'.contains(_searchQuery) ||
+            fromWalletName.contains(_searchQuery) ||
+            toWalletName.contains(_searchQuery) ||
+            desc.contains(_searchQuery) ||
+            amountText.contains(_searchQuery);
+      } else {
+        final transaction = item.transaction!;
+        final categoryName =
+            _categoriesCache[transaction.categoryId]?.name.toLowerCase() ?? '';
+        final walletName =
+            _walletsCache[transaction.walletId]?.name.toLowerCase() ?? '';
+        final description = transaction.description.toLowerCase();
+        final note = (transaction.note ?? '').toLowerCase();
+        final amountText = transaction.amount.toStringAsFixed(0);
+
+        return categoryName.contains(_searchQuery) ||
+            walletName.contains(_searchQuery) ||
+            description.contains(_searchQuery) ||
+            note.contains(_searchQuery) ||
+            amountText.contains(_searchQuery);
+      }
     }).toList();
   }
 
-  double _computeAmountUpperBound(List<Transaction> transactions) {
-    final rawMax = transactions.fold<double>(
+  double _computeAmountUpperBound(List<TransactionWithDetails> items) {
+    final rawMax = items.fold<double>(
       0,
       (max, t) => t.amount > max ? t.amount : max,
     );
@@ -271,11 +305,19 @@ class _DashboardPageState extends State<DashboardPage> {
   String _buildFilterSummaryText() {
     final parts = <String>[];
 
-    if (_activeFilter.transactionType == DashboardTransactionType.income) {
-      parts.add('Pemasukan');
-    } else if (_activeFilter.transactionType ==
-        DashboardTransactionType.expense) {
-      parts.add('Pengeluaran');
+    if (_activeFilter.transactionTypes.isNotEmpty &&
+        _activeFilter.transactionTypes.length < 3) {
+      final types = <String>[];
+      if (_activeFilter.transactionTypes.contains('income')) {
+        types.add('Pemasukan');
+      }
+      if (_activeFilter.transactionTypes.contains('expense')) {
+        types.add('Pengeluaran');
+      }
+      if (_activeFilter.transactionTypes.contains('transfer')) {
+        types.add('Transfer');
+      }
+      parts.add(types.join(', '));
     }
 
     switch (_activeFilter.dateRange) {
@@ -295,15 +337,19 @@ class _DashboardPageState extends State<DashboardPage> {
         break;
     }
 
-    if (_activeFilter.walletId != null) {
-      final walletName = _walletsCache[_activeFilter.walletId!]?.name;
-      if (walletName != null && walletName.isNotEmpty) {
-        parts.add(walletName);
+    if (_activeFilter.walletIds.isNotEmpty) {
+      if (_activeFilter.walletIds.length == 1) {
+        final walletName = _walletsCache[_activeFilter.walletIds.first]?.name;
+        if (walletName != null && walletName.isNotEmpty) {
+          parts.add(walletName);
+        }
+      } else {
+        parts.add('${_activeFilter.walletIds.length} Dompet');
       }
     }
 
     if (_activeFilter.categoryIds.isNotEmpty) {
-      parts.add('${_activeFilter.categoryIds.length} kategori');
+      parts.add('${_activeFilter.categoryIds.length} Kategori');
     }
 
     if (_activeFilter.amountUpperBound > 0 &&
@@ -670,14 +716,28 @@ class _DashboardPageState extends State<DashboardPage> {
         body: SafeArea(
           child: BlocBuilder<TransactionCubit, TransactionState>(
             builder: (context, state) {
-              List<Transaction> allTransactions = [];
+              List<TransactionWithDetails> allItems = [];
               if (state is TransactionLoaded) {
-                allTransactions = state.transactions;
+                final txItems = state.transactions.map((t) {
+                  return TransactionWithDetails(
+                    transaction: t,
+                    category: _categoriesCache[t.categoryId],
+                    wallet: _walletsCache[t.walletId],
+                  );
+                });
+                final trItems = state.transfers.map((tr) {
+                  return TransactionWithDetails(
+                    transfer: tr,
+                    wallet: _walletsCache[tr.fromWalletId],
+                    toWallet: _walletsCache[tr.toWalletId],
+                  );
+                });
+                allItems = [...txItems, ...trItems];
               }
-              _allTransactions = allTransactions;
+              _allItems = allItems;
 
-              final filteredTransactions = _getFilteredTransactions(
-                allTransactions,
+              final filteredItems = _getFilteredItems(
+                allItems,
               );
 
               return Column(
@@ -715,7 +775,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
                   // Scrollable transaction sections
                   Expanded(
-                    child: _buildTransactionList(state, filteredTransactions),
+                    child: _buildTransactionList(state, filteredItems),
                   ),
                 ],
               );
@@ -766,7 +826,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildTransactionList(
     TransactionState state,
-    List<Transaction> transactions,
+    List<TransactionWithDetails> items,
   ) {
     if (state is TransactionLoading ||
         state is TransactionInitial ||
@@ -790,7 +850,7 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    if (transactions.isEmpty) {
+    if (items.isEmpty) {
       return Center(
         child: SingleChildScrollView(
           child: Column(
@@ -822,18 +882,9 @@ class _DashboardPageState extends State<DashboardPage> {
       );
     }
 
-    // Convert transactions to TransactionWithDetails
-    final transactionsWithDetails = transactions.map((t) {
-      return TransactionWithDetails(
-        transaction: t,
-        category: _categoriesCache[t.categoryId],
-        wallet: _walletsCache[t.walletId],
-      );
-    }).toList();
-
     // Group by date
     final groupedTransactions = groupTransactionsByDate(
-      transactionsWithDetails,
+      items,
     );
 
     return SingleChildScrollView(
@@ -846,6 +897,7 @@ class _DashboardPageState extends State<DashboardPage> {
               sectionTitle: entry.key,
               transactions: entry.value,
               onDeleteTransaction: _deleteTransaction,
+              onDeleteTransfer: _deleteTransfer,
             ),
           ),
           // Bottom padding for FAB

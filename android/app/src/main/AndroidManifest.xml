@@ -61,6 +61,36 @@
         </receiver>
         <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
               android:exported="false" />
+
+        <!-- Saku Wallets & Total Balance AppWidget -->
+        <receiver
+            android:name=".SakuWalletsWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/saku_wallets_widget_info" />
+        </receiver>
+
+        <!-- RemoteViewsService for Scrollable Wallets ListView in AppWidget -->
+        <service
+            android:name=".SakuWalletsWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
+        <!-- Saku Daily Spending Runway AppWidget -->
+        <receiver
+            android:name=".SakuRunwayWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/saku_runway_widget_info" />
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

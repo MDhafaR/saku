@@ -3,6 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:drift/drift.dart' show Value;
 import '../../../../core/injection.dart';
 import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/presentation/components/custom_color_picker_dialog.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../components/category_icon_picker_modal.dart';
@@ -149,7 +151,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: Theme.of(context).colorScheme.onSurface,
-            size: 20.sp,
+            size: 18.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -168,12 +170,13 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
               icon: Icon(
                 Icons.more_horiz,
                 color: Theme.of(context).colorScheme.onSurface,
-                size: 24.sp,
+                size: 20.sp,
               ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12.r),
               ),
               color: Theme.of(context).colorScheme.surface,
+              surfaceTintColor: Colors.transparent,
               elevation: 4,
               offset: Offset(0, 40.h),
               onSelected: (value) {
@@ -191,13 +194,13 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                       Icon(
                         Icons.delete_outline,
                         color: const Color(0xFFEF4444),
-                        size: 20.sp,
+                        size: 18.sp,
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 10.w),
                       Text(
                         'Hapus Wallet',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFFEF4444),
                         ),
@@ -211,16 +214,16 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                     children: [
                       Icon(
                         Icons.drive_file_move_outline,
-                        color: const Color(0xFF111111),
-                        size: 20.sp,
+                        color: Theme.of(context).colorScheme.onSurface,
+                        size: 18.sp,
                       ),
-                      SizedBox(width: 12.w),
+                      SizedBox(width: 10.w),
                       Text(
                         'Pindahkan Wallet',
                         style: TextStyle(
-                          fontSize: 14.sp,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF111111),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                     ],
@@ -232,28 +235,28 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Preview card
             _buildPreviewCard(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
             // Name
             _buildSectionLabel('Nama Wallet'),
-            SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
             _buildTextField(
               controller: _nameController,
               hint: 'Cash Wallet',
               onChanged: (_) => setState(() {}),
             ),
+            SizedBox(height: 12.h),
 
             // Initial Balance (Only for new wallets)
             if (!_isEdit) ...[
-              SizedBox(height: 20.h),
               _buildSectionLabel('Saldo Awal'),
-              SizedBox(height: 8.h),
+              SizedBox(height: 6.h),
               _buildTextField(
                 controller: _initialBalanceController,
                 hint: '1.000.000',
@@ -274,141 +277,38 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                   }
                 },
               ),
+              SizedBox(height: 12.h),
             ],
-            SizedBox(height: 20.h),
 
             // Icon Selector
             _buildIconSelector(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
             // Color Selection
             _buildSectionLabel('Warna'),
-            SizedBox(height: 8.h),
+            SizedBox(height: 6.h),
             _buildColorSelector(),
-            SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
             // Preferences Section
             _buildSectionLabel('Preferensi'),
-            SizedBox(height: 12.h),
+            SizedBox(height: 6.h),
 
             _buildSwitchTile(
               title: 'Sembunyikan Saldo',
               value: _isHidden,
               onChanged: (val) => setState(() => _isHidden = val),
             ),
-            SizedBox(height: 24.h),
+            SizedBox(height: 12.h),
 
             // Account Number Section
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(16.r),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Nomor Rekening / ID (Opsional)',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurface.withValues(alpha: 0.5),
-                    ),
-                  ),
-                  SizedBox(height: 8.h),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: TextField(
-                      controller: _accountNumberController,
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: const Color(0xFF111111),
-                        fontWeight: FontWeight.w500,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: '5220123456',
-                        hintStyle: TextStyle(
-                          color: const Color(0xFF9CA3AF),
-                          fontSize: 14.sp,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 16.w,
-                          vertical: 14.h,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Sensor & Kunci Nomor',
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              'Jika aktif, nomor akan disensor dan membutuhkan PIN/FaceID untuk menyalin.',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.4),
-                                height: 1.4,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(width: 12.w),
-                      Transform.scale(
-                        scale: 0.8,
-                        child: Switch(
-                          value: _isNumberMasked,
-                          onChanged: (val) =>
-                              setState(() => _isNumberMasked = val),
-                          activeThumbColor: Colors.white,
-                          activeTrackColor: const Color(0xFF111111),
-                          inactiveThumbColor: Colors.white,
-                          inactiveTrackColor: const Color(0xFFE5E7EB),
-                          trackOutlineColor: WidgetStateProperty.all(
-                            Colors.transparent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 32.h),
+            _buildAccountNumberSection(),
+            SizedBox(height: 18.h),
 
             // Save button
             _buildSaveButton(),
 
-            SizedBox(height: 24.h),
+            SizedBox(height: 20.h),
           ],
         ),
       ),
@@ -420,38 +320,28 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
         ? 'Nama Wallet'
         : _nameController.text.trim();
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return SakuCard(
+      borderRadius: 14,
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.all(12.w),
       child: Row(
         children: [
           Container(
-            width: 44.w,
-            height: 44.w,
+            width: 42.w,
+            height: 42.w,
             decoration: BoxDecoration(
               color: Color(_selectedColor),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
               child: CategoryIcon(
-                iconName: _selectedIcon,
-                color: Colors.white,
-                size: 22.sp,
-              ),
+                 iconName: _selectedIcon,
+                 color: Colors.white,
+                 size: 20.sp,
+               ),
             ),
           ),
-          SizedBox(width: 14.w),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -490,18 +380,10 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     TextInputType keyboardType = TextInputType.text,
     ValueChanged<String>? onChanged,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+    return SakuCard(
+      borderRadius: 14,
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 2.h),
       child: TextField(
         controller: controller,
         keyboardType: keyboardType,
@@ -515,12 +397,12 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
           hintStyle: TextStyle(
             color: Theme.of(
               context,
-            ).colorScheme.onSurface.withValues(alpha: 0.4),
-            fontSize: 14.sp,
+            ).colorScheme.onSurface.withValues(alpha: 0.35),
+            fontSize: 13.sp,
           ),
           prefixIcon: prefix != null
               ? Padding(
-                  padding: EdgeInsets.only(left: 16.w, right: 8.w),
+                  padding: EdgeInsets.only(right: 6.w),
                   child: Text(
                     prefix,
                     style: TextStyle(
@@ -531,22 +413,13 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                   ),
                 )
               : null,
-          prefixIconConstraints: BoxConstraints(minWidth: 0, minHeight: 0),
-          prefixStyle: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12.r),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Theme.of(context).colorScheme.surface,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 14.h,
-          ),
+          prefixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
+          filled: false,
+          fillColor: Colors.transparent,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(vertical: 10.h),
         ),
       ),
     );
@@ -578,7 +451,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
               },
               icon: Icon(
                 Icons.grid_view_rounded,
-                size: 16.sp,
+                size: 15.sp,
                 color: Color(_selectedColor),
               ),
               label: Text(
@@ -590,34 +463,24 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                 ),
               ),
               style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                 visualDensity: VisualDensity.compact,
               ),
             ),
           ],
         ),
-        SizedBox(height: 8.h),
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(16.w),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: BorderRadius.circular(16.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
+        SizedBox(height: 4.h),
+        SakuCard(
+          borderRadius: 14,
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.all(10.w),
           child: GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
-              mainAxisSpacing: 12.h,
-              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 8.h,
+              crossAxisSpacing: 8.w,
               childAspectRatio: 1,
             ),
             itemCount: _icons.length,
@@ -640,7 +503,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                                   context,
                                 ).colorScheme.surfaceContainerLow
                               : const Color(0xFFF3F4F6)),
-                    borderRadius: BorderRadius.circular(12.r),
+                    borderRadius: BorderRadius.circular(10.r),
                     border: isSelected
                         ? Border.all(color: Color(_selectedColor), width: 2)
                         : null,
@@ -653,7 +516,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                         : Theme.of(
                             context,
                           ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 20.sp,
+                    size: 19.sp,
                   ),
                 ),
               );
@@ -665,51 +528,112 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Widget _buildColorSelector() {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return SakuCard(
+      borderRadius: 14,
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.all(10.w),
+      child: Wrap(
+        spacing: 10.w,
+        runSpacing: 10.h,
+        children: [
+          ..._colors.map((colorValue) {
+            final isSelected = _selectedColor == colorValue;
+            return GestureDetector(
+              onTap: () => setState(() => _selectedColor = colorValue),
+              child: Container(
+                width: 32.w,
+                height: 32.w,
+                decoration: BoxDecoration(
+                  color: Color(colorValue),
+                  shape: BoxShape.circle,
+                  border: isSelected
+                      ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
+                      : Border.all(color: Colors.transparent, width: 2),
+                  boxShadow: [
+                    if (isSelected)
+                      BoxShadow(
+                        color: Color(colorValue).withValues(alpha: 0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                  ],
+                ),
+                child: isSelected
+                    ? Icon(Icons.check, color: Colors.white, size: 16.sp)
+                    : null,
+              ),
+            );
+          }),
+          // Custom Color Button
+          GestureDetector(
+            onTap: () async {
+              final picked = await showCustomColorPickerDialog(
+                context,
+                initialColor: Color(_selectedColor),
+              );
+              if (picked != null) {
+                setState(() => _selectedColor = picked.toARGB32());
+              }
+            },
+            child: Builder(
+              builder: (context) {
+                final isCustomSelected = !_colors.contains(_selectedColor);
+                return Container(
+                  width: 32.w,
+                  height: 32.w,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: isCustomSelected
+                        ? null
+                        : const SweepGradient(
+                            colors: [
+                              Colors.red,
+                              Colors.amber,
+                              Colors.green,
+                              Colors.cyan,
+                              Colors.blue,
+                              Colors.purple,
+                              Colors.red,
+                            ],
+                          ),
+                    color: isCustomSelected ? Color(_selectedColor) : null,
+                    border: isCustomSelected
+                        ? Border.all(color: Theme.of(context).colorScheme.onSurface, width: 2)
+                        : Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withValues(alpha: 0.2),
+                            width: 1,
+                          ),
+                    boxShadow: [
+                      if (isCustomSelected)
+                        BoxShadow(
+                          color: Color(_selectedColor).withValues(alpha: 0.4),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                    ],
+                  ),
+                  child: isCustomSelected
+                      ? Icon(Icons.check, color: Colors.white, size: 16.sp)
+                      : Container(
+                          margin: EdgeInsets.all(2.w),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.add_rounded,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            size: 16.sp,
+                          ),
+                        ),
+                );
+              },
+            ),
           ),
         ],
-      ),
-      child: Wrap(
-        spacing: 12.w,
-        runSpacing: 12.h,
-        children: _colors.map((colorValue) {
-          final isSelected = _selectedColor == colorValue;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedColor = colorValue),
-            child: Container(
-              width: 32.w,
-              height: 32.w,
-              decoration: BoxDecoration(
-                color: Color(colorValue),
-                shape: BoxShape.circle,
-                border: isSelected
-                    ? Border.all(color: const Color(0xFF111111), width: 2)
-                    : Border.all(color: Colors.transparent, width: 2),
-                boxShadow: [
-                  if (isSelected)
-                    BoxShadow(
-                      color: Color(colorValue).withValues(alpha: 0.4),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4),
-                    ),
-                ],
-              ),
-              child: isSelected
-                  ? Icon(Icons.check, color: Colors.white, size: 16.sp)
-                  : null,
-            ),
-          );
-        }).toList(),
       ),
     );
   }
@@ -719,14 +643,10 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     required bool value,
     required ValueChanged<bool> onChanged,
   }) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: Theme.of(context).brightness == Brightness.dark
-            ? Theme.of(context).colorScheme.surfaceContainerLow
-            : const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(16.r),
-      ),
+    return SakuCard(
+      borderRadius: 14,
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -744,11 +664,117 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
               value: value,
               onChanged: onChanged,
               activeThumbColor: Colors.white,
-              activeTrackColor: const Color(0xFF111111),
+              activeTrackColor: Theme.of(context).colorScheme.primary,
               inactiveThumbColor: Colors.white,
-              inactiveTrackColor: const Color(0xFFE5E7EB),
+              inactiveTrackColor: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerHigh
+                  : const Color(0xFFE5E7EB),
               trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAccountNumberSection() {
+    return SakuCard(
+      borderRadius: 14,
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.all(12.w),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Nomor Rekening / ID (Opsional)',
+            style: TextStyle(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.w600,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Theme.of(context).colorScheme.surfaceContainerLow
+                  : const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: TextField(
+              controller: _accountNumberController,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+              decoration: InputDecoration(
+                hintText: '5220123456',
+                hintStyle: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
+                  fontSize: 13.sp,
+                ),
+                filled: false,
+                fillColor: Colors.transparent,
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 12.w,
+                  vertical: 8.h,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sensor & Kunci Nomor',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                    SizedBox(height: 2.h),
+                    Text(
+                      'Jika aktif, nomor akan disensor dan membutuhkan PIN/FaceID untuk menyalin.',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.4),
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: _isNumberMasked,
+                  onChanged: (val) =>
+                      setState(() => _isNumberMasked = val),
+                  activeThumbColor: Colors.white,
+                  activeTrackColor: Theme.of(context).colorScheme.primary,
+                  inactiveThumbColor: Colors.white,
+                  inactiveTrackColor: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.surfaceContainerHigh
+                      : const Color(0xFFE5E7EB),
+                  trackOutlineColor: WidgetStateProperty.all(
+                    Colors.transparent,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -758,24 +784,25 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   Widget _buildSaveButton() {
     return SizedBox(
       width: double.infinity,
-      height: 50.h,
+      height: 46.h,
       child: ElevatedButton(
         onPressed: _save,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF111111),
+          backgroundColor: Theme.of(context).colorScheme.primary,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(16.r),
           ),
         ),
         child: Text(
           _isEdit ? 'Simpan Perubahan' : 'Tambah Wallet',
-          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
       ),
     );
   }
+
 
   void _showDeleteDialog() async {
     final db = locator<AppDatabase>();

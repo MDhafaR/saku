@@ -1,12 +1,9 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:saku/core/injection.dart';
 import 'package:saku/data/local/database/app_database.dart';
 import 'package:saku/features/dashboard/presentation/cubit/transaction_cubit.dart';
 import 'package:saku/features/dashboard/presentation/cubit/transaction_state.dart';
-
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:drift/native.dart';
 

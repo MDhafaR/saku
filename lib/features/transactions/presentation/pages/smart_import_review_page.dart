@@ -9,6 +9,7 @@ import '../../../../core/injection.dart';
 import '../../../../core/models/voice_intent_model.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../../../settings/presentation/pages/add_edit_wallet_page.dart';
 
 /// Formatter untuk memformat angka dengan pemisah ribuan titik (contoh: 25.000, 50.000.000)
 class ThousandsSeparatorInputFormatter extends TextInputFormatter {
@@ -45,6 +46,7 @@ class EditableIntentItem {
   String type; // 'expense', 'income', 'hutang', 'piutang'
   double amount;
   String note;
+  DateTime date;
   String? category;
   int? categoryId;
   String? wallet; // Detected wallet name from parser (source wallet)
@@ -61,6 +63,7 @@ class EditableIntentItem {
     required this.type,
     required this.amount,
     required this.note,
+    required this.date,
     this.category,
     this.categoryId,
     this.wallet,
@@ -86,9 +89,10 @@ class EditableIntentItem {
   factory EditableIntentItem.fromModel(VoiceIntentModel model) {
     return EditableIntentItem(
       feature: model.feature,
-      type: model.type ?? (model.feature == 'hutang_piutang' ? 'hutang' : 'expense'),
+      type: model.type ?? (model.feature == 'hutang_piutang' ? 'hutang' : (model.feature == 'penyesuaian_saldo' ? 'adjustment' : 'expense')),
       amount: model.amount ?? 0,
       note: model.note ?? '',
+      date: model.date ?? DateTime.now(),
       category: model.category,
       wallet: model.feature == 'transfer' ? model.fromWallet : (model.wallet ?? model.fromWallet),
       toWallet: model.toWallet,
@@ -157,69 +161,49 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
         categories = await _db.categoryDao.getAllCategories();
       }
 
-      // Intelligently resolve wallet matching & auto-creation for items
+      // Intelligently resolve wallet matching against existing wallets
+      final defaultWallet = wallets.isNotEmpty
+          ? (wallets.where((w) => w.isMain).firstOrNull ?? wallets.first)
+          : null;
+
       for (final item in _items) {
         // 1. Source wallet
         if (item.wallet != null && item.wallet!.trim().isNotEmpty) {
           final matchedId = _findMatchingWalletId(item.wallet!, wallets);
-          if (matchedId != null) {
-            item.walletId = matchedId;
-          } else {
-            // Auto-create new wallet in database if user mentions new account
-            final newId = await _autoCreateWallet(item.wallet!);
-            wallets = await _db.walletDao.getAllWallets();
-            item.walletId = newId;
-          }
+          item.walletId = matchedId ?? defaultWallet?.id;
+        } else {
+          item.walletId ??= defaultWallet?.id;
         }
 
         // 2. Destination wallet for transfer
-        if (item.feature == 'transfer' && item.toWallet != null && item.toWallet!.trim().isNotEmpty) {
-          final matchedToId = _findMatchingWalletId(item.toWallet!, wallets);
-          if (matchedToId != null) {
+        if (item.feature == 'transfer') {
+          if (item.toWallet != null && item.toWallet!.trim().isNotEmpty) {
+            final matchedToId = _findMatchingWalletId(item.toWallet!, wallets);
             item.toWalletId = matchedToId;
-          } else {
-            final newToId = await _autoCreateWallet(item.toWallet!);
-            wallets = await _db.walletDao.getAllWallets();
-            item.toWalletId = newToId;
           }
+          if (item.toWalletId == null || (item.toWalletId == item.walletId && wallets.length > 1)) {
+            if (wallets.length > 1) {
+              item.toWalletId = wallets.where((w) => w.id != item.walletId).firstOrNull?.id ?? wallets.first.id;
+            } else {
+              item.toWalletId = item.walletId;
+            }
+          }
+        }
+
+        // Set category with intelligent bilingual & synonym matching
+        item.categoryId = _findMatchingCategoryId(item.category, item.type, categories);
+
+        // Fallback category if not matched
+        if (item.categoryId == null && categories.isNotEmpty) {
+          final fallback = categories.where((c) => c.type == item.type).firstOrNull ?? categories.first;
+          item.categoryId = fallback.id;
+          item.category = fallback.name;
         }
       }
 
       setState(() {
         _wallets = wallets;
         _categories = categories;
-
-        // Auto-match default wallet and category for each item
-        final defaultWallet = wallets.isNotEmpty
-            ? (wallets.where((w) => w.isMain).firstOrNull ?? wallets.first)
-            : null;
-
-        for (final item in _items) {
-          // Fallback to default wallet if still null
-          item.walletId ??= defaultWallet?.id;
-
-          // Set category with intelligent bilingual & synonym matching
-          item.categoryId = _findMatchingCategoryId(item.category, item.type, categories);
-
-          // Fallback category if not matched
-          if (item.categoryId == null && categories.isNotEmpty) {
-            final fallback = categories.where((c) => c.type == item.type).firstOrNull ?? categories.first;
-            item.categoryId = fallback.id;
-            item.category = fallback.name;
-          }
-
-          // For transfer destination wallet
-          if (item.feature == 'transfer') {
-            if (item.toWalletId == null || (item.toWalletId == item.walletId && wallets.length > 1)) {
-              if (wallets.length > 1) {
-                item.toWalletId = wallets.where((w) => w.id != item.walletId).firstOrNull?.id ?? wallets.first.id;
-              } else {
-                item.toWalletId = item.walletId;
-              }
-            }
-          }
-        }
-
         _isLoadingData = false;
       });
     } catch (e) {
@@ -231,70 +215,34 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
 
   int? _findMatchingWalletId(String rawWallet, List<Wallet> wallets) {
     final raw = rawWallet.toLowerCase().trim();
+    if (raw.isEmpty) return null;
 
     // 1. Exact case-insensitive match
     for (final w in wallets) {
       if (w.name.toLowerCase().trim() == raw) return w.id;
     }
 
-    // 2. Partial / alias match
+    // 2. Alias / substring / brand match
     for (final w in wallets) {
       final wLower = w.name.toLowerCase().trim();
+      if (wLower == raw) return w.id;
       if (wLower.contains(raw) || raw.contains(wLower)) return w.id;
       if ((raw == 'gopay' || raw == 'gojek') && (wLower.contains('gopay') || wLower.contains('gojek'))) return w.id;
       if ((raw == 'spay' || raw == 'shopeepay') && (wLower.contains('shopee') || wLower.contains('spay'))) return w.id;
+      if (raw == 'dana' && wLower.contains('dana')) return w.id;
+      if (raw == 'ovo' && wLower.contains('ovo')) return w.id;
+      if (raw == 'bca' && wLower.contains('bca')) return w.id;
+      if (raw == 'bni' && wLower.contains('bni')) return w.id;
+      if (raw == 'bri' && wLower.contains('bri')) return w.id;
+      if (raw == 'mandiri' && wLower.contains('mandiri')) return w.id;
+      if (raw == 'jago' && wLower.contains('jago')) return w.id;
+      if ((raw == 'tunai' || raw == 'cash' || raw == 'dompet' || raw == 'kantong') &&
+          (wLower.contains('dompet') || wLower.contains('tunai') || wLower.contains('cash') || w.type == 'cash')) {
+        return w.id;
+      }
     }
 
     return null;
-  }
-
-  Future<int> _autoCreateWallet(String walletName) async {
-    final lower = walletName.toLowerCase();
-    String type = 'bank';
-    String icon = 'bank';
-    int iconColor = 0xFF3B82F6; // Blue default
-
-    if (lower.contains('dompet') || lower.contains('cash') || lower.contains('tunai') || lower.contains('kantong')) {
-      type = 'cash';
-      icon = 'wallet';
-      iconColor = 0xFF10B981; // Green
-    } else if (lower.contains('gopay') || lower.contains('gojek') || lower.contains('ovo') || lower.contains('dana') || lower.contains('shopee') || lower.contains('linkaja')) {
-      type = 'e-wallet';
-      icon = 'mobile';
-      iconColor = 0xFF8A2BE2; // Purple
-    } else if (lower.contains('jago')) {
-      type = 'bank';
-      icon = 'bank';
-      iconColor = 0xFFF59E0B; // Amber
-    } else if (lower.contains('bca')) {
-      type = 'bank';
-      icon = 'bank';
-      iconColor = 0xFF3B82F6; // Blue
-    } else if (lower.contains('bri')) {
-      type = 'bank';
-      icon = 'bank';
-      iconColor = 0xFF06B6D4; // Cyan
-    } else if (lower.contains('bni')) {
-      type = 'bank';
-      icon = 'bank';
-      iconColor = 0xFFEF4444; // Orange/Red
-    } else if (lower.contains('mandiri')) {
-      type = 'bank';
-      icon = 'bank';
-      iconColor = 0xFF3B82F6; // Blue
-    }
-
-    return _db.walletDao.createWallet(
-      WalletsCompanion(
-        name: drift.Value(walletName),
-        type: drift.Value(type),
-        icon: drift.Value(icon),
-        iconColor: drift.Value(iconColor),
-        initialBalance: const drift.Value(0.0),
-        currentBalance: const drift.Value(0.0),
-        isMain: const drift.Value(false),
-      ),
-    );
   }
 
   int? _findMatchingCategoryId(String? rawCategory, String type, List<Category> categories) {
@@ -385,7 +333,7 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
               type: drift.Value(item.type),
               description: drift.Value(item.noteController.text.trim()),
               note: drift.Value(item.noteController.text.trim()),
-              transactionDate: drift.Value(DateTime.now()),
+              transactionDate: drift.Value(item.date),
             ),
           );
         } else if (item.feature == 'transfer') {
@@ -399,7 +347,7 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
                 amount: drift.Value(item.amount),
                 fee: const drift.Value(0),
                 description: drift.Value(item.noteController.text.trim()),
-                transferDate: drift.Value(DateTime.now()),
+                transferDate: drift.Value(item.date),
               ),
             );
           }
@@ -418,7 +366,7 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
             personId = await _db.debtDao.createPerson(
               PersonsCompanion(
                 name: drift.Value(contact),
-                createdAt: drift.Value(DateTime.now()),
+                createdAt: drift.Value(item.date),
               ),
             );
           }
@@ -432,9 +380,42 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
               paidAmount: const drift.Value(0),
               status: const drift.Value('pending'),
               description: drift.Value(item.noteController.text.trim()),
-              createdAt: drift.Value(DateTime.now()),
+              createdAt: drift.Value(item.date),
             ),
           );
+        } else if (item.feature == 'penyesuaian_saldo') {
+          final walletId = item.walletId ?? fallbackWalletId;
+          final targetWallet = _wallets.where((w) => w.id == walletId).firstOrNull;
+          final currentBal = targetWallet?.currentBalance ?? 0.0;
+          final targetBal = item.amount;
+          final diff = targetBal - currentBal;
+
+          if (diff != 0) {
+            final isIncome = diff > 0;
+            final absDiff = diff.abs();
+            final adjType = isIncome ? 'income' : 'expense';
+            final category = await _db.categoryDao.getOrCreateAdjustmentCategory(adjType);
+
+            final noteText = item.noteController.text.trim();
+            final descriptionText = noteText.isNotEmpty
+                ? noteText
+                : (isIncome ? 'Penyesuaian Masuk' : 'Penyesuaian Keluar');
+
+            final walletName = targetWallet?.name ?? 'Dompet';
+            final detailedNote = 'Penyesuaian saldo $walletName dari Rp ${_currencyFormat.format(currentBal).replaceAll('Rp ', '')} ke Rp ${_currencyFormat.format(targetBal).replaceAll('Rp ', '')}${noteText.isNotEmpty ? ' ($noteText)' : ''}';
+
+            await _db.transactionDao.createTransaction(
+              TransactionsCompanion(
+                walletId: drift.Value(walletId),
+                categoryId: drift.Value(category.id),
+                amount: drift.Value(absDiff),
+                type: drift.Value(adjType),
+                description: drift.Value(descriptionText),
+                note: drift.Value(detailedNote),
+                transactionDate: drift.Value(item.date),
+              ),
+            );
+          }
         }
       }
 
@@ -592,6 +573,10 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
       badgeColor = Colors.blue.shade600;
       typeLabel = 'Transfer Dompet';
       typeIcon = Icons.swap_horiz_rounded;
+    } else if (item.feature == 'penyesuaian_saldo') {
+      badgeColor = const Color(0xFF0D9488);
+      typeLabel = 'Ngepasin Saldo (Penyesuaian)';
+      typeIcon = Icons.tune_rounded;
     } else if (item.feature == 'hutang_piutang') {
       if (item.type == 'hutang') {
         badgeColor = Colors.orange.shade700;
@@ -669,8 +654,8 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
             TextFormField(
               controller: item.noteController,
               decoration: InputDecoration(
-                labelText: 'Catatan Transaksi',
-                hintText: 'Contoh: Bensin, Mi ayam',
+                labelText: item.feature == 'penyesuaian_saldo' ? 'Catatan Penyesuaian' : 'Catatan Transaksi',
+                hintText: item.feature == 'penyesuaian_saldo' ? 'Contoh: Penyesuaian saldo riil BNI' : 'Contoh: Bensin, Mi ayam',
                 prefixIcon: const Icon(Icons.description_outlined),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
                 contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -690,9 +675,9 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
                 ThousandsSeparatorInputFormatter(),
               ],
               decoration: InputDecoration(
-                labelText: 'Nominal Transaksi',
+                labelText: item.feature == 'penyesuaian_saldo' ? 'Target Saldo Riil' : 'Nominal Transaksi',
                 hintText: '0',
-                prefixIcon: const Icon(Icons.payments_outlined),
+                prefixIcon: Icon(item.feature == 'penyesuaian_saldo' ? Icons.account_balance_wallet_outlined : Icons.payments_outlined),
                 prefixText: 'Rp ',
                 prefixStyle: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
@@ -706,7 +691,11 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
             ),
             SizedBox(height: 12.h),
 
-            // ── 4. Dropdowns Kategori & Dompet ────────────────────────────────
+            // ── 4. Tanggal Transaksi (Full Width Interactive Selector) ────────
+            _buildDateSelectorField(item),
+            SizedBox(height: 12.h),
+
+            // ── 5. Dropdowns Kategori & Dompet ────────────────────────────────
             if (item.feature == 'transaksi') ...[
               // Kategori Selector (Full Width with Icon)
               _buildCategorySelectorField(item),
@@ -722,6 +711,22 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
                   });
                 },
               ),
+            ] else if (item.feature == 'penyesuaian_saldo') ...[
+              // Dompet yang Disesuaikan Selector
+              _buildWalletSelectorField(
+                label: 'Dompet yang Disesuaikan',
+                selectedId: item.walletId,
+                accentColor: const Color(0xFF0D9488),
+                onSelected: (val) {
+                  setState(() {
+                    item.walletId = val;
+                  });
+                },
+              ),
+              SizedBox(height: 12.h),
+
+              // Preview Perbandingan Saldo & Selisih Live
+              _buildAdjustmentBalanceCard(item),
             ] else if (item.feature == 'transfer') ...[
               Container(
                 padding: EdgeInsets.all(14.w),
@@ -822,6 +827,235 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
         ),
       ),
     ).animate().fadeIn(duration: 200.ms);
+  }
+
+  Widget _buildAdjustmentBalanceCard(EditableIntentItem item) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final targetWallet = _wallets.where((w) => w.id == item.walletId).firstOrNull;
+    final currentBal = targetWallet?.currentBalance ?? 0.0;
+    final targetBal = item.amount;
+    final diff = targetBal - currentBal;
+
+    final isIncome = diff > 0;
+    final isExact = diff == 0;
+
+    final Color deltaColor = isExact
+        ? Colors.grey.shade600
+        : (isIncome ? Colors.green.shade700 : Colors.red.shade700);
+
+    final String deltaText = isExact
+        ? 'Saldo sudah sesuai (Rp 0)'
+        : (isIncome
+            ? '+ ${_currencyFormat.format(diff)} (Pendapatan Penyesuaian)'
+            : '- ${_currencyFormat.format(-diff)} (Pengeluaran Penyesuaian)');
+
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0D9488).withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: const Color(0xFF0D9488).withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.info_outline_rounded, color: const Color(0xFF0D9488), size: 18.r),
+              SizedBox(width: 8.w),
+              Text(
+                'Perhitungan Otomatis Saku',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  color: const Color(0xFF0D9488),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Saldo di Aplikasi:',
+                style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+              Text(
+                _currencyFormat.format(currentBal),
+                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          SizedBox(height: 4.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Target Saldo Riil:',
+                style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              ),
+              Text(
+                _currencyFormat.format(targetBal),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF0D9488),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Akan dicatat sebagai:',
+                style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Flexible(
+                child: Text(
+                  deltaText,
+                  textAlign: TextAlign.end,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: deltaColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateSelectorField(EditableIntentItem item) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(item.date);
+    final relativeBadge = _formatRelativeDate(item.date);
+
+    return InkWell(
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: item.date,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2100),
+          locale: const Locale('id', 'ID'),
+        );
+        if (picked != null) {
+          setState(() {
+            item.date = DateTime(
+              picked.year,
+              picked.month,
+              picked.day,
+              item.date.hour,
+              item.date.minute,
+              item.date.second,
+            );
+          });
+        }
+      },
+      borderRadius: BorderRadius.circular(12.r),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36.w,
+              height: 36.w,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                Icons.calendar_today_rounded,
+                color: colorScheme.primary,
+                size: 18.sp,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tanggal Transaksi',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  SizedBox(height: 2.h),
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          formattedDate,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      if (relativeBadge.isNotEmpty) ...[
+                        SizedBox(width: 8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          child: Text(
+                            relativeBadge,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.edit_calendar_rounded,
+              color: colorScheme.onSurface.withValues(alpha: 0.4),
+              size: 18.r,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatRelativeDate(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final target = DateTime(date.year, date.month, date.day);
+    final diffDays = target.difference(today).inDays;
+
+    if (diffDays == 0) return 'Hari Ini';
+    if (diffDays == -1) return 'Kemarin';
+    if (diffDays == -2) return 'Kemarin Lusa';
+    if (diffDays == 1) return 'Besok';
+    if (diffDays == 2) return 'Lusa';
+    if (diffDays < -2 && diffDays >= -7) return '${diffDays.abs()} hari lalu';
+    if (diffDays > 2 && diffDays <= 7) return '$diffDays hari lagi';
+    if (diffDays < -7 && diffDays >= -31) return '${(diffDays.abs() / 7).round()} minggu lalu';
+    if (diffDays < -31 && diffDays >= -365) return '${(diffDays.abs() / 30).round()} bulan lalu';
+    if (diffDays < -365) return '${(diffDays.abs() / 365).round()} tahun lalu';
+    return '';
   }
 
   Widget _buildCategorySelectorField(EditableIntentItem item) {
@@ -1255,6 +1489,39 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
                       ),
                     );
                   },
+                ),
+              ),
+              // Tambah Dompet Baru button (Explicit User Action)
+              Padding(
+                padding: EdgeInsets.only(left: 20.w, right: 20.w, top: 4.h, bottom: 12.h),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () async {
+                      Navigator.pop(ctx);
+                      final created = await Navigator.push<bool>(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AddEditWalletPage()),
+                      );
+                      if (created == true) {
+                        final updated = await _db.walletDao.getAllWallets();
+                        setState(() {
+                          _wallets = updated;
+                          if (updated.isNotEmpty) {
+                            onSelected(updated.last.id);
+                          }
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.add_rounded, size: 18),
+                    label: const Text('Buat Rekening Baru'),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 12.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ],

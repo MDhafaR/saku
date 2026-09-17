@@ -10,21 +10,27 @@ class TransactionSection extends StatelessWidget {
   final String sectionTitle;
   final List<TransactionWithDetails> transactions;
   final Function(int transactionId)? onDeleteTransaction;
+  final Function(int transferId)? onDeleteTransfer;
 
   const TransactionSection({
     super.key,
     required this.sectionTitle,
     required this.transactions,
     this.onDeleteTransaction,
+    this.onDeleteTransfer,
   });
 
   double get _dailyTotal {
     double total = 0.0;
     for (final item in transactions) {
-      if (item.transaction.type == 'income') {
-        total += item.transaction.amount;
-      } else {
-        total -= item.transaction.amount;
+      if (item.isTransfer) {
+        if (item.transfer != null && item.transfer!.fee > 0) {
+          total -= item.transfer!.fee;
+        }
+      } else if (item.transaction?.type == 'income') {
+        total += item.transaction!.amount;
+      } else if (item.transaction?.type == 'expense') {
+        total -= item.transaction!.amount;
       }
     }
     return total;
@@ -80,9 +86,17 @@ class TransactionSection extends StatelessWidget {
           ...transactions.map(
             (item) => TransactionItem(
               transaction: item.transaction,
+              transfer: item.transfer,
               category: item.category,
               wallet: item.wallet,
-              onDelete: () => onDeleteTransaction?.call(item.transaction.id),
+              toWallet: item.toWallet,
+              onDelete: () {
+                if (item.isTransfer && item.transfer != null) {
+                  onDeleteTransfer?.call(item.transfer!.id);
+                } else if (item.transaction != null) {
+                  onDeleteTransaction?.call(item.transaction!.id);
+                }
+              },
             ),
           ),
         ],
@@ -91,20 +105,29 @@ class TransactionSection extends StatelessWidget {
   }
 }
 
-/// Helper class to hold transaction with its related category and wallet
+/// Helper class to hold transaction or transfer with its related category and wallet(s)
 class TransactionWithDetails {
-  final Transaction transaction;
+  final Transaction? transaction;
+  final Transfer? transfer;
   final Category? category;
   final Wallet? wallet;
+  final Wallet? toWallet;
 
   TransactionWithDetails({
-    required this.transaction,
+    this.transaction,
+    this.transfer,
     this.category,
     this.wallet,
-  });
+    this.toWallet,
+  }) : assert(transaction != null || transfer != null);
+
+  bool get isTransfer => transfer != null;
+  DateTime get date => isTransfer ? transfer!.transferDate : transaction!.transactionDate;
+  double get amount => isTransfer ? transfer!.amount : transaction!.amount;
+  String get type => isTransfer ? 'transfer' : transaction!.type;
 }
 
-/// Groups transactions by date (Today, Yesterday, or formatted date)
+/// Groups transactions and transfers by date (Today, Yesterday, or formatted date)
 Map<String, List<TransactionWithDetails>> groupTransactionsByDate(
   List<TransactionWithDetails> transactions,
 ) {
@@ -113,23 +136,27 @@ Map<String, List<TransactionWithDetails>> groupTransactionsByDate(
   final today = DateTime(now.year, now.month, now.day);
   final yesterday = today.subtract(const Duration(days: 1));
 
-  for (final item in transactions) {
-    final transactionDay = DateTime(
-      item.transaction.transactionDate.year,
-      item.transaction.transactionDate.month,
-      item.transaction.transactionDate.day,
+  // Sort items newest first by date
+  final sorted = List<TransactionWithDetails>.from(transactions)
+    ..sort((a, b) => b.date.compareTo(a.date));
+
+  for (final item in sorted) {
+    final itemDay = DateTime(
+      item.date.year,
+      item.date.month,
+      item.date.day,
     );
 
     String key;
-    if (transactionDay == today) {
+    if (itemDay == today) {
       key = 'Hari Ini';
-    } else if (transactionDay == yesterday) {
+    } else if (itemDay == yesterday) {
       key = 'Kemarin';
     } else {
       key = DateFormat(
         'dd MMMM yyyy',
         'id',
-      ).format(item.transaction.transactionDate);
+      ).format(item.date);
     }
 
     grouped.putIfAbsent(key, () => []);

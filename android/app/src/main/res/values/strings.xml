@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Saku</string>
+    <string name="wallets_widget_name">Saku — Total Saldo &amp; Wallets</string>
+    <string name="wallets_widget_description">Menampilkan total saldo aktif dan daftar rekening dompet yang dapat di-scroll.</string>
+    <string name="runway_widget_name">Saku — Perencana Belanja Harian</string>
+    <string name="runway_widget_description">Menampilkan pagu belanja aman per hari dan countdown target pemasukan.</string>
+</resources>

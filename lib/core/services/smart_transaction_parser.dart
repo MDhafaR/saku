@@ -124,6 +124,7 @@ class SmartTransactionParser {
     if (cleanSegment.isEmpty) return null;
 
     final amount = _extractAmount(cleanSegment);
+    final date = _extractDate(cleanSegment);
     final lower = cleanSegment.toLowerCase();
 
     // ── 1. Deteksi Hutang / Piutang ──────────────────────────────────────────
@@ -141,6 +142,7 @@ class SmartTransactionParser {
         amount: amount,
         contactName: contact,
         note: _extractNote(cleanSegment, 'hutang', contact),
+        date: date,
       );
     }
 
@@ -158,6 +160,7 @@ class SmartTransactionParser {
         amount: amount,
         contactName: contact,
         note: _extractNote(cleanSegment, 'piutang', contact),
+        date: date,
       );
     }
 
@@ -175,10 +178,17 @@ class SmartTransactionParser {
         amount: amount,
         contactName: contact,
         note: _extractNote(cleanSegment, 'piutang', contact),
+        date: date,
       );
     }
 
-    // ── 2. Deteksi Transfer Antar Dompet vs Pemasukan ──────────────────────
+    // ── 2. Deteksi Penyesuaian Saldo (Ngepasin Saldo) ──────────────────────
+    final adjustmentIntent = _detectBalanceAdjustment(cleanSegment, amount, date);
+    if (adjustmentIntent != null) {
+      return adjustmentIntent;
+    }
+
+    // ── 3. Deteksi Transfer Antar Dompet vs Pemasukan ──────────────────────
     final isIncome = _isIncomeIntent(lower);
 
     if (!isIncome) {
@@ -259,6 +269,7 @@ class SmartTransactionParser {
           fromWallet: normFrom,
           toWallet: normTo,
           note: _extractNote(cleanSegment, 'transfer', null, normFrom, normTo),
+          date: date,
         );
       }
     }
@@ -274,6 +285,7 @@ class SmartTransactionParser {
         category: category,
         wallet: wallet,
         note: _extractNote(cleanSegment, 'income', null, wallet),
+        date: date,
       );
     }
 
@@ -287,7 +299,170 @@ class SmartTransactionParser {
       category: category,
       wallet: wallet,
       note: _extractNote(cleanSegment, 'expense', null, wallet),
+      date: date,
     );
+  }
+
+  /// Deteksi Intent Penyesuaian Saldo / Ngepasin Saldo
+  VoiceIntentModel? _detectBalanceAdjustment(String cleanSegment, double? amount, DateTime? date) {
+    if (amount == null) return null;
+    final lower = cleanSegment.toLowerCase();
+
+    // 1. Cek apakah ada indikasi kata kunci adjustment
+    final hasAdjustmentKeyword = RegExp(
+      r'\b(?:ngepasin|pasin|paskan|sesuaikan|koreksi|seharusnya|harusnya|mestinya|aslinya|riilnya|saldo\s+riil|saldo\s+fisik|saldo\s+nyata|saldo\s+sebenarnya|saldo\s+asli)\b',
+      caseSensitive: false,
+    ).hasMatch(lower);
+
+    // Pola kalimat locative: "di [wallet] (uangnya|duitnya|saldonya|dana)? (sekarang|saat ini|tinggal|ada|aslinya|riilnya) [nominal]"
+    final isLocativeBalancePhrase = RegExp(
+      r'\bdi\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\s+(?:uangnya|duitnya|saldonya|dana)?\s*(?:sekarang|saat\s+ini|tinggal|ada|aslinya|riilnya|seharusnya|harusnya|mestinya)\b',
+      caseSensitive: false,
+    ).hasMatch(lower);
+
+    // Pola kalimat kepemilikan saldo: "(uang|duit|saldo|dana) di [wallet] (sekarang|saat ini|tinggal|ada|aslinya|riilnya|seharusnya|harusnya|mestinya)"
+    final isWalletBalancePhrase = RegExp(
+      r'\b(?:uang|duit|saldo|dana)\s+(?:di\s+)?(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\s+(?:sekarang|saat\s+ini|tinggal|ada|aslinya|riilnya|seharusnya|harusnya|mestinya|jadi|ke|menjadi)\b',
+      caseSensitive: false,
+    ).hasMatch(lower);
+
+    // Pola kalimat saldo wallet: "saldo [wallet] (seharusnya|harusnya|mestinya|aslinya|riilnya|jadi|ke|menjadi|ada|sekarang|tinggal)"
+    final isSaldoWalletPhrase = RegExp(
+      r'\bsaldo\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\s+(?:seharusnya|harusnya|mestinya|aslinya|riilnya|fisik|nyata|sebenarnya|jadi|ke|menjadi|ada|sekarang|tinggal)\b',
+      caseSensitive: false,
+    ).hasMatch(lower);
+
+    // Pola kalimat reverse: "[wallet] seharusnya/harusnya/mestinya [nominal]" atau "[wallet] saldonya sekarang/tinggal [nominal]"
+    final isWalletShouldBePhrase = RegExp(
+      r'\b(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\s+(?:seharusnya|harusnya|mestinya|saldonya\s+sekarang|saldonya\s+tinggal|saldonya\s+aslinya)\b',
+      caseSensitive: false,
+    ).hasMatch(lower);
+
+    if (!hasAdjustmentKeyword && !isLocativeBalancePhrase && !isWalletBalancePhrase && !isSaldoWalletPhrase && !isWalletShouldBePhrase) {
+      return null;
+    }
+
+    // Ekstrak wallet
+    String? wallet;
+
+    // 1. Cek dari "di [wallet]"
+    final locMatch = RegExp(
+      r'\bdi\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\b',
+      caseSensitive: false,
+    ).firstMatch(lower);
+    if (locMatch != null) {
+      final cand = _cleanWalletCandidate(locMatch.group(1));
+      if (_isKnownOrValidWallet(cand)) {
+        wallet = cand;
+      }
+    }
+
+    // 2. Cek dari "saldo [wallet]" atau "saldo riil/fisik/nyata [wallet]"
+    if (wallet == null) {
+      final saldoMatch = RegExp(
+        r'\bsaldo\s+(?:riil\s+|fisik\s+|nyata\s+|asli\s+|sebenarnya\s+)?(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\b',
+        caseSensitive: false,
+      ).firstMatch(lower);
+      if (saldoMatch != null) {
+        final cand = _cleanWalletCandidate(saldoMatch.group(1));
+        if (_isKnownOrValidWallet(cand)) {
+          wallet = cand;
+        }
+      }
+    }
+
+    // 3. Cek dari "[wallet] seharusnya / harusnya / mestinya / aslinya"
+    if (wallet == null) {
+      final shouldMatch = RegExp(
+        r'\b(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\s+(?:seharusnya|harusnya|mestinya|aslinya|saldonya)\b',
+        caseSensitive: false,
+      ).firstMatch(lower);
+      if (shouldMatch != null) {
+        final cand = _cleanWalletCandidate(shouldMatch.group(1));
+        if (_isKnownOrValidWallet(cand)) {
+          wallet = cand;
+        }
+      }
+    }
+
+    // 4. Cek dari aksi: "ngepasin / pasin / sesuaikan [wallet]"
+    if (wallet == null) {
+      final actionMatch = RegExp(
+        r'\b(?:ngepasin|pasin|paskan|sesuaikan|koreksi|atur|set|update)\s+(?:saldo\s+)?(?:riil\s+|fisik\s+|nyata\s+|asli\s+)?(?:rekening\s+|bank\s+|dompet\s+|akun\s+)?([A-Za-z0-9_]+)\b',
+        caseSensitive: false,
+      ).firstMatch(lower);
+      if (actionMatch != null) {
+        final cand = _cleanWalletCandidate(actionMatch.group(1));
+        if (_isKnownOrValidWallet(cand)) {
+          wallet = cand;
+        }
+      }
+    }
+
+    // Fallback general wallet extraction
+    wallet ??= _extractWallet(cleanSegment);
+
+    final normWallet = wallet != null ? _normalizeWalletName(wallet) : null;
+    final note = _extractAdjustmentNote(cleanSegment, normWallet);
+
+    return VoiceIntentModel(
+      feature: 'penyesuaian_saldo',
+      type: 'adjustment',
+      amount: amount,
+      wallet: normWallet,
+      note: note,
+      date: date,
+    );
+  }
+
+  /// Cek apakah kandidat kata adalah nama wallet yang valid / dikenal
+  bool _isKnownOrValidWallet(String? candidate) {
+    if (candidate == null || candidate.trim().isEmpty) return false;
+    final lower = candidate.trim().toLowerCase();
+    const stopWords = [
+      'uang', 'uangnya', 'duit', 'duitnya', 'saldo', 'saldonya', 'dana', 'dananya',
+      'riil', 'riilnya', 'fisik', 'fisiknya', 'nyata', 'nyatanya', 'asli', 'aslinya', 'sebenarnya',
+      'seharusnya', 'harusnya', 'mestinya', 'sekarang', 'tinggal',
+      'ada', 'jadi', 'ke', 'menjadi', 'sebesar', 'senilai', 'sejumlah', 'ini', 'itu',
+    ];
+    if (stopWords.contains(lower)) return false;
+    return true;
+  }
+
+  /// Membersihkan catatan khusus intent penyesuaian saldo
+  String _extractAdjustmentNote(String segment, String? wallet) {
+    var note = segment.trim();
+
+    // 1. Buang hashtag
+    note = note.replaceAll(RegExp(r'#\s*[\w\s&-]+', caseSensitive: false), ' ').trim();
+
+    // 2. Buang tag kategori Mind Space umum
+    note = note.replaceAll(RegExp(r'\b(?:Shopping|Daily Life|Food & Drink|Finance|Personal|Work|Life|Remarks)\b', caseSensitive: false), ' ').trim();
+
+    // 3. Buang klausa nominal
+    note = note.replaceAll(RegExp(r'\s*(?:sebesar|sejumlah|senilai|seharga|nominal|total|harga)?\s*(?:Rp\.?\s*)?\d[\d.,]*\s*(?:juta|jt|million|ribu|rb|k)?', caseSensitive: false), ' ').trim();
+
+    // 4. Buang kata kunci adjustment & kata sambung
+    note = note.replaceAll(
+      RegExp(
+        r'\b(?:ngepasin|pasin|paskan|sesuaikan|koreksi|seharusnya|harusnya|mestinya|aslinya|riilnya|fisik|nyata|sebenarnya|saldo\s+riil|saldo\s+fisik|saldo\s+nyata|saldo\s+sebenarnya|saldo\s+asli|saldo|uangnya|duitnya|saldonya|uang|duit|dana|sekarang|saat\s+ini|tinggal|ada|jadi|ke|menjadi|di|pada|rekening|bank|dompet|akun|kartu)\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    ).trim();
+
+    if (wallet != null && wallet.isNotEmpty) {
+      note = note.replaceAll(RegExp('\\b${RegExp.escape(wallet)}\\b', caseSensitive: false), ' ').trim();
+    }
+
+    note = _cleanDatePhrases(note);
+    note = note.replaceAll(RegExp(r'\s+'), ' ').trim();
+
+    if (note.isEmpty || note.length <= 2) {
+      return 'Penyesuaian saldo ${wallet ?? 'Dompet'}'.trim();
+    }
+
+    return note[0].toUpperCase() + note.substring(1);
   }
 
   /// Ekstraksi nilai nominal double dari kalimat
@@ -769,9 +944,14 @@ class SmartTransactionParser {
 
   /// Normalisasi nama wallet agar rapi dan kapitalisasi tepat
   String _normalizeWalletName(String raw) {
-    final clean = raw.replaceAll(RegExp(r'^(?:rekening|bank|dompet|akun|kartu)\s+', caseSensitive: false), '').trim();
+    var clean = raw.trim();
     final lower = clean.toLowerCase();
-    switch (lower) {
+    if (lower == 'dompet utama' || lower == 'dompet' || lower == 'cash' || lower == 'tunai' || lower == 'utama') {
+      return 'Dompet Utama';
+    }
+    clean = clean.replaceAll(RegExp(r'^(?:rekening|bank|dompet|akun|kartu)\s+', caseSensitive: false), '').trim();
+    final cleanLower = clean.toLowerCase();
+    switch (cleanLower) {
       case 'jago':
       case 'bank jago':
         return 'Jago';
@@ -823,6 +1003,8 @@ class SmartTransactionParser {
       case 'cash':
       case 'tunai':
       case 'dompet':
+      case 'dompet utama':
+      case 'utama':
         return 'Dompet Utama';
       default:
         return clean.split(' ').map((w) => w.isNotEmpty ? w[0].toUpperCase() + w.substring(1) : '').join(' ');
@@ -861,8 +1043,8 @@ class SmartTransactionParser {
     // 6. Buang sisa-sisa pola titik nominal seperti ".000" atau ",00"
     note = note.replaceAll(RegExp(r'[.,]\d{2,3}\b'), ' ').trim();
 
-    // 7. Buang keterangan waktu umum
-    note = note.replaceAll(RegExp(r'\s+(?:pada\s+)?(?:kemarin|tadi|semalam|hari ini|siang ini|pagi ini|malam ini|sore ini)(?:\s+(?:pagi|siang|sore|malam))?', caseSensitive: false), ' ').trim();
+    // 7. Buang keterangan waktu dan tanggal
+    note = _cleanDatePhrases(note);
 
     // 8. Buang kata sambung & kata kerja aksi di awal kalimat berulang kali
     var prev = '';
@@ -899,5 +1081,331 @@ class SmartTransactionParser {
     }
 
     return note[0].toUpperCase() + note.substring(1);
+  }
+
+  /// Ekstraksi tanggal cerdas (natural language + format tanggal)
+  DateTime? _extractDate(String text) {
+    final lower = text.toLowerCase();
+    final now = DateTime.now();
+
+    // 1. Relatif: Kemarin lusa / 2 hari lalu
+    if (RegExp(r'\b(?:kemarin\s+lusa|kemaren\s+lusa|2\s+hari\s+(?:yang\s+)?lalu|dua\s+hari\s+(?:yang\s+)?lalu)\b').hasMatch(lower)) {
+      return now.subtract(const Duration(days: 2));
+    }
+
+    // 2. Relatif: Kemarin / Kemaren / Semalam / Yesterday
+    if (RegExp(r'\b(?:kemarin|kemaren|semalam|yesterday)\b').hasMatch(lower)) {
+      return now.subtract(const Duration(days: 1));
+    }
+
+    // 3. Relatif: Lusa / Besok lusa / 2 hari lagi
+    if (RegExp(r'\b(?:besok\s+lusa|lusa|2\s+hari\s+lagi|dua\s+hari\s+lagi)\b').hasMatch(lower)) {
+      return now.add(const Duration(days: 2));
+    }
+
+    // 4. Relatif: Besok / Esok / Tomorrow / 1 hari lagi
+    if (RegExp(r'\b(?:besok|esok|tomorrow|1\s+hari\s+lagi|sehari\s+lagi)\b').hasMatch(lower)) {
+      return now.add(const Duration(days: 1));
+    }
+
+    // 5. Relatif: N hari lalu
+    final nHariLaluMatch = RegExp(r'\b(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh)\s+hari\s+(?:yang\s+)?lalu\b').firstMatch(lower);
+    if (nHariLaluMatch != null) {
+      final days = _parseIndoNumber(nHariLaluMatch.group(1)!);
+      if (days != null) return now.subtract(Duration(days: days));
+    }
+
+    // 6. Relatif: N hari lagi / ke depan
+    final nHariLagiMatch = RegExp(r'\b(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh)\s+hari\s+(?:lagi|ke\s+depan)\b').firstMatch(lower);
+    if (nHariLagiMatch != null) {
+      final days = _parseIndoNumber(nHariLagiMatch.group(1)!);
+      if (days != null) return now.add(Duration(days: days));
+    }
+
+    // 7. Relatif: N minggu / pekan lalu
+    final nMingguLaluMatch = RegExp(r'\b(?:(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|se)\s+)?(?:minggu|pekan)\s+(?:yang\s+)?lalu\b').firstMatch(lower);
+    if (nMingguLaluMatch != null) {
+      final weeks = _parseIndoNumber(nMingguLaluMatch.group(1) ?? '1') ?? 1;
+      return now.subtract(Duration(days: weeks * 7));
+    }
+
+    // 8. Relatif: N minggu / pekan depan / lagi
+    final nMingguDepanMatch = RegExp(r'\b(?:(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|se)\s+)?(?:minggu|pekan)\s+(?:depan|lagi|ke\s+depan)\b').firstMatch(lower);
+    if (nMingguDepanMatch != null) {
+      final weeks = _parseIndoNumber(nMingguDepanMatch.group(1) ?? '1') ?? 1;
+      return now.add(Duration(days: weeks * 7));
+    }
+
+    // 9. Relatif: N bulan lalu (contoh: "3 bulan lalu", "sebulan lalu", "bulan lalu")
+    final nBulanLaluMatch = RegExp(r'\b(?:(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\s+belas|duabelas|se)\s+)?bulan\s+(?:yang\s+)?lalu\b').firstMatch(lower);
+    if (nBulanLaluMatch != null) {
+      final months = _parseIndoNumber(nBulanLaluMatch.group(1) ?? '1') ?? 1;
+      return _shiftMonths(now, -months);
+    }
+
+    // 10. Relatif: N bulan lagi / depan
+    final nBulanDepanMatch = RegExp(r'\b(?:(\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\s+belas|duabelas|se)\s+)?bulan\s+(?:depan|lagi|ke\s+depan)\b').firstMatch(lower);
+    if (nBulanDepanMatch != null) {
+      final months = _parseIndoNumber(nBulanDepanMatch.group(1) ?? '1') ?? 1;
+      return _shiftMonths(now, months);
+    }
+
+    // 11. Relatif: N tahun lalu
+    final nTahunLaluMatch = RegExp(r'\b(?:(\d+|satu|dua|tiga|empat|lima|se)\s+)?tahun\s+(?:yang\s+)?lalu\b').firstMatch(lower);
+    if (nTahunLaluMatch != null) {
+      final years = _parseIndoNumber(nTahunLaluMatch.group(1) ?? '1') ?? 1;
+      return _shiftYears(now, -years);
+    }
+
+    // 12. Hari dalam seminggu lalu: "senin lalu", "senin kemarin", "hari senin lalu"
+    final dayOfWeekMatch = RegExp(r'\b(?:hari\s+)?(senin|selasa|rabu|kamis|jumat|jum' "'" r'?at|sabtu|minggu)\s+(?:lalu|kemarin)\b').firstMatch(lower);
+    if (dayOfWeekMatch != null) {
+      final targetWk = _parseDayOfWeek(dayOfWeekMatch.group(1)!);
+      if (targetWk != null) {
+        int diff = now.weekday - targetWk;
+        if (diff <= 0) diff += 7;
+        return now.subtract(Duration(days: diff));
+      }
+    }
+
+    // 13. Format Tanggal ISO: YYYY-MM-DD (e.g. 2026-09-14)
+    final isoMatch = RegExp(r'\b(\d{4})-(\d{1,2})-(\d{1,2})\b').firstMatch(lower);
+    if (isoMatch != null) {
+      final y = int.tryParse(isoMatch.group(1)!);
+      final m = int.tryParse(isoMatch.group(2)!);
+      final d = int.tryParse(isoMatch.group(3)!);
+      if (y != null && m != null && d != null) {
+        return DateTime(y, m, d, now.hour, now.minute, now.second);
+      }
+    }
+
+    // 14. Format Tanggal Standard: DD/MM/YYYY atau DD-MM-YYYY
+    final slashDateMatch = RegExp(r'\b(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b').firstMatch(lower);
+    if (slashDateMatch != null) {
+      final d = int.tryParse(slashDateMatch.group(1)!);
+      final m = int.tryParse(slashDateMatch.group(2)!);
+      var y = int.tryParse(slashDateMatch.group(3)!);
+      if (y != null && y < 100) y += 2000;
+      if (d != null && m != null && y != null) {
+        return DateTime(y, m, d, now.hour, now.minute, now.second);
+      }
+    }
+
+    // 15. Format Tanggal Teks: "14 September 2026", "tanggal 14 Sep", "14 September"
+    final textDateMatch = RegExp(
+      r'\b(?:tanggal|tgl)?\s*(\d{1,2})\s+(januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember|jan|feb|mar|apr|may|jun|jul|aug|agu|sep|okt|oct|nov|nop|dec|des)(?:\s+(\d{4}))?\b',
+    ).firstMatch(lower);
+    if (textDateMatch != null) {
+      final d = int.tryParse(textDateMatch.group(1)!);
+      final m = _parseMonthName(textDateMatch.group(2)!);
+      final y = textDateMatch.group(3) != null ? int.tryParse(textDateMatch.group(3)!) : now.year;
+      if (d != null && m != null && y != null) {
+        return DateTime(y, m, d, now.hour, now.minute, now.second);
+      }
+    }
+
+    // 16. Tanggal Hari Ini / Tadi
+    if (RegExp(r'\b(?:hari\s+ini|today|tadi\s+pagi|tadi\s+siang|tadi\s+sore|tadi\s+malam|tadi)\b').hasMatch(lower)) {
+      return now;
+    }
+
+    // 17. Tanggal saja tanpa bulan: "tanggal 14", "tgl 25"
+    final onlyDateMatch = RegExp(r'\b(?:tanggal|tgl)\s+(\d{1,2})\b').firstMatch(lower);
+    if (onlyDateMatch != null) {
+      final d = int.tryParse(onlyDateMatch.group(1)!);
+      if (d != null && d >= 1 && d <= 31) {
+        final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
+        final validD = d > daysInMonth ? daysInMonth : d;
+        return DateTime(now.year, now.month, validD, now.hour, now.minute, now.second);
+      }
+    }
+
+    return null;
+  }
+
+  /// Membersihkan frasa penunjuk tanggal & waktu dari catatan transaksi
+  String _cleanDatePhrases(String text) {
+    var clean = text;
+
+    // Bersihkan penanda tanggal eksplisit (e.g. "tanggal 14 September 2026", "14 September", "tgl 15")
+    clean = clean.replaceAll(
+      RegExp(
+        r'\b(?:pada\s+)?(?:tanggal|tgl)?\s*\d{1,2}\s+(?:januari|februari|maret|april|mei|juni|juli|agustus|september|oktober|november|desember|jan|feb|mar|apr|may|jun|jul|aug|agu|sep|okt|oct|nov|nop|dec|des)(?:\s+\d{4})?\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+
+    // Bersihkan DD/MM/YYYY atau YYYY-MM-DD
+    clean = clean.replaceAll(RegExp(r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b'), ' ');
+    clean = clean.replaceAll(RegExp(r'\b\d{4}-\d{2}-\d{2}\b'), ' ');
+
+    // Bersihkan "tanggal 14", "tgl 20"
+    clean = clean.replaceAll(RegExp(r'\b(?:pada\s+)?(?:tanggal|tgl)\s+\d{1,2}\b', caseSensitive: false), ' ');
+
+    // Bersihkan "kemarin lusa", "kemarin malam", "kemarin", "kemaren", "semalam", "hari ini", "besok lusa", "besok", "lusa"
+    clean = clean.replaceAll(
+      RegExp(
+        r'\b(?:pada\s+)?(?:kemarin\s+lusa|kemaren\s+lusa|besok\s+lusa|kemarin\s+malam|kemaren\s+malam|kemarin\s+pagi|kemaren\s+pagi|kemarin\s+siang|kemaren\s+siang|kemarin\s+sore|kemaren\s+sore|kemarin|kemaren|semalam|hari\s+ini|besok|esok|lusa|today|yesterday|tomorrow)\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+
+    // Bersihkan "N hari / minggu / bulan / tahun lalu"
+    clean = clean.replaceAll(
+      RegExp(
+        r'\b(?:pada\s+)?(?:\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\s+belas|duabelas|se)?\s*(?:hari|minggu|pekan|bulan|tahun)\s+(?:yang\s+)?lalu\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+
+    // Bersihkan "N hari / minggu / bulan / tahun lagi / depan"
+    clean = clean.replaceAll(
+      RegExp(
+        r'\b(?:pada\s+)?(?:\d+|satu|dua|tiga|empat|lima|enam|tujuh|delapan|sembilan|sepuluh|sebelas|dua\s+belas|duabelas|se)?\s*(?:hari|minggu|pekan|bulan|tahun)\s+(?:lagi|depan|ke\s+depan)\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+
+    // Bersihkan hari dalam seminggu ("senin lalu", "hari senin", dst)
+    clean = clean.replaceAll(
+      RegExp(
+        r'\b(?:pada\s+)?(?:hari\s+)?(?:senin|selasa|rabu|kamis|jumat|jum' "'" r'?at|sabtu|minggu)\s*(?:lalu|kemarin|depan)?\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+
+    // Bersihkan waktu detail ("tadi pagi", "pagi tadi", "tadi malam", "tadi sore", "tadi siang", "tadi", "siang ini", "pagi ini", "malam ini", "kemarin malam", "kemarin pagi", dsb)
+    clean = clean.replaceAll(
+      RegExp(
+        r'\b(?:pada\s+)?(?:tadi\s+pagi|pagi\s+tadi|tadi\s+siang|siang\s+tadi|tadi\s+sore|sore\s+tadi|tadi\s+malam|malam\s+tadi|tadi|pagi\s+ini|siang\s+ini|sore\s+ini|malam\s+ini|kemarin\s+malam|kemaren\s+malam|kemarin\s+pagi|kemaren\s+pagi|kemarin\s+siang|kemaren\s+siang|kemarin\s+sore|kemaren\s+sore)\b',
+        caseSensitive: false,
+      ),
+      ' ',
+    );
+
+    // Bersihkan kata sambung waktu seperti "pada", "pas" yang berdiri sendiri
+    clean = clean.replaceAll(RegExp(r'\b(?:pada|pas\s+waktu|pas)\b', caseSensitive: false), ' ');
+
+    return clean;
+  }
+
+  /// Shift bulan dengan penyesuaian batas tanggal maksimum dalam bulan tujuan
+  DateTime _shiftMonths(DateTime base, int deltaMonths) {
+    int newYear = base.year;
+    int newMonth = base.month + deltaMonths;
+    while (newMonth <= 0) {
+      newMonth += 12;
+      newYear -= 1;
+    }
+    while (newMonth > 12) {
+      newMonth -= 12;
+      newYear += 1;
+    }
+    final daysInTargetMonth = DateTime(newYear, newMonth + 1, 0).day;
+    final newDay = base.day > daysInTargetMonth ? daysInTargetMonth : base.day;
+    return DateTime(newYear, newMonth, newDay, base.hour, base.minute, base.second);
+  }
+
+  /// Shift tahun dengan penyesuaian tahun kabisat (29 Feb)
+  DateTime _shiftYears(DateTime base, int deltaYears) {
+    final newYear = base.year + deltaYears;
+    final daysInTargetMonth = DateTime(newYear, base.month + 1, 0).day;
+    final newDay = base.day > daysInTargetMonth ? daysInTargetMonth : base.day;
+    return DateTime(newYear, base.month, newDay, base.hour, base.minute, base.second);
+  }
+
+  /// Parser angka teks bahasa Indonesia ke int
+  int? _parseIndoNumber(String text) {
+    final clean = text.trim().toLowerCase();
+    final directNum = int.tryParse(clean);
+    if (directNum != null) return directNum;
+    switch (clean) {
+      case 'se':
+      case 'satu':
+      case 'one':
+      case '1':
+        return 1;
+      case 'dua':
+      case 'two':
+      case '2':
+        return 2;
+      case 'tiga':
+      case 'three':
+      case '3':
+        return 3;
+      case 'empat':
+      case 'four':
+      case '4':
+        return 4;
+      case 'lima':
+      case 'five':
+      case '5':
+        return 5;
+      case 'enam':
+      case 'six':
+      case '6':
+        return 6;
+      case 'tujuh':
+      case 'seven':
+      case '7':
+        return 7;
+      case 'delapan':
+      case 'eight':
+      case '8':
+        return 8;
+      case 'sembilan':
+      case 'nine':
+      case '9':
+        return 9;
+      case 'sepuluh':
+      case 'ten':
+      case '10':
+        return 10;
+      case 'sebelas':
+      case '11':
+        return 11;
+      case 'dua belas':
+      case 'duabelas':
+      case '12':
+        return 12;
+      default:
+        return null;
+    }
+  }
+
+  /// Konversi nama bulan ke nomor bulan 1-12
+  int? _parseMonthName(String monthStr) {
+    final lower = monthStr.toLowerCase();
+    if (lower.startsWith('jan')) return 1;
+    if (lower.startsWith('feb')) return 2;
+    if (lower.startsWith('mar')) return 3;
+    if (lower.startsWith('apr')) return 4;
+    if (lower.startsWith('mei') || lower.startsWith('may')) return 5;
+    if (lower.startsWith('jun')) return 6;
+    if (lower.startsWith('jul')) return 7;
+    if (lower.startsWith('agu') || lower.startsWith('aug') || lower.startsWith('agt')) return 8;
+    if (lower.startsWith('sep')) return 9;
+    if (lower.startsWith('okt') || lower.startsWith('oct')) return 10;
+    if (lower.startsWith('nop') || lower.startsWith('nov')) return 11;
+    if (lower.startsWith('des') || lower.startsWith('dec')) return 12;
+    return null;
+  }
+
+  /// Konversi nama hari ke int weekday DateTime (1 = Senin, 7 = Minggu)
+  int? _parseDayOfWeek(String dayStr) {
+    final lower = dayStr.toLowerCase();
+    if (lower.contains('senin') || lower.contains('monday')) return DateTime.monday;
+    if (lower.contains('selasa') || lower.contains('tuesday')) return DateTime.tuesday;
+    if (lower.contains('rabu') || lower.contains('wednesday')) return DateTime.wednesday;
+    if (lower.contains('kamis') || lower.contains('thursday')) return DateTime.thursday;
+    if (lower.contains('jumat') || lower.contains("jum'at") || lower.contains('friday')) return DateTime.friday;
+    if (lower.contains('sabtu') || lower.contains('saturday')) return DateTime.saturday;
+    if (lower.contains('minggu') || lower.contains('ahad') || lower.contains('sunday')) return DateTime.sunday;
+    return null;
   }
 }

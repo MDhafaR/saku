@@ -34,6 +34,9 @@ class VoiceIntentModel extends Equatable {
   /// Nama kontak untuk hutang/piutang
   final String? contactName;
 
+  /// Tanggal transaksi yang diekstrak dari teks alami (misal: "kemarin", "14 September", "3 bulan lalu")
+  final DateTime? date;
+
   const VoiceIntentModel({
     required this.feature,
     this.type,
@@ -44,6 +47,7 @@ class VoiceIntentModel extends Equatable {
     this.fromWallet,
     this.toWallet,
     this.contactName,
+    this.date,
   });
 
   factory VoiceIntentModel.fromJson(Map<String, dynamic> json) {
@@ -57,6 +61,7 @@ class VoiceIntentModel extends Equatable {
       fromWallet: json['from_wallet'] as String?,
       toWallet: json['to_wallet'] as String?,
       contactName: json['contact_name'] as String?,
+      date: json['date'] != null ? DateTime.tryParse(json['date'] as String) : null,
     );
   }
 
@@ -70,6 +75,7 @@ class VoiceIntentModel extends Equatable {
         'from_wallet': fromWallet,
         'to_wallet': toWallet,
         'contact_name': contactName,
+        'date': date?.toIso8601String(),
       };
 
   /// Label ringkas untuk ditampilkan di UI konfirmasi
@@ -87,6 +93,8 @@ class VoiceIntentModel extends Equatable {
       case 'hutang_piutang':
         final label = type == 'hutang' ? 'Hutang' : 'Piutang';
         return '$label $nominal${contactName != null ? ' (${contactName!})' : ''}';
+      case 'penyesuaian_saldo':
+        return '⚖️ Ngepasin Saldo ${wallet ?? 'Dompet'} jadi $nominal';
       default:
         final label = type == 'income' ? '📈 Pemasukan' : '📉 Pengeluaran';
         return '$label $nominal${note != null ? ' — ${note!}' : ''}';
@@ -104,5 +112,6 @@ class VoiceIntentModel extends Equatable {
         fromWallet,
         toWallet,
         contactName,
+        date,
       ];
 }

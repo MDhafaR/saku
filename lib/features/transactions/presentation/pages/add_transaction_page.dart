@@ -33,6 +33,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   bool isExpense = true;
   String amount = '0';
   String note = '';
+  bool _isNumpadVisible = false;
+  final FocusNode _noteFocusNode = FocusNode();
+  final TextEditingController _noteController = TextEditingController();
   DateTime selectedDate = DateTime.now();
   TimeOfDay selectedTime = TimeOfDay.now();
   Map<String, dynamic>? selectedCategory;
@@ -52,6 +55,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
       isExpense = tx.type == 'expense';
       amount = tx.amount.toStringAsFixed(0);
       note = tx.note ?? tx.description;
+      _noteController.text = note;
       selectedDate = tx.transactionDate;
       selectedTime = TimeOfDay.fromDateTime(tx.transactionDate);
 
@@ -81,6 +85,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     }
   }
 
+  @override
+  void dispose() {
+    _noteFocusNode.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
   void _onKeyPressed(String value) {
     setState(() {
       if (amount == '0') {
@@ -103,6 +114,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 
   Future<void> _selectDate() async {
+    _noteFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: selectedDate,
@@ -122,6 +136,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         );
       },
     );
+
+    _noteFocusNode.unfocus();
+    if (!mounted) return;
+    FocusScope.of(context).unfocus();
+
     if (picked != null && picked != selectedDate) {
       setState(() {
         selectedDate = picked;
@@ -149,6 +168,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 
   Future<void> _selectTime() async {
+    _noteFocusNode.unfocus();
+    FocusScope.of(context).unfocus();
+
     final TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedTime,
@@ -166,6 +188,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         );
       },
     );
+
+    _noteFocusNode.unfocus();
+    if (!mounted) return;
+    FocusScope.of(context).unfocus();
+
     if (picked != null && picked != selectedTime) {
       setState(() {
         selectedTime = picked;
@@ -250,6 +277,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final feedbackColor = isExpense
+        ? AppTheme.semanticRed
+        : AppTheme.semanticGreen;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -261,6 +292,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
           color: Theme.of(context).iconTheme.color,
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          SizedBox(width: 48.w), // Balanced center alignment
+        ],
         centerTitle: true,
         title: isEditMode
             ? Text(
@@ -268,162 +302,215 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black87,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               )
-            : Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Theme.of(context).colorScheme.surfaceContainerLow
-                      : const Color(0xFFF3F4F6),
-                  borderRadius: BorderRadius.circular(24.r),
+            : SizedBox(
+                width: 215.w,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(context).colorScheme.surfaceContainerLow
+                        : const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(24.r),
+                  ),
+                  padding: EdgeInsets.all(3.w),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final tabWidth = constraints.maxWidth / 2;
+                      return Stack(
+                        children: [
+                          // Sliding indicator
+                          AnimatedPositioned(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            left: isExpense ? 0 : tabWidth,
+                            top: 0,
+                            bottom: 0,
+                            width: tabWidth,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                borderRadius: BorderRadius.circular(20.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.05),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // Tab labels
+                          Row(
+                            children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    _noteFocusNode.unfocus();
+                                    FocusScope.of(context).unfocus();
+                                    if (!isExpense) {
+                                      setState(() {
+                                        isExpense = true;
+                                        selectedCategory = null;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 6.h),
+                                    child: Text(
+                                      'Pengeluaran',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: isExpense
+                                            ? AppTheme.semanticRed
+                                            : AppTheme.lightTextSecondary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    _noteFocusNode.unfocus();
+                                    FocusScope.of(context).unfocus();
+                                    if (isExpense) {
+                                      setState(() {
+                                        isExpense = false;
+                                        selectedCategory = null;
+                                      });
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(vertical: 6.h),
+                                    child: Text(
+                                      'Pemasukan',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: !isExpense
+                                            ? AppTheme.semanticGreen
+                                            : AppTheme.lightTextSecondary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ),
-                padding: EdgeInsets.all(3.w),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final tabWidth = constraints.maxWidth / 2;
-                    return Stack(
+              ),
+      ),
+      body: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () {
+          _noteFocusNode.unfocus();
+          FocusScope.of(context).unfocus();
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Sliding indicator
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeInOut,
-                          left: isExpense ? 0 : tabWidth,
-                          top: 0,
-                          bottom: 0,
-                          width: tabWidth,
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(20.r),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.05),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
+                        // Amount Section - Interactive with Numpad Toggle
+                        GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {
+                            _noteFocusNode.unfocus();
+                            FocusScope.of(context).unfocus();
+                            setState(() {
+                              _isNumpadVisible = !_isNumpadVisible;
+                            });
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Masukkan Jumlah',
+                                      style: TextStyle(
+                                        color: AppTheme.lightTextSecondary,
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    Icon(
+                                      _isNumpadVisible
+                                          ? Icons.keyboard_arrow_down_rounded
+                                          : Icons.edit_note_rounded,
+                                      size: 16.sp,
+                                      color: AppTheme.lightTextSecondary,
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 6.h),
+                                AnimatedContainer(
+                                  duration: const Duration(milliseconds: 200),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 14.w,
+                                    vertical: 4.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _isNumpadVisible
+                                        ? feedbackColor.withValues(alpha: 0.08)
+                                        : Colors.transparent,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                    border: Border.all(
+                                      color: _isNumpadVisible
+                                          ? feedbackColor.withValues(alpha: 0.3)
+                                          : Colors.transparent,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Rp ${CurrencyFormatter.format(amount)}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .displayMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 28.sp,
+                                          color: feedbackColor,
+                                        ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        // Tab labels
-                        Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  if (!isExpense) {
-                                    setState(() {
-                                      isExpense = true;
-                                      selectedCategory = null;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 6.h),
-                                  child: Text(
-                                    'Pengeluaran',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: isExpense
-                                          ? AppTheme.semanticRed
-                                          : AppTheme.lightTextSecondary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  if (isExpense) {
-                                    setState(() {
-                                      isExpense = false;
-                                      selectedCategory = null;
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 6.h),
-                                  child: Text(
-                                    'Pemasukan',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: !isExpense
-                                          ? AppTheme.semanticGreen
-                                          : AppTheme.lightTextSecondary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12.sp,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.more_horiz, size: 20.sp),
-            color: Theme.of(context).iconTheme.color,
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight,
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Amount Section
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 24.h),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Masukkan Jumlah',
-                                style: TextStyle(
-                                  color: AppTheme.lightTextSecondary,
-                                  fontSize: 12.sp,
-                                ),
-                              ),
-                              SizedBox(height: 6.h),
-                              Text(
-                                'Rp ${CurrencyFormatter.format(amount)}',
-                                style: Theme.of(context).textTheme.displayMedium
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 28.sp,
-                                      color: isExpense
-                                          ? AppTheme.semanticRed
-                                          : AppTheme.semanticGreen,
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
 
-                        // Details Card
+                        // Details Card (Extends all the way down seamlessly)
                         Container(
                           width: double.infinity,
+                          constraints: BoxConstraints(
+                            minHeight: (constraints.maxHeight - 88.h).clamp(
+                              0.0,
+                              double.infinity,
+                            ),
+                          ),
                           decoration: BoxDecoration(
                             color: Theme.of(context).cardTheme.color,
                             borderRadius: BorderRadius.vertical(
@@ -431,14 +518,15 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
+                                color: Colors.black.withValues(alpha: 0.04),
                                 blurRadius: 8,
                                 offset: const Offset(0, -2),
                               ),
                             ],
                           ),
-                          padding: EdgeInsets.all(20.w),
+                          padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 24.h),
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // Date & Time
                               Row(
@@ -447,7 +535,16 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     child: _buildInputChip(
                                       icon: Icons.calendar_today_outlined,
                                       label: _getDateLabel(),
-                                      onTap: _selectDate,
+                                      onTap: () {
+                                        _noteFocusNode.unfocus();
+                                        FocusScope.of(context).unfocus();
+                                        if (_isNumpadVisible) {
+                                          setState(
+                                            () => _isNumpadVisible = false,
+                                          );
+                                        }
+                                        _selectDate();
+                                      },
                                     ),
                                   ),
                                   SizedBox(width: 12.w),
@@ -455,7 +552,16 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     child: _buildInputChip(
                                       icon: Icons.access_time_outlined,
                                       label: _getTimeLabel(),
-                                      onTap: _selectTime,
+                                      onTap: () {
+                                        _noteFocusNode.unfocus();
+                                        FocusScope.of(context).unfocus();
+                                        if (_isNumpadVisible) {
+                                          setState(
+                                            () => _isNumpadVisible = false,
+                                          );
+                                        }
+                                        _selectTime();
+                                      },
                                     ),
                                   ),
                                 ],
@@ -466,8 +572,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               _buildSelectionField(
                                 leadingWidget: selectedCategory != null
                                     ? CategoryIcon(
-                                        iconName: selectedCategory!['iconName'] ?? selectedCategory!['icon']?.toString() ?? 'category',
-                                        color: selectedCategory!['color'] as Color?,
+                                        iconName:
+                                            selectedCategory!['iconName'] ??
+                                            selectedCategory!['icon']
+                                                ?.toString() ??
+                                            'category',
+                                        color:
+                                            selectedCategory!['color']
+                                                as Color?,
                                         size: 18.sp,
                                       )
                                     : null,
@@ -478,6 +590,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     : 'Pilih kategori...',
                                 isPlaceholder: selectedCategory == null,
                                 onTap: () async {
+                                  _noteFocusNode.unfocus();
+                                  FocusScope.of(context).unfocus();
+                                  if (_isNumpadVisible) {
+                                    setState(() => _isNumpadVisible = false);
+                                  }
                                   final result =
                                       await Navigator.push<
                                         Map<String, dynamic>
@@ -490,11 +607,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                               ),
                                         ),
                                       );
+                                  _noteFocusNode.unfocus();
+                                  if (!mounted) return;
                                   if (result != null) {
                                     setState(() {
                                       selectedCategory = result;
                                       if (result['isExpense'] != null) {
-                                        isExpense = result['isExpense'] as bool;
+                                        isExpense =
+                                            result['isExpense'] as bool;
                                       }
                                     });
                                   }
@@ -506,8 +626,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               _buildSelectionField(
                                 leadingWidget: selectedWallet != null
                                     ? CategoryIcon(
-                                        iconName: selectedWallet!['iconName'] ?? selectedWallet!['icon']?.toString() ?? 'wallet',
-                                        color: selectedWallet!['color'] as Color?,
+                                        iconName:
+                                            selectedWallet!['iconName'] ??
+                                            selectedWallet!['icon']
+                                                ?.toString() ??
+                                            'wallet',
+                                        color:
+                                            selectedWallet!['color'] as Color?,
                                         size: 18.sp,
                                       )
                                     : null,
@@ -518,6 +643,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     : 'Pilih wallet...',
                                 isPlaceholder: selectedWallet == null,
                                 onTap: () async {
+                                  _noteFocusNode.unfocus();
+                                  FocusScope.of(context).unfocus();
+                                  if (_isNumpadVisible) {
+                                    setState(() => _isNumpadVisible = false);
+                                  }
                                   final result =
                                       await Navigator.push<
                                         Map<String, dynamic>
@@ -528,6 +658,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                               const WalletSelectionPage(),
                                         ),
                                       );
+                                  _noteFocusNode.unfocus();
+                                  if (!mounted) return;
                                   if (result != null) {
                                     setState(() {
                                       selectedWallet = result;
@@ -537,50 +669,73 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                               ),
                               SizedBox(height: 12.h),
 
-                              // Note
+                              // Note Field
                               Container(
                                 padding: EdgeInsets.symmetric(
                                   horizontal: 14.w,
-                                  vertical: 8.h,
+                                  vertical: 12.h,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).brightness == Brightness.dark
-                                      ? Theme.of(context).colorScheme.surfaceContainerLow
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerLow
                                       : const Color(0xFFF9FAFB),
                                   borderRadius: BorderRadius.circular(12.r),
                                   border: Border.all(
-                                    color: Theme.of(context).brightness == Brightness.dark
-                                        ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Theme.of(context)
+                                            .colorScheme
+                                            .outline
+                                            .withValues(alpha: 0.3)
                                         : const Color(0xFFE5E7EB),
                                   ),
                                 ),
                                 child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(top: 4.h),
-                                      child: Icon(
-                                        Icons.edit_outlined,
-                                        color: AppTheme.lightTextSecondary,
-                                        size: 20.sp,
-                                      ),
+                                    Icon(
+                                      Icons.edit_outlined,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface
+                                          .withValues(alpha: 0.5),
+                                      size: 18.sp,
                                     ),
-                                    SizedBox(width: 12.w),
+                                    SizedBox(width: 10.w),
                                     Expanded(
-                                      child: TextFormField(
-                                        initialValue: note,
+                                      child: TextField(
+                                        controller: _noteController,
+                                        focusNode: _noteFocusNode,
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
                                         onChanged: (value) {
                                           note = value;
                                         },
-                                        maxLines: 3,
-                                        minLines: 2,
-                                        cursorColor: const Color(0xFF6B7280),
+                                        onTap: () {
+                                          if (_isNumpadVisible) {
+                                            setState(
+                                              () => _isNumpadVisible = false,
+                                            );
+                                          }
+                                        },
+                                        cursorColor: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
                                         decoration: InputDecoration(
                                           hintText: 'Tulis catatan...',
                                           hintStyle: TextStyle(
-                                            color: AppTheme.lightTextSecondary,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onSurface
+                                                .withValues(alpha: 0.4),
                                             fontSize: 14.sp,
+                                            fontWeight: FontWeight.normal,
                                           ),
+                                          filled: false,
+                                          fillColor: Colors.transparent,
                                           border: InputBorder.none,
                                           enabledBorder: InputBorder.none,
                                           focusedBorder: InputBorder.none,
@@ -590,86 +745,92 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                         style: TextStyle(
                                           fontSize: 14.sp,
                                           fontWeight: FontWeight.w500,
-                                          color: const Color(0xFF1F2937),
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.onSurface,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                              SizedBox(height: 16.h),
+                              SizedBox(height: 20.h),
                             ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
-
-          // Fixed Numpad and Submit Button at bottom
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(
-              20.w,
-              16.h,
-              20.w,
-              MediaQuery.of(context).padding.bottom + 20.h,
-            ),
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Theme.of(context).colorScheme.surfaceContainerLow
-                  : const Color(0xFFF9FAFB),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-              border: Border(
-                top: BorderSide(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Theme.of(context).colorScheme.outline.withValues(alpha: 0.3)
-                      : const Color(0xFFE5E7EB),
-                  width: 1,
-                ),
+                  );
+                },
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Numpad
-                CustomNumpad(
-                  onKeyPressed: _onKeyPressed,
-                  onDelete: _onDelete,
-                  onSubmit: _saveTransaction,
-                  submitColor: AppTheme.primaryBlue,
-                ),
-                SizedBox(height: 16.h),
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 48.h,
-                  child: ElevatedButton(
-                    onPressed: _saveTransaction,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF111111),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.r),
+
+            // Collapsible Animated Numpad and Submit Button at bottom
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.fromLTRB(
+                20.w,
+                10.h,
+                20.w,
+                MediaQuery.of(context).padding.bottom + 12.h,
+              ),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardTheme.color,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Animated Slide-Up / Slide-Down Numpad
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOutCubic,
+                    alignment: Alignment.topCenter,
+                    child: _isNumpadVisible
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CustomNumpad(
+                                onKeyPressed: _onKeyPressed,
+                                onDelete: _onDelete,
+                                onSubmit: () {
+                                  setState(() => _isNumpadVisible = false);
+                                },
+                                submitColor: feedbackColor,
+                              ),
+                              SizedBox(height: 12.h),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+
+                  // Submit Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48.h,
+                    child: ElevatedButton(
+                      onPressed: _saveTransaction,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF111111),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        elevation: 0,
                       ),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      isEditMode ? 'Simpan Perubahan' : 'Simpan',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
+                      child: Text(
+                        isEditMode ? 'Simpan Perubahan' : 'Simpan',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

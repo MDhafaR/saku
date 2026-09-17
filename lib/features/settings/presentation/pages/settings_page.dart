@@ -181,210 +181,91 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  void _showShareBottomSheet() {
-    showModalBottomSheet(
+  void _showUnderDevelopmentDialog({
+    required String featureName,
+    String? description,
+  }) {
+    showDialog(
       context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.all(24.0.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Center(
-                child: Container(
-                  width: 40.w,
-                  height: 4.h,
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final cs = Theme.of(context).colorScheme;
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          backgroundColor: cs.surface,
+          elevation: 8,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 24.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 56.w,
+                  height: 56.w,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                    borderRadius: BorderRadius.circular(2.r),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.construction_rounded,
+                    color: const Color(0xFF10B981),
+                    size: 28.sp,
                   ),
                 ),
-              ),
-              SizedBox(height: 24.h),
-
-              // Link Preview Card
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+                SizedBox(height: 16.h),
+                Text(
+                  'Fitur Dalam Pengembangan',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: cs.onSurface,
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 60.w,
-                      height: 60.w,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF8B5CF6),
+                SizedBox(height: 8.h),
+                Text(
+                  description ??
+                      'Fitur $featureName saat ini masih dalam tahap pengembangan dan akan segera hadir pada pembaruan mendatang. Terima kasih atas dukungan Anda!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: cs.onSurface.withValues(alpha: 0.65),
+                    height: 1.45,
+                  ),
+                ),
+                SizedBox(height: 22.h),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44.h,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isDark
+                          ? cs.primary
+                          : const Color(0xFF111111),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12.r),
                       ),
-                      child: Icon(
-                        Icons.account_balance_wallet,
-                        color: Colors.white,
-                        size: 30.sp,
+                    ),
+                    child: Text(
+                      'Oke, Mengerti',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(width: 16.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Yuk atur keuangan bareng Saku!',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14.sp,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 4.h),
-                          Text(
-                            'saku.app',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 12.sp,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-
-              SizedBox(height: 32.h),
-
-              // Contacts Row
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildContactItem('Dika', Colors.brown),
-                    SizedBox(width: 20.w),
-                    _buildContactItem('Putri', Colors.pink),
-                    SizedBox(width: 20.w),
-                    _buildContactItem('Mama', Colors.orange),
-                    SizedBox(width: 20.w),
-                    _buildContactItem('Budi', Colors.blue),
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 32.h),
-
-              // Apps Row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildShareAppItem(
-                    Icons.link,
-                    'Copy Link',
-                    Theme.of(context).brightness == Brightness.dark ? const Color(0xFF333333) : Colors.grey[200]!,
-                    Theme.of(context).colorScheme.onSurface,
-                  ),
-                  _buildShareAppItem(
-                    Icons.chat_bubble,
-                    'WhatsApp',
-                    const Color(0xFF25D366),
-                    Colors.white,
-                  ),
-                  _buildShareAppItem(
-                    Icons.camera_alt,
-                    'Instagram',
-                    const Color(0xFFE1306C),
-                    Colors.white,
-                  ),
-                  _buildShareAppItem(
-                    Icons.message,
-                    'Messages',
-                    const Color(0xFF007AFF),
-                    Colors.white,
-                  ),
-                ],
-              ),
-              SizedBox(height: 24.h),
-            ],
+              ],
+            ),
           ),
         );
       },
-    );
-  }
-
-  Widget _buildContactItem(String name, Color color) {
-    return Column(
-      children: [
-        Stack(
-          children: [
-            CircleAvatar(
-              radius: 28.r,
-              backgroundColor: color.withOpacity(0.2),
-              child: Text(
-                name[0],
-                style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18.sp,
-                ),
-              ),
-            ),
-            Positioned(
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: EdgeInsets.all(4.w),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.chat_bubble,
-                  size: 12.sp,
-                  color: const Color(0xFF25D366),
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          name,
-          style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildShareAppItem(
-    IconData icon,
-    String label,
-    Color bg,
-    Color iconColor,
-  ) {
-    return Column(
-      children: [
-        Container(
-          width: 56.w,
-          height: 56.w,
-          decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Icon(icon, color: iconColor),
-        ),
-        SizedBox(height: 8.h),
-        Text(
-          label,
-          style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
-        ),
-      ],
     );
   }
 
@@ -485,7 +366,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     borderRadius: BorderRadius.circular(12.r),
                     boxShadow: [
                       BoxShadow(
-                        color: isDark ? Colors.black.withOpacity(0.3) : Colors.grey.withOpacity(0.1),
+                        color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.1),
                         spreadRadius: 1,
                         blurRadius: 8,
                         offset: Offset(0, 4.h),
@@ -577,8 +458,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
             // General Settings
             ...settingsItems.map(
-              (item) => InkWell(
-                onTap: () {
+              (item) {
+                void handleTap() {
                   if (item.id == '1') {
                     Navigator.push(
                       context,
@@ -619,7 +500,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   } else if (item.id == '6') {
                     // Theme — handled by toggle switch
                   } else if (item.id == '7') {
-                    _showShareBottomSheet();
+                    _showUnderDevelopmentDialog(
+                      featureName: 'Bagikan Aplikasi (Share App)',
+                    );
                   } else if (item.id == 'about') {
                     Navigator.push(
                       context,
@@ -635,43 +518,50 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     );
                   }
-                },
-                child: item.id == '4'
-                    ? BlocProvider.value(
-                        value: locator<BackupCubit>(),
-                        child: BlocBuilder<BackupCubit, BackupState>(
-                          builder: (context, backupState) {
-                            final isConnected =
-                                backupState.status == BackupStatus.signedIn ||
-                                backupState.status == BackupStatus.backingUp ||
-                                backupState.status == BackupStatus.restoring ||
-                                backupState.status == BackupStatus.success;
-                            return SettingsItemWidget(
-                              item: item.copyWith(
-                                subtitle: isConnected
-                                    ? backupState.email ?? 'Terhubung'
-                                    : 'Connect to Google Drive',
-                                status: isConnected ? 'Connected' : null,
-                                clearStatus: !isConnected,
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    : item.id == '6'
-                    ? BlocBuilder<ThemeCubit, ThemeMode>(
-                        builder: (context, themeMode) {
-                          final isDark = themeMode == ThemeMode.dark;
-                          return SettingsItemWidget(
-                            item: item.copyWith(toggleValue: isDark),
-                            onToggleChanged: (_) {
-                              context.read<ThemeCubit>().toggleTheme();
-                            },
-                          );
+                }
+
+                if (item.id == '4') {
+                  return BlocProvider.value(
+                    value: locator<BackupCubit>(),
+                    child: BlocBuilder<BackupCubit, BackupState>(
+                      builder: (context, backupState) {
+                        final isConnected =
+                            backupState.status == BackupStatus.signedIn ||
+                            backupState.status == BackupStatus.backingUp ||
+                            backupState.status == BackupStatus.restoring ||
+                            backupState.status == BackupStatus.success;
+                        return SettingsItemWidget(
+                          item: item.copyWith(
+                            subtitle: isConnected
+                                ? backupState.email ?? 'Terhubung'
+                                : 'Connect to Google Drive',
+                            status: isConnected ? 'Connected' : null,
+                            clearStatus: !isConnected,
+                          ),
+                          onTap: handleTap,
+                        );
+                      },
+                    ),
+                  );
+                } else if (item.id == '6') {
+                  return BlocBuilder<ThemeCubit, ThemeMode>(
+                    builder: (context, themeMode) {
+                      final isDark = themeMode == ThemeMode.dark;
+                      return SettingsItemWidget(
+                        item: item.copyWith(toggleValue: isDark),
+                        onToggleChanged: (_) {
+                          context.read<ThemeCubit>().toggleTheme();
                         },
-                      )
-                    : SettingsItemWidget(item: item),
-              ),
+                      );
+                    },
+                  );
+                }
+
+                return SettingsItemWidget(
+                  item: item,
+                  onTap: handleTap,
+                );
+              },
             ),
           ],
         ),

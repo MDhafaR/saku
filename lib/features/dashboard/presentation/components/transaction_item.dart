@@ -8,33 +8,45 @@ import '../../../../data/local/database/app_database.dart';
 import '../../../transactions/presentation/pages/add_transaction_page.dart';
 
 class TransactionItem extends StatelessWidget {
-  final Transaction transaction;
+  final Transaction? transaction;
+  final Transfer? transfer;
   final Category? category;
   final Wallet? wallet;
+  final Wallet? toWallet;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
 
   const TransactionItem({
     super.key,
-    required this.transaction,
+    this.transaction,
+    this.transfer,
     this.category,
     this.wallet,
+    this.toWallet,
     this.onDelete,
     this.onEdit,
-  });
+  }) : assert(transaction != null || transfer != null);
 
-  bool get isIncome => transaction.type == 'income';
+  bool get isTransfer => transfer != null;
+  bool get isIncome => transaction?.type == 'income';
 
   String get _formattedAmount {
+    if (isTransfer) {
+      final formatted = CurrencyFormatter.format(
+        transfer!.amount.toStringAsFixed(0),
+      );
+      return 'Rp $formatted';
+    }
     final formatted = CurrencyFormatter.format(
-      transaction.amount.toStringAsFixed(0),
+      transaction!.amount.toStringAsFixed(0),
     );
     return isIncome ? '+Rp $formatted' : '-Rp $formatted';
   }
 
-  String get _iconName => category?.icon ?? 'category';
+  String get _iconName => isTransfer ? 'swap_horiz' : (category?.icon ?? 'category');
 
   Color get _iconColor {
+    if (isTransfer) return const Color(0xFF3B82F6);
     return Color(category?.iconColor ?? 0xFF2196F3);
   }
 
@@ -42,14 +54,16 @@ class TransactionItem extends StatelessWidget {
     return _iconColor.withValues(alpha: 0.15);
   }
 
+  DateTime get _itemDate => isTransfer ? transfer!.transferDate : transaction!.transactionDate;
+
   String _formatDateTime() {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final transactionDay = DateTime(
-      transaction.transactionDate.year,
-      transaction.transactionDate.month,
-      transaction.transactionDate.day,
+      _itemDate.year,
+      _itemDate.month,
+      _itemDate.day,
     );
 
     String dateLabel;
@@ -61,21 +75,41 @@ class TransactionItem extends StatelessWidget {
       dateLabel = DateFormat(
         'dd MMM yyyy',
         'id',
-      ).format(transaction.transactionDate);
+      ).format(_itemDate);
     }
 
-    final timeLabel = DateFormat('HH:mm').format(transaction.transactionDate);
+    final timeLabel = DateFormat('HH:mm').format(_itemDate);
     return '$dateLabel, $timeLabel';
   }
 
   String? get _noteText {
-    if (transaction.description.trim().isNotEmpty) {
-      return transaction.description.trim();
+    if (isTransfer) {
+      if (transfer!.description.trim().isNotEmpty) {
+        return transfer!.description.trim();
+      }
+      return null;
     }
-    if (transaction.note != null && transaction.note!.trim().isNotEmpty) {
-      return transaction.note!.trim();
+    if (transaction!.description.trim().isNotEmpty) {
+      return transaction!.description.trim();
+    }
+    if (transaction!.note != null && transaction!.note!.trim().isNotEmpty) {
+      return transaction!.note!.trim();
     }
     return null;
+  }
+
+  String get _titleText {
+    if (isTransfer) return 'Transfer';
+    return category?.name ?? 'Uncategorized';
+  }
+
+  String get _walletText {
+    if (isTransfer) {
+      final fromName = wallet?.name ?? 'Dompet';
+      final toName = toWallet?.name ?? 'Dompet';
+      return '$fromName → $toName';
+    }
+    return wallet?.name ?? 'Unknown Wallet';
   }
 
   @override
@@ -96,15 +130,27 @@ class TransactionItem extends StatelessWidget {
           Container(
             width: 40.w,
             height: 40.w,
-            decoration: BoxDecoration(
-              color: _backgroundColor,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
+            decoration: isTransfer
+                ? const BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [
+                        Color(0xFF10B981), // Emerald Green
+                        Color(0xFFF97316), // Vibrant Orange
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  )
+                : BoxDecoration(
+                    color: _backgroundColor,
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
             alignment: Alignment.center,
             child: CategoryIcon(
               iconName: _iconName,
-              color: _iconColor,
-              size: 20.sp,
+              color: isTransfer ? Colors.white : _iconColor,
+              size: 19.sp,
             ),
           ),
           SizedBox(width: 10.w),
@@ -113,7 +159,7 @@ class TransactionItem extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  category?.name ?? 'Uncategorized',
+                  _titleText,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
@@ -138,7 +184,7 @@ class TransactionItem extends StatelessWidget {
                 ],
                 SizedBox(height: 2.h),
                 Text(
-                  wallet?.name ?? 'Unknown Wallet',
+                  _walletText,
                   style: TextStyle(
                     fontSize: 10.sp,
                     color: Colors.grey[500],
@@ -155,9 +201,11 @@ class TransactionItem extends StatelessWidget {
             style: TextStyle(
               fontSize: 13.sp,
               fontWeight: FontWeight.w800,
-              color: isIncome
-                  ? const Color(0xFF2E7D32)
-                  : const Color(0xFFD32F2F),
+              color: isTransfer
+                  ? const Color(0xFF2563EB)
+                  : isIncome
+                      ? const Color(0xFF2E7D32)
+                      : const Color(0xFFD32F2F),
               letterSpacing: -0.3,
             ),
           ),
@@ -197,16 +245,29 @@ class TransactionItem extends StatelessWidget {
             children: [
               // Icon
               Container(
-                width: 52.w,
-                height: 52.w,
-                decoration: BoxDecoration(
-                  color: _backgroundColor,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
+                width: 48.w,
+                height: 48.w,
+                decoration: isTransfer
+                    ? const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Color(0xFF10B981), // Emerald Green
+                            Color(0xFFF97316), // Vibrant Orange
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                      )
+                    : BoxDecoration(
+                        color: _backgroundColor,
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                alignment: Alignment.center,
                 child: CategoryIcon(
                   iconName: _iconName,
-                  color: _iconColor,
-                  size: 26.sp,
+                  color: isTransfer ? Colors.white : _iconColor,
+                  size: 22.sp,
                 ),
               ),
               SizedBox(width: 14.w),
@@ -220,7 +281,7 @@ class TransactionItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          category?.name ?? 'Uncategorized',
+                          _titleText,
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w700,
@@ -232,9 +293,11 @@ class TransactionItem extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w800,
-                            color: isIncome
-                                ? const Color(0xFF2E7D32)
-                                : const Color(0xFFD32F2F),
+                            color: isTransfer
+                                ? const Color(0xFF2563EB)
+                                : isIncome
+                                    ? const Color(0xFF2E7D32)
+                                    : const Color(0xFFD32F2F),
                           ),
                         ),
                       ],
@@ -267,17 +330,20 @@ class TransactionItem extends StatelessWidget {
                           ),
                         ),
                         Icon(
-                          Icons.account_balance_wallet_outlined,
+                          isTransfer ? Icons.swap_horiz_rounded : Icons.account_balance_wallet_outlined,
                           size: 12.sp,
                           color: Colors.grey[400],
                         ),
                         SizedBox(width: 4.w),
-                        Text(
-                          wallet?.name ?? 'Unknown',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            color: Colors.grey[600],
-                            fontWeight: FontWeight.w600,
+                        Flexible(
+                          child: Text(
+                            _walletText,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -289,9 +355,36 @@ class TransactionItem extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
 
+          // Fee info if transfer has admin fee
+          if (isTransfer && transfer != null && transfer!.fee > 0)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+              margin: EdgeInsets.only(bottom: 12.h),
+              decoration: BoxDecoration(
+                color: Colors.amber.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(10.r),
+                border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline_rounded, size: 16.sp, color: Colors.amber.shade800),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'Biaya Admin: Rp ${CurrencyFormatter.format(transfer!.fee.toStringAsFixed(0))}',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
           // Description Box (if has note or description)
-          if (transaction.description.isNotEmpty ||
-              (transaction.note?.isNotEmpty ?? false))
+          if ((!isTransfer && (transaction!.description.isNotEmpty || (transaction!.note?.isNotEmpty ?? false))) ||
+              (isTransfer && transfer!.description.isNotEmpty))
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(14.w),
@@ -304,7 +397,7 @@ class TransactionItem extends StatelessWidget {
                 ),
               ),
               child: Text(
-                transaction.note ?? transaction.description,
+                isTransfer ? transfer!.description : (transaction!.note ?? transaction!.description),
                 style: TextStyle(
                   fontSize: 13.sp,
                   color: cs.onSurface.withValues(alpha: 0.8),
@@ -317,44 +410,46 @@ class TransactionItem extends StatelessWidget {
           // Action Buttons
           Row(
             children: [
-              Expanded(
-                child: TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // Navigate to edit page
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddTransactionPage(
-                          existingTransaction: transaction,
-                          existingCategory: category,
-                          existingWallet: wallet,
+              if (!isTransfer && transaction != null) ...[
+                Expanded(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      // Navigate to edit page
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddTransactionPage(
+                            existingTransaction: transaction,
+                            existingCategory: category,
+                            existingWallet: wallet,
+                          ),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14.r),
+                        side: BorderSide(
+                          color: cs.outline.withValues(alpha: 0.4),
+                          width: 1.5,
                         ),
                       ),
-                    );
-                  },
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                      side: BorderSide(
-                        color: cs.outline.withValues(alpha: 0.4),
-                        width: 1.5,
-                      ),
+                      overlayColor: cs.onSurface.withValues(alpha: 0.05),
                     ),
-                    overlayColor: cs.onSurface.withValues(alpha: 0.05),
-                  ),
-                  child: Text(
-                    "Edit",
-                    style: TextStyle(
-                      color: cs.onSurface,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13.sp,
+                    child: Text(
+                      "Edit",
+                      style: TextStyle(
+                        color: cs.onSurface,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13.sp,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              SizedBox(width: 12.w),
+                SizedBox(width: 12.w),
+              ],
               Expanded(
                 child: ElevatedButton(
                   onPressed: () {
@@ -389,6 +484,11 @@ class TransactionItem extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
+    final title = isTransfer ? 'Hapus Transfer' : 'Hapus Transaksi';
+    final content = isTransfer
+        ? 'Apakah Anda yakin ingin menghapus transfer ini? Saldo kedua rekening akan dikembalikan seperti semula.'
+        : 'Apakah Anda yakin ingin menghapus transaksi ini?';
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -396,11 +496,11 @@ class TransactionItem extends StatelessWidget {
           borderRadius: BorderRadius.circular(16.r),
         ),
         title: Text(
-          'Hapus Transaksi',
+          title,
           style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'Apakah Anda yakin ingin menghapus transaksi ini?',
+          content,
           style: TextStyle(fontSize: 14.sp),
         ),
         actions: [

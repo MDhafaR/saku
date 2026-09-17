@@ -6,8 +6,13 @@ import '../../../data/local/database/app_database.dart';
 
 class AccountCard extends StatelessWidget {
   final Wallet wallet;
+  final Widget? trailing;
 
-  const AccountCard({super.key, required this.wallet});
+  const AccountCard({
+    super.key,
+    required this.wallet,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +77,13 @@ class AccountCard extends StatelessWidget {
               ],
             ),
           ),
-          // Arrow icon
-          Icon(
-            Icons.arrow_forward_ios,
-            color: colorScheme.onSurfaceVariant,
-            size: 12.sp,
-          ),
+          // Trailing or Arrow icon
+          trailing ??
+              Icon(
+                Icons.arrow_forward_ios,
+                color: colorScheme.onSurfaceVariant,
+                size: 12.sp,
+              ),
         ],
       ),
     );

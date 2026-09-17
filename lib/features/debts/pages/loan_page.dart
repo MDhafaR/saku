@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../data/local/database/app_database.dart';
 import '../presentation/cubit/debt_cubit.dart';
 import '../presentation/cubit/debt_state.dart';
 import '../widgets/summary_card.dart';
@@ -166,25 +165,44 @@ class LoanPage extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 48.sp,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-          ),
-          SizedBox(height: 12.h),
-          Text(
-            'Belum ada piutang',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.only(bottom: 75.h),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: cs.onSurface.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.receipt_long_outlined,
+                size: 40.sp,
+                color: cs.onSurface.withValues(alpha: 0.3),
+              ),
             ),
-          ),
-        ],
+            SizedBox(height: 12.h),
+            Text(
+              'Belum ada piutang',
+              style: TextStyle(
+                color: cs.onSurface.withValues(alpha: 0.6),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              'Ketuk tombol + untuk mencatat piutang baru',
+              style: TextStyle(
+                color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                fontSize: 11.sp,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

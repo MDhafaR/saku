@@ -11,13 +11,18 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
 
   /// Get all non-archived wallets
   Future<List<Wallet>> getAllWallets() =>
-      (select(wallets)..where((tbl) => tbl.isArchived.equals(false))).get();
+      (select(wallets)
+            ..where((tbl) => tbl.isArchived.equals(false))
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .get();
 
   /// Get all visible (non-hidden) wallets
   Future<List<Wallet>> getVisibleWallets() =>
-      (select(wallets)..where(
-            (tbl) => tbl.isHidden.equals(false) & tbl.isArchived.equals(false),
-          ))
+      (select(wallets)
+            ..where(
+              (tbl) => tbl.isHidden.equals(false) & tbl.isArchived.equals(false),
+            )
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
           .get();
 
   /// Get wallet by ID
@@ -26,14 +31,33 @@ class WalletDao extends DatabaseAccessor<AppDatabase> with _$WalletDaoMixin {
 
   /// Watch all wallets for real-time updates
   Stream<List<Wallet>> watchAllWallets() =>
-      (select(wallets)..where((tbl) => tbl.isArchived.equals(false))).watch();
+      (select(wallets)
+            ..where((tbl) => tbl.isArchived.equals(false))
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
+          .watch();
 
   /// Watch visible wallets for dashboard
   Stream<List<Wallet>> watchVisibleWallets() =>
-      (select(wallets)..where(
-            (tbl) => tbl.isHidden.equals(false) & tbl.isArchived.equals(false),
-          ))
+      (select(wallets)
+            ..where(
+              (tbl) => tbl.isHidden.equals(false) & tbl.isArchived.equals(false),
+            )
+            ..orderBy([(t) => OrderingTerm(expression: t.sortOrder)]))
           .watch();
+
+  /// Update order of wallets
+  Future<void> updateWalletOrder(List<Wallet> entries) async {
+    await batch((batch) {
+      for (var i = 0; i < entries.length; i++) {
+        final entry = entries[i];
+        batch.update(
+          wallets,
+          WalletsCompanion(sortOrder: Value(i)),
+          where: (tbl) => tbl.id.equals(entry.id),
+        );
+      }
+    });
+  }
 
   /// Create a new wallet
   Future<int> createWallet(WalletsCompanion entry) =>

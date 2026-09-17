@@ -196,6 +196,81 @@ Pembelian jus alpukat seharga Rp10.000 menggunakan BNI.
       expect(rawResults[0].wallet, 'BNI');
       expect(rawResults[0].note, 'Jus alpukat');
     });
+
+    test('9. Kasus Penyesuaian Saldo / Ngepasin Saldo (Berbagai Variasi Bahasa)', () {
+      // 1. Pola Descriptive ("Saldo BNI seharusnya 200k", "Saldo BNI harusnya 200 ribu")
+      final t1 = parser.parse('Saldo BNI seharusnya 200k');
+      expect(t1.length, 1);
+      expect(t1[0].feature, 'penyesuaian_saldo');
+      expect(t1[0].amount, 200000.0);
+      expect(t1[0].wallet, 'BNI');
+
+      final t2 = parser.parse('Saldo BNI harusnya 200 ribu');
+      expect(t2[0].feature, 'penyesuaian_saldo');
+      expect(t2[0].amount, 200000.0);
+      expect(t2[0].wallet, 'BNI');
+
+      // 2. Pola Action / Imperative ("Ngepasin saldo BCA jadi 500rb", "Pasin dompet ke 100k")
+      final t3 = parser.parse('Ngepasin saldo BCA jadi 500rb');
+      expect(t3[0].feature, 'penyesuaian_saldo');
+      expect(t3[0].amount, 500000.0);
+      expect(t3[0].wallet, 'BCA');
+
+      final t4 = parser.parse('Pasin dompet ke 100k');
+      expect(t4[0].feature, 'penyesuaian_saldo');
+      expect(t4[0].amount, 100000.0);
+      expect(t4[0].wallet, 'Dompet Utama');
+
+      final t5 = parser.parse('Sesuaikan saldo Mandiri menjadi 250.000');
+      expect(t5[0].feature, 'penyesuaian_saldo');
+      expect(t5[0].amount, 250000.0);
+      expect(t5[0].wallet, 'Mandiri');
+
+      // 3. Pola Riil / Fisik ("Saldo riil BNI ada 30.000", "Saldo fisik dompet 50rb")
+      final t6 = parser.parse('Saldo riil BNI ada 30.000');
+      expect(t6[0].feature, 'penyesuaian_saldo');
+      expect(t6[0].amount, 30000.0);
+      expect(t6[0].wallet, 'BNI');
+
+      final t7 = parser.parse('Saldo fisik dompet 50rb');
+      expect(t7[0].feature, 'penyesuaian_saldo');
+      expect(t7[0].amount, 50000.0);
+      expect(t7[0].wallet, 'Dompet Utama');
+
+      // 4. Pola Locative ("Di BNI uangnya sekarang 30.000", "Duit di Jago aslinya tinggal 150rb")
+      final t8 = parser.parse('Di BNI uangnya sekarang 30.000');
+      expect(t8[0].feature, 'penyesuaian_saldo');
+      expect(t8[0].amount, 30000.0);
+      expect(t8[0].wallet, 'BNI');
+
+      final t9 = parser.parse('Duit di Jago aslinya tinggal 150rb');
+      expect(t9[0].feature, 'penyesuaian_saldo');
+      expect(t9[0].amount, 150000.0);
+      expect(t9[0].wallet, 'Jago');
+
+      // 5. Pola Reverse ("BNI seharusnya 200k")
+      final t10 = parser.parse('BNI seharusnya 200k');
+      expect(t10[0].feature, 'penyesuaian_saldo');
+      expect(t10[0].amount, 200000.0);
+      expect(t10[0].wallet, 'BNI');
+
+      // 6. Pola Mind Space Card OCR
+      const ocrCard = '''
+Mind Space
+Card Title: Balance Adjustment
+Source: Voice memos
+
+Transcription
+Ngepasin saldo BNI sebesar Rp200.000.
+
+# Finance
+''';
+      final t11 = parser.parse(ocrCard);
+      expect(t11.length, 1);
+      expect(t11[0].feature, 'penyesuaian_saldo');
+      expect(t11[0].amount, 200000.0);
+      expect(t11[0].wallet, 'BNI');
+    });
   });
 }
 

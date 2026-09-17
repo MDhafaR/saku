@@ -14,6 +14,8 @@ import 'features/onboarding/presentation/pages/onboarding_wrapper.dart';
 import 'features/transactions/presentation/pages/smart_import_review_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'core/services/saku_home_widget_service.dart';
+import 'package:home_widget/home_widget.dart';
 import 'features/settings/presentation/cubit/security_cubit.dart';
 import 'features/settings/presentation/cubit/security_state.dart';
 import 'features/settings/presentation/cubit/theme_cubit.dart';
@@ -27,6 +29,7 @@ void main() async {
   await ThemeService.init();
   await initializeDateFormatting('id_ID', null);
   await NotificationService().init();
+  await SakuHomeWidgetService.updateAllWidgets();
   runApp(
     MultiBlocProvider(
       providers: [
@@ -49,12 +52,33 @@ class AppLifecycleObserver extends StatefulWidget {
 class _AppLifecycleObserverState extends State<AppLifecycleObserver>
     with WidgetsBindingObserver {
   StreamSubscription? _shareSub;
+  StreamSubscription? _widgetClickSub;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initShareListener();
+    _initWidgetClickListener();
+  }
+
+  void _initWidgetClickListener() {
+    HomeWidget.initiallyLaunchedFromHomeWidget().then((uri) {
+      if (uri != null) {
+        _handleWidgetUri(uri);
+      }
+    });
+
+    _widgetClickSub = HomeWidget.widgetClicked.listen((uri) {
+      if (uri != null) {
+        _handleWidgetUri(uri);
+      }
+    });
+  }
+
+  void _handleWidgetUri(Uri uri) {
+    // Saku widgets launch the app seamlessly
+    SakuHomeWidgetService.updateAllWidgets();
   }
 
   void _initShareListener() {
@@ -83,6 +107,7 @@ class _AppLifecycleObserverState extends State<AppLifecycleObserver>
   @override
   void dispose() {
     _shareSub?.cancel();
+    _widgetClickSub?.cancel();
     locator<SharingIntentService>().dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

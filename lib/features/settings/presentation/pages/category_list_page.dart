@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
+import '../../../statistics/presentation/pages/category_transactions_page.dart';
 import 'add_edit_category_page.dart';
 
 class CategoryListPage extends StatefulWidget {
@@ -249,10 +250,6 @@ class _CategoryListPageState extends State<CategoryListPage> {
                       margin: EdgeInsets.only(
                         bottom: 12.h,
                       ), // ReorderableListView doesn't have separatorBuilder
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16.w,
-                        vertical: 12.h,
-                      ),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceContainer,
                         borderRadius: BorderRadius.circular(16.r),
@@ -266,64 +263,93 @@ class _CategoryListPageState extends State<CategoryListPage> {
                           ),
                         ],
                       ),
-                      child: Row(
-                        children: [
-                          // Icon
-                          Container(
-                            width: 40.w,
-                            height: 40.w,
-                            decoration: BoxDecoration(
-                              color: Color(category.iconColor).withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: CategoryIcon(
-                              iconName: category.icon,
-                              color: Color(category.iconColor),
-                              size: 20.sp,
-                            ),
-                          ),
-                          SizedBox(width: 16.w),
-                          // Name
-                          Expanded(
-                            child: Text(
-                              category.name,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Theme.of(context).colorScheme.onSurface,
+                      child: Material(
+                        color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(16.r),
+                        clipBehavior: Clip.antiAlias,
+                        child: InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CategoryTransactionsPage(
+                                  categoryId: category.id,
+                                  categoryName: category.name,
+                                  iconName: category.icon,
+                                  color: Color(category.iconColor),
+                                  totalAmount: 0.0,
+                                  period: 'Monthly',
+                                  targetDate: DateTime.now(),
+                                ),
                               ),
+                            );
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16.w,
+                              vertical: 12.h,
                             ),
-                          ),
-                          // Edit Button
-                          IconButton(
-                            icon: Icon(
-                              Icons.edit_outlined,
-                              size: 20.sp,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                            ),
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AddEditCategoryPage(
-                                    type: type,
-                                    category: category,
+                            child: Row(
+                              children: [
+                                // Icon
+                                Container(
+                                  width: 40.w,
+                                  height: 40.w,
+                                  decoration: BoxDecoration(
+                                    color: Color(category.iconColor).withValues(alpha: 0.15),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: CategoryIcon(
+                                    iconName: category.icon,
+                                    color: Color(category.iconColor),
+                                    size: 20.sp,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                          // Drag Handle
-                          ReorderableDragStartListener(
-                            index: index,
-                            child: Icon(
-                              Icons.drag_handle,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
-                              size: 24.sp,
+                                SizedBox(width: 16.w),
+                                // Name
+                                Expanded(
+                                  child: Text(
+                                    category.name,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ),
+                                // Edit Button
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.edit_outlined,
+                                    size: 20.sp,
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddEditCategoryPage(
+                                          type: type,
+                                          category: category,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                // Drag Handle
+                                ReorderableDragStartListener(
+                                  index: index,
+                                  child: Icon(
+                                    Icons.drag_handle,
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                                    size: 24.sp,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
                     );
                   },

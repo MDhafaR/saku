@@ -40,7 +40,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(super.e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -63,6 +63,16 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 5) {
           await m.createTable(importHistories);
+        }
+        if (from < 6) {
+          await m.addColumn(wallets, wallets.sortOrder);
+        }
+      },
+      beforeOpen: (details) async {
+        try {
+          await customStatement('ALTER TABLE wallets ADD COLUMN sort_order INTEGER NOT NULL DEFAULT 0;');
+        } catch (_) {
+          // Column already exists, ignore
         }
       },
     );

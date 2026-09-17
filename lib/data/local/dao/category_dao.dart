@@ -128,4 +128,34 @@ class CategoryDao extends DatabaseAccessor<AppDatabase>
     await reassignTransactions(categoryId, targetId);
     await (delete(categories)..where((tbl) => tbl.id.equals(categoryId))).go();
   }
+
+  /// Get or create a 'Penyesuaian Saldo' category for a given type (income/expense)
+  Future<Category> getOrCreateAdjustmentCategory(String type) async {
+    final existing = await (select(categories)..where(
+          (tbl) =>
+              (tbl.name.equals('Penyesuaian Saldo') |
+                  tbl.name.equals('Penyesuaian') |
+                  tbl.name.equals('Ngepasin Saldo') |
+                  tbl.name.equals('Adjustment') |
+                  tbl.name.equals('Balance Adjustment')) &
+              tbl.type.equals(type),
+        ))
+        .getSingleOrNull();
+
+    if (existing != null) return existing;
+
+    final isIncome = type == 'income';
+    final id = await into(categories).insert(
+      CategoriesCompanion.insert(
+        name: 'Penyesuaian Saldo',
+        type: type,
+        icon: const Value('tune'),
+        iconColor: Value(isIncome ? 0xFF10B981 : 0xFFEF4444),
+        isDefault: const Value(true),
+        sortOrder: const Value(998),
+      ),
+    );
+
+    return (select(categories)..where((tbl) => tbl.id.equals(id))).getSingle();
+  }
 }

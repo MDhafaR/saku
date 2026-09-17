@@ -2,22 +2,40 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/services/saku_home_widget_service.dart';
 import '../../../../data/local/database/app_database.dart';
 import 'transaction_state.dart';
 
 class TransactionCubit extends Cubit<TransactionState> {
   final AppDatabase _db;
-  StreamSubscription<List<Transaction>>? _subscription;
+  StreamSubscription<List<Transaction>>? _transactionSubscription;
+  StreamSubscription<List<Transfer>>? _transferSubscription;
+  List<Transaction> _latestTransactions = const [];
+  List<Transfer> _latestTransfers = const [];
 
   TransactionCubit(this._db) : super(const TransactionInitial());
 
-  /// Start listening to transactions from database
+  /// Start listening to both transactions and transfers from database
   void start() {
-    // emit(const TransactionLoading());
-    _subscription?.cancel();
-    _subscription = _db.transactionDao.watchAllTransactions().listen(
+    _transactionSubscription?.cancel();
+    _transferSubscription?.cancel();
+
+    _transactionSubscription = _db.transactionDao.watchAllTransactions().listen(
       (transactions) {
-        emit(TransactionLoaded(transactions));
+        _latestTransactions = transactions;
+        emit(TransactionLoaded(_latestTransactions, _latestTransfers));
+        SakuHomeWidgetService.updateAllWidgets(_db);
+      },
+      onError: (error) {
+        emit(TransactionError(error.toString()));
+      },
+    );
+
+    _transferSubscription = _db.transferDao.watchAllTransfers().listen(
+      (transfers) {
+        _latestTransfers = transfers;
+        emit(TransactionLoaded(_latestTransactions, _latestTransfers));
+        SakuHomeWidgetService.updateAllWidgets(_db);
       },
       onError: (error) {
         emit(TransactionError(error.toString()));
@@ -57,6 +75,11 @@ class TransactionCubit extends Cubit<TransactionState> {
     return _db.transactionDao.deleteTransaction(id);
   }
 
+  /// Delete a transfer and revert wallet balances
+  Future<int> deleteTransfer(int id) async {
+    return _db.transferDao.deleteTransfer(id);
+  }
+
   /// Get all categories by type
   Future<List<Category>> getCategories(String type) {
     return _db.categoryDao.getCategoriesByType(type);
@@ -69,7 +92,8 @@ class TransactionCubit extends Cubit<TransactionState> {
 
   @override
   Future<void> close() {
-    _subscription?.cancel();
+    _transactionSubscription?.cancel();
+    _transferSubscription?.cancel();
     return super.close();
   }
 }

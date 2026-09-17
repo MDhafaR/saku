@@ -7,6 +7,7 @@ import '../../../../core/injection.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../debts/presentation/pages/add_loan_page.dart';
 import '../../transactions/presentation/pages/transfer_page.dart';
+import '../../transactions/presentation/pages/adjust_balance_page.dart';
 import '../../settings/presentation/pages/add_edit_wallet_page.dart';
 
 class AnimatedFab extends StatefulWidget {
@@ -211,7 +212,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
           // Transaction
           Positioned(
             right: 20,
-            bottom: 292,
+            bottom: 354,
             child: _buildExpandedButton(
               context: context,
               icon: Icons.add,
@@ -227,7 +228,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
           // Transfer
           Positioned(
             right: 20,
-            bottom: 230,
+            bottom: 292,
             child: _buildExpandedButton(
               context: context,
               icon: Icons.swap_horiz,
@@ -288,13 +289,13 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   );
                 }
               },
-              delay: 100,
+              delay: 80,
             ),
           ),
           // Loan
           Positioned(
             right: 20,
-            bottom: 168,
+            bottom: 230,
             child: _buildExpandedButton(
               context: context,
               icon: Icons.account_balance_wallet,
@@ -308,7 +309,28 @@ class _AnimatedFabState extends State<AnimatedFab> {
                       builder: (context) => const AddLoanPage()),
                 );
               },
-              delay: 200,
+              delay: 160,
+            ),
+          ),
+          // Ngepasin Saldo
+          Positioned(
+            right: 20,
+            bottom: 168,
+            child: _buildExpandedButton(
+              context: context,
+              icon: Icons.tune_rounded,
+              iconColor: const Color(0xFF0D9488), // teal modern
+              label: 'Ngepasin',
+              onTap: () {
+                _toggleFabExpansion();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdjustBalancePage(),
+                  ),
+                );
+              },
+              delay: 240,
             ),
           ),
         ],

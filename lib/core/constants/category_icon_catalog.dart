@@ -477,6 +477,12 @@ class CategoryIconCatalog {
           keywords: ['bonus', 'thr', 'reward', 'award', 'komisi', 'cashback'],
           icon: HugeIcons.strokeRoundedAward01,
         ),
+        CategoryIconItem(
+          key: 'swap_horiz',
+          label: 'Transfer Antar Dompet',
+          keywords: ['transfer', 'pindah', 'mutasi', 'swap', 'kirim', 'antar dompet', 'exchange'],
+          icon: HugeIcons.strokeRoundedTransaction,
+        ),
       ],
     ),
 
@@ -548,6 +554,7 @@ class CategoryIconCatalog {
       case 'cash':
       case 'money':
       case 'payments':
+      case 'payment':
       case 'monetization_on':
       case 'attach_money':
       case 'huge_money':
@@ -576,10 +583,17 @@ class CategoryIconCatalog {
 
       // Category Aliases
       case 'restaurant':
-      case 'local_cafe':
-      case 'local_bar':
-      case 'fastfood':
         return HugeIcons.strokeRoundedRestaurant01;
+      case 'local_cafe':
+      case 'coffee':
+        return HugeIcons.strokeRoundedCoffee01;
+      case 'local_bar':
+      case 'bar':
+      case 'drinks':
+        return HugeIcons.strokeRoundedDrink;
+      case 'fastfood':
+      case 'burger':
+        return HugeIcons.strokeRoundedHamburger01;
       case 'directions_car':
       case 'drive_eta':
       case 'commute':
@@ -622,11 +636,19 @@ class CategoryIconCatalog {
       case 'sports_esports':
       case 'gamepad':
         return HugeIcons.strokeRoundedGameController01;
-      case 'pets':
       case 'child_care':
+      case 'baby':
+      case 'pets':
+        return HugeIcons.strokeRoundedUserGroup;
       case 'favorite':
       case 'favorite_border':
         return HugeIcons.strokeRoundedFavourite;
+      case 'swap_horiz':
+      case 'swap_horizontal':
+      case 'transfer':
+      case 'transaction':
+      case 'exchange':
+        return HugeIcons.strokeRoundedTransaction;
       default:
         return HugeIcons.strokeRoundedGrid;
     }

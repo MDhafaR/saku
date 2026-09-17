@@ -3,10 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../dashboard/presentation/components/transaction_section.dart';
 import '../../../dashboard/presentation/cubit/transaction_cubit.dart';
+import '../../../../features/transactions/presentation/pages/transfer_page.dart';
+import '../../../../features/transactions/presentation/pages/adjust_balance_page.dart';
 import '../../../../features/transactions/presentation/pages/wallet_history_page.dart';
 import 'add_edit_wallet_page.dart';
 
@@ -29,6 +33,8 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
   Map<int, Category> _categoriesCache = {};
   Map<int, Wallet> _walletsCache = {};
   bool _isLoading = true;
+
+  Wallet get _wallet => _walletsCache[widget.wallet.id] ?? widget.wallet;
 
   @override
   void initState() {
@@ -101,13 +107,15 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_ios_new,
             color: Theme.of(context).colorScheme.onSurface,
-            size: 20.sp,
+            size: 18.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -122,26 +130,58 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
         centerTitle: true,
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_horiz, color: Theme.of(context).colorScheme.onSurface),
-            onSelected: (value) {
+            icon: Icon(
+              Icons.more_horiz,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 20.sp,
+            ),
+            onSelected: (value) async {
               if (value == 'hide') {
                 _toggleHideWallet();
+              } else if (value == 'edit') {
+                final updated = await Navigator.push<bool>(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        AddEditWalletPage(wallet: _wallet),
+                  ),
+                );
+                if (updated == true) {
+                  _loadData();
+                }
               }
             },
             itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'edit',
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.edit_outlined,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 18.sp,
+                    ),
+                    SizedBox(width: 10.w),
+                    Text(
+                      'Edit Rekening',
+                      style: TextStyle(fontSize: 13.sp),
+                    ),
+                  ],
+                ),
+              ),
               PopupMenuItem(
                 value: 'hide',
                 child: Row(
                   children: [
                     Icon(
                       _isHidden ? Icons.visibility : Icons.visibility_off,
-                      color: Colors.grey[700],
-                      size: 20.sp,
+                      color: Theme.of(context).colorScheme.onSurface,
+                      size: 18.sp,
                     ),
-                    SizedBox(width: 12.w),
+                    SizedBox(width: 10.w),
                     Text(
-                      _isHidden ? 'Show Wallet' : 'Hide Wallet',
-                      style: TextStyle(fontSize: 14.sp),
+                      _isHidden ? 'Tampilkan Rekening' : 'Sembunyikan Rekening',
+                      style: TextStyle(fontSize: 13.sp),
                     ),
                   ],
                 ),
@@ -153,7 +193,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Blue Header Card
+            // Header Card
             _buildHeaderCard(),
 
             // Income/Expense Summary
@@ -161,7 +201,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
 
             // Transactions Title
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -174,12 +214,12 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                 ),
               ),
             ),
-            SizedBox(height: 12.h),
+            SizedBox(height: 8.h),
 
-            // Transaction List from Database
+            // Transaction List (Top 3 only)
             _buildTransactionList(),
 
-            SizedBox(height: 40.h),
+            SizedBox(height: 24.h),
           ],
         ),
       ),
@@ -187,17 +227,25 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
   }
 
   Widget _buildHeaderCard() {
+    final wallet = _wallet;
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 20.h),
+      margin: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 0),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(24.r)),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.12),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10.r,
-            offset: Offset(0, 4.h),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.3)
+                : const Color(0xFF1A1A1A).withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -207,47 +255,77 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+                width: 36.w,
+                height: 36.w,
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(4.r),
+                  color: Color(wallet.iconColor),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
-                child: Text(
-                  widget.wallet.type.toUpperCase(),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurface,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10.sp,
+                child: Center(
+                  child: CategoryIcon(
+                    iconName: wallet.icon,
+                    color: Colors.white,
+                    size: 18.sp,
                   ),
                 ),
               ),
-              SizedBox(width: 6.w),
-              Text(
-                widget.wallet.name,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 12.sp,
-                ),
+              SizedBox(width: 10.w),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          wallet.type.toUpperCase(),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 9.sp,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        wallet.name,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const Spacer(),
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
+                onTap: () async {
+                  final updated = await Navigator.push<bool>(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          AddEditWalletPage(wallet: widget.wallet),
+                          AddEditWalletPage(wallet: wallet),
                     ),
                   );
+                  if (updated == true) {
+                    _loadData();
+                  }
                 },
                 child: Container(
                   padding: EdgeInsets.all(6.w),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.06),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.edit,
+                    Icons.edit_outlined,
                     color: Theme.of(context).colorScheme.onSurface,
                     size: 14.sp,
                   ),
@@ -255,30 +333,64 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               ),
             ],
           ),
-          SizedBox(height: 16.h),
+          SizedBox(height: 12.h),
           Text(
             'Saldo Utama',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-              fontSize: 10.sp,
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w500,
             ),
           ),
           SizedBox(height: 2.h),
           Text(
-            'Rp ${CurrencyFormatter.format(widget.wallet.currentBalance.toStringAsFixed(0))}',
+            'Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
-              fontSize: 24.sp,
+              fontSize: 22.sp,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(height: 20.h),
+          SizedBox(height: 16.h),
 
           // Action Buttons
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildActionButton(Icons.arrow_outward, 'Transfer'),
+              _buildActionButton(
+                Icons.arrow_outward,
+                'Transfer',
+                onTap: () async {
+                  final wallets = await _db.walletDao.getAllWallets();
+                  if (!mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TransferPage(wallets: wallets),
+                    ),
+                  );
+                },
+              ),
+              _buildActionButton(
+                Icons.tune_rounded,
+                'Ngepasin',
+                onTap: () async {
+                  final wallets = await _db.walletDao.getAllWallets();
+                  if (!mounted) return;
+                  final updated = await Navigator.push<bool>(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AdjustBalancePage(
+                        preselectedWallet: wallet,
+                        wallets: wallets,
+                      ),
+                    ),
+                  );
+                  if (updated == true) {
+                    _loadData();
+                  }
+                },
+              ),
               _buildActionButton(
                 Icons.history,
                 'Riwayat',
@@ -287,7 +399,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          WalletHistoryPage(wallet: widget.wallet),
+                          WalletHistoryPage(wallet: wallet),
                     ),
                   );
                 },
@@ -299,22 +411,12 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     );
   }
 
+
   Widget _buildSummaryCard(double income, double expense) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8.r,
-            offset: Offset(0, 2.h),
-          ),
-        ],
-        border: Border.all(color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
-      ),
+    return SakuCard(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      borderRadius: 16.r,
       child: Row(
         children: [
           Expanded(
@@ -326,41 +428,46 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     Container(
                       padding: EdgeInsets.all(4.w),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withOpacity(0.1),
+                        color: const Color(0xFF10B981).withValues(alpha: 0.12),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.arrow_downward,
-                        size: 12.sp,
+                        size: 11.sp,
                         color: const Color(0xFF10B981),
                       ),
                     ),
-                    SizedBox(width: 5.w),
+                    SizedBox(width: 6.w),
                     Text(
                       'Pemasukan',
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 3.h),
+                SizedBox(height: 4.h),
                 Text(
                   'Rp ${CurrencyFormatter.format(income.toStringAsFixed(0))}',
                   style: TextStyle(
                     color: const Color(0xFF10B981),
                     fontWeight: FontWeight.bold,
-                    fontSize: 15.sp,
+                    fontSize: 14.sp,
                   ),
                 ),
               ],
             ),
           ),
-          Container(width: 1.w, height: 36.h, color: Colors.grey[200]),
+          Container(
+            width: 1.w,
+            height: 32.h,
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15),
+          ),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(left: 16.w),
+              padding: EdgeInsets.only(left: 14.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -369,32 +476,33 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                       Container(
                         padding: EdgeInsets.all(4.w),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEF4444).withOpacity(0.1),
+                          color: const Color(0xFFEF4444).withValues(alpha: 0.12),
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
                           Icons.arrow_upward,
-                          size: 12.sp,
+                          size: 11.sp,
                           color: const Color(0xFFEF4444),
                         ),
                       ),
-                      SizedBox(width: 5.w),
+                      SizedBox(width: 6.w),
                       Text(
                         'Pengeluaran',
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 3.h),
+                  SizedBox(height: 4.h),
                   Text(
                     'Rp ${CurrencyFormatter.format(expense.toStringAsFixed(0))}',
                     style: TextStyle(
                       color: const Color(0xFFEF4444),
                       fontWeight: FontWeight.bold,
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                     ),
                   ),
                 ],
@@ -409,35 +517,38 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
   Widget _buildTransactionList() {
     if (_isLoading) {
       return Padding(
-        padding: EdgeInsets.symmetric(vertical: 40.h),
+        padding: EdgeInsets.symmetric(vertical: 32.h),
         child: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (_transactions.isEmpty) {
       return Padding(
-        padding: EdgeInsets.symmetric(vertical: 40.h),
+        padding: EdgeInsets.symmetric(vertical: 32.h),
         child: Center(
           child: Column(
             children: [
               Icon(
                 Icons.receipt_long_outlined,
-                size: 48.sp,
+                size: 40.sp,
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 8.h),
               Text(
                 'Belum ada transaksi',
                 style: TextStyle(
-                  fontSize: 14.sp,
+                  fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(height: 2.h),
               Text(
                 'Transaksi untuk rekening ini akan muncul di sini',
-                style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3)),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
+                ),
               ),
             ],
           ),
@@ -445,8 +556,11 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
       );
     }
 
+    // Limit to top 3 latest transactions
+    final recentTransactions = _transactions.take(3).toList();
+
     // Convert to TransactionWithDetails
-    final transactionsWithDetails = _transactions.map((t) {
+    final transactionsWithDetails = recentTransactions.map((t) {
       return TransactionWithDetails(
         transaction: t,
         category: _categoriesCache[t.categoryId],
@@ -458,18 +572,50 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     final grouped = groupTransactionsByDate(transactionsWithDetails);
 
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: grouped.entries
-            .map(
-              (entry) => TransactionSection(
-                sectionTitle: entry.key,
-                transactions: entry.value,
-                onDeleteTransaction: _deleteTransaction,
+        children: [
+          ...grouped.entries.map(
+            (entry) => TransactionSection(
+              sectionTitle: entry.key,
+              transactions: entry.value,
+              onDeleteTransaction: _deleteTransaction,
+            ),
+          ),
+          if (_transactions.length > 3)
+            Padding(
+              padding: EdgeInsets.only(top: 4.h, bottom: 8.h),
+              child: Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            WalletHistoryPage(wallet: widget.wallet),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.history_rounded, size: 16.sp),
+                  label: Text(
+                    'Lihat Semua Riwayat (${_transactions.length})',
+                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.r),
+                      side: BorderSide(
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            )
-            .toList(),
+            ),
+        ],
       ),
     );
   }
@@ -482,24 +628,31 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     return Column(
       children: [
         Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF3F4F6),
+          width: 44.w,
+          height: 44.w,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
             shape: BoxShape.circle,
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
+            ),
           ),
           child: InkWell(
             onTap: onTap,
             customBorder: const CircleBorder(),
-            child: Icon(icon, color: Theme.of(context).colorScheme.onSurface, size: 18.sp),
+            child: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.onSurface,
+              size: 20.sp,
+            ),
           ),
         ),
         SizedBox(height: 6.h),
         Text(
           label,
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurface,
-            fontSize: 10.sp,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.8),
+            fontSize: 11.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -507,3 +660,4 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     );
   }
 }
+

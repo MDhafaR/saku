@@ -17,9 +17,12 @@ class TransactionLoading extends TransactionState {
 
 class TransactionLoaded extends TransactionState {
   final List<Transaction> transactions;
-  const TransactionLoaded(this.transactions);
+  final List<Transfer> transfers;
+
+  const TransactionLoaded(this.transactions, [this.transfers = const []]);
+
   @override
-  List<Object?> get props => [transactions];
+  List<Object?> get props => [transactions, transfers];
 }
 
 class TransactionError extends TransactionState {

@@ -186,6 +186,18 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -202,6 +214,7 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
     accountNumber,
     isMain,
     isNumberMasked,
+    sortOrder,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -312,6 +325,12 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
         ),
       );
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    }
     return context;
   }
 
@@ -377,6 +396,10 @@ class $WalletsTable extends Wallets with TableInfo<$WalletsTable, Wallet> {
         DriftSqlType.bool,
         data['${effectivePrefix}is_number_masked'],
       )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
     );
   }
 
@@ -401,6 +424,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
   final String? accountNumber;
   final bool isMain;
   final bool isNumberMasked;
+  final int sortOrder;
   const Wallet({
     required this.id,
     required this.name,
@@ -416,6 +440,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
     this.accountNumber,
     required this.isMain,
     required this.isNumberMasked,
+    required this.sortOrder,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -436,6 +461,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
     }
     map['is_main'] = Variable<bool>(isMain);
     map['is_number_masked'] = Variable<bool>(isNumberMasked);
+    map['sort_order'] = Variable<int>(sortOrder);
     return map;
   }
 
@@ -457,6 +483,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           : Value(accountNumber),
       isMain: Value(isMain),
       isNumberMasked: Value(isNumberMasked),
+      sortOrder: Value(sortOrder),
     );
   }
 
@@ -480,6 +507,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
       accountNumber: serializer.fromJson<String?>(json['accountNumber']),
       isMain: serializer.fromJson<bool>(json['isMain']),
       isNumberMasked: serializer.fromJson<bool>(json['isNumberMasked']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
     );
   }
   @override
@@ -500,6 +528,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
       'accountNumber': serializer.toJson<String?>(accountNumber),
       'isMain': serializer.toJson<bool>(isMain),
       'isNumberMasked': serializer.toJson<bool>(isNumberMasked),
+      'sortOrder': serializer.toJson<int>(sortOrder),
     };
   }
 
@@ -518,6 +547,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
     Value<String?> accountNumber = const Value.absent(),
     bool? isMain,
     bool? isNumberMasked,
+    int? sortOrder,
   }) => Wallet(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -535,6 +565,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
         : this.accountNumber,
     isMain: isMain ?? this.isMain,
     isNumberMasked: isNumberMasked ?? this.isNumberMasked,
+    sortOrder: sortOrder ?? this.sortOrder,
   );
   Wallet copyWithCompanion(WalletsCompanion data) {
     return Wallet(
@@ -562,6 +593,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
       isNumberMasked: data.isNumberMasked.present
           ? data.isNumberMasked.value
           : this.isNumberMasked,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
     );
   }
 
@@ -581,7 +613,8 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           ..write('updatedAt: $updatedAt, ')
           ..write('accountNumber: $accountNumber, ')
           ..write('isMain: $isMain, ')
-          ..write('isNumberMasked: $isNumberMasked')
+          ..write('isNumberMasked: $isNumberMasked, ')
+          ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
   }
@@ -602,6 +635,7 @@ class Wallet extends DataClass implements Insertable<Wallet> {
     accountNumber,
     isMain,
     isNumberMasked,
+    sortOrder,
   );
   @override
   bool operator ==(Object other) =>
@@ -620,7 +654,8 @@ class Wallet extends DataClass implements Insertable<Wallet> {
           other.updatedAt == this.updatedAt &&
           other.accountNumber == this.accountNumber &&
           other.isMain == this.isMain &&
-          other.isNumberMasked == this.isNumberMasked);
+          other.isNumberMasked == this.isNumberMasked &&
+          other.sortOrder == this.sortOrder);
 }
 
 class WalletsCompanion extends UpdateCompanion<Wallet> {
@@ -638,6 +673,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
   final Value<String?> accountNumber;
   final Value<bool> isMain;
   final Value<bool> isNumberMasked;
+  final Value<int> sortOrder;
   const WalletsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -653,6 +689,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     this.accountNumber = const Value.absent(),
     this.isMain = const Value.absent(),
     this.isNumberMasked = const Value.absent(),
+    this.sortOrder = const Value.absent(),
   });
   WalletsCompanion.insert({
     this.id = const Value.absent(),
@@ -669,6 +706,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     this.accountNumber = const Value.absent(),
     this.isMain = const Value.absent(),
     this.isNumberMasked = const Value.absent(),
+    this.sortOrder = const Value.absent(),
   }) : name = Value(name),
        type = Value(type);
   static Insertable<Wallet> custom({
@@ -686,6 +724,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     Expression<String>? accountNumber,
     Expression<bool>? isMain,
     Expression<bool>? isNumberMasked,
+    Expression<int>? sortOrder,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -702,6 +741,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
       if (accountNumber != null) 'account_number': accountNumber,
       if (isMain != null) 'is_main': isMain,
       if (isNumberMasked != null) 'is_number_masked': isNumberMasked,
+      if (sortOrder != null) 'sort_order': sortOrder,
     });
   }
 
@@ -720,6 +760,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     Value<String?>? accountNumber,
     Value<bool>? isMain,
     Value<bool>? isNumberMasked,
+    Value<int>? sortOrder,
   }) {
     return WalletsCompanion(
       id: id ?? this.id,
@@ -736,6 +777,7 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
       accountNumber: accountNumber ?? this.accountNumber,
       isMain: isMain ?? this.isMain,
       isNumberMasked: isNumberMasked ?? this.isNumberMasked,
+      sortOrder: sortOrder ?? this.sortOrder,
     );
   }
 
@@ -784,6 +826,9 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
     if (isNumberMasked.present) {
       map['is_number_masked'] = Variable<bool>(isNumberMasked.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
     return map;
   }
 
@@ -803,7 +848,8 @@ class WalletsCompanion extends UpdateCompanion<Wallet> {
           ..write('updatedAt: $updatedAt, ')
           ..write('accountNumber: $accountNumber, ')
           ..write('isMain: $isMain, ')
-          ..write('isNumberMasked: $isNumberMasked')
+          ..write('isNumberMasked: $isNumberMasked, ')
+          ..write('sortOrder: $sortOrder')
           ..write(')'))
         .toString();
   }
@@ -4756,6 +4802,7 @@ typedef $$WalletsTableCreateCompanionBuilder =
       Value<String?> accountNumber,
       Value<bool> isMain,
       Value<bool> isNumberMasked,
+      Value<int> sortOrder,
     });
 typedef $$WalletsTableUpdateCompanionBuilder =
     WalletsCompanion Function({
@@ -4773,6 +4820,7 @@ typedef $$WalletsTableUpdateCompanionBuilder =
       Value<String?> accountNumber,
       Value<bool> isMain,
       Value<bool> isNumberMasked,
+      Value<int> sortOrder,
     });
 
 final class $$WalletsTableReferences
@@ -4911,6 +4959,11 @@ class $$WalletsTableFilterComposer
 
   ColumnFilters<bool> get isNumberMasked => $composableBuilder(
     column: $table.isNumberMasked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5068,6 +5121,11 @@ class $$WalletsTableOrderingComposer
     column: $table.isNumberMasked,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WalletsTableAnnotationComposer
@@ -5130,6 +5188,9 @@ class $$WalletsTableAnnotationComposer
     column: $table.isNumberMasked,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
 
   Expression<T> transactionsRefs<T extends Object>(
     Expression<T> Function($$TransactionsTableAnnotationComposer a) f,
@@ -5253,6 +5314,7 @@ class $$WalletsTableTableManager
                 Value<String?> accountNumber = const Value.absent(),
                 Value<bool> isMain = const Value.absent(),
                 Value<bool> isNumberMasked = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
               }) => WalletsCompanion(
                 id: id,
                 name: name,
@@ -5268,6 +5330,7 @@ class $$WalletsTableTableManager
                 accountNumber: accountNumber,
                 isMain: isMain,
                 isNumberMasked: isNumberMasked,
+                sortOrder: sortOrder,
               ),
           createCompanionCallback:
               ({
@@ -5285,6 +5348,7 @@ class $$WalletsTableTableManager
                 Value<String?> accountNumber = const Value.absent(),
                 Value<bool> isMain = const Value.absent(),
                 Value<bool> isNumberMasked = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
               }) => WalletsCompanion.insert(
                 id: id,
                 name: name,
@@ -5300,6 +5364,7 @@ class $$WalletsTableTableManager
                 accountNumber: accountNumber,
                 isMain: isMain,
                 isNumberMasked: isNumberMasked,
+                sortOrder: sortOrder,
               ),
           withReferenceMapper: (p0) => p0
               .map(

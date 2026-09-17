@@ -8,6 +8,8 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../components/category_transactions_info_modal.dart';
 import '../components/description_transactions_info_modal.dart';
+import '../components/period_date_navigator.dart';
+import '../components/time_period_selector.dart';
 import '../cubit/statistics_state.dart';
 
 enum CategorySortOption {
@@ -96,10 +98,16 @@ class CategoryTransactionsPage extends StatefulWidget {
 class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   late Future<List<Transaction>> _transactionsFuture;
   CategorySortOption _selectedSort = CategorySortOption.dateDesc;
+  late String _period;
+  late DateTime _targetDate;
+  AppDateTimeRange? _customRange;
 
   @override
   void initState() {
     super.initState();
+    _period = widget.period;
+    _targetDate = widget.targetDate;
+    _customRange = widget.customRange;
     _loadTransactions();
   }
 
@@ -151,23 +159,56 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
 
   void _loadTransactions() {
     final range = _computeRange(
-      widget.period,
-      widget.targetDate,
-      widget.customRange,
+      _period,
+      _targetDate,
+      _customRange,
     );
-    _transactionsFuture = locator<AppDatabase>()
-        .transactionDao
-        .getTransactionsByCategory(
-          widget.categoryId,
-          range.start,
-          range.end,
-        )
-        .then((list) {
-          if (list.isEmpty && widget.initialTransactions.isNotEmpty) {
-            return widget.initialTransactions;
-          }
-          return list;
-        });
+    setState(() {
+      _transactionsFuture = locator<AppDatabase>()
+          .transactionDao
+          .getTransactionsByCategory(
+            widget.categoryId,
+            range.start,
+            range.end,
+          );
+    });
+  }
+
+  Future<void> _openCustomDateRangePicker() async {
+    final now = DateTime.now();
+    final result = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2020),
+      lastDate: now,
+      initialDateRange: _customRange != null
+          ? DateTimeRange(start: _customRange!.start, end: _customRange!.end)
+          : DateTimeRange(
+              start: now.subtract(const Duration(days: 30)),
+              end: now,
+            ),
+      initialEntryMode: DatePickerEntryMode.input,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: widget.color,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: const Color(0xFF111111),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _customRange = AppDateTimeRange(start: result.start, end: result.end);
+        _period = 'Custom';
+        _loadTransactions();
+      });
+    }
   }
 
   List<Transaction> _sortTransactions(List<Transaction> txList) {
@@ -373,7 +414,8 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
           FutureBuilder<List<Transaction>>(
             future: _transactionsFuture,
             builder: (context, snapshot) {
-              final txs = snapshot.data ?? widget.initialTransactions;
+              final txs = snapshot.data ?? [];
+              final dynamicTotal = txs.fold<double>(0.0, (sum, tx) => sum + tx.amount);
               return IconButton(
                 icon: Icon(
                   Icons.info_outline_rounded,
@@ -386,14 +428,14 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                     categoryName: widget.categoryName,
                     iconName: widget.iconName,
                     categoryColor: widget.color,
-                    totalAmount: widget.totalAmount,
+                    totalAmount: dynamicTotal,
                     percentage: widget.percentage,
                     trendValue: widget.trendValue,
                     isTrendUp: widget.isTrendUp,
                     transactions: txs,
-                    period: widget.period,
-                    targetDate: widget.targetDate,
-                    customRange: widget.customRange,
+                    period: _period,
+                    targetDate: _targetDate,
+                    customRange: _customRange,
                   );
                 },
               );
@@ -409,20 +451,18 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final rawTxList = snapshot.data ?? widget.initialTransactions;
-
-          if (rawTxList.isEmpty) {
-            return _buildEmptyState(cs);
-          }
-
+          final rawTxList = snapshot.data ?? [];
           final txList = _sortTransactions(rawTxList);
 
           return ListView.builder(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-            itemCount: txList.length + 1, // +1 for header
+            itemCount: rawTxList.isEmpty ? 2 : txList.length + 1, // +1 for header
             itemBuilder: (context, index) {
               if (index == 0) {
-                return _buildHeader(cs, rawTxList.length);
+                return _buildHeader(cs, rawTxList);
+              }
+              if (rawTxList.isEmpty) {
+                return _buildEmptyState(cs);
               }
               final tx = txList[index - 1];
               return _buildTransactionItem(cs, tx, rawTxList);
@@ -433,10 +473,46 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
     );
   }
 
-  Widget _buildHeader(ColorScheme cs, int totalCount) {
+  Widget _buildHeader(ColorScheme cs, List<Transaction> rawTxList) {
+    final dynamicTotal = rawTxList.fold<double>(0.0, (sum, tx) => sum + tx.amount);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Time Period Selector
+        TimePeriodSelector(
+          selectedPeriod: _period,
+          onPeriodChanged: (newPeriod) {
+            setState(() {
+              _period = newPeriod;
+              _loadTransactions();
+            });
+          },
+          onCustomDateSelected: (range) {
+            setState(() {
+              _customRange = AppDateTimeRange(start: range.start, end: range.end);
+              _period = 'Custom';
+              _loadTransactions();
+            });
+          },
+        ),
+        SizedBox(height: 8.h),
+
+        // Period Date Navigator
+        PeriodDateNavigator(
+          period: _period,
+          targetDate: _targetDate,
+          customRange: _customRange,
+          onDateChanged: (newDate) {
+            setState(() {
+              _targetDate = newDate;
+              _loadTransactions();
+            });
+          },
+          onCustomTap: _openCustomDateRangePicker,
+        ),
+        SizedBox(height: 10.h),
+
         // Total Summary Card
         SakuCard(
           margin: EdgeInsets.zero,
@@ -473,7 +549,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                       fit: BoxFit.scaleDown,
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        CurrencyFormatter.formatRupiah(widget.totalAmount),
+                        CurrencyFormatter.formatRupiah(dynamicTotal),
                         style: TextStyle(
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w800,
@@ -494,7 +570,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                   borderRadius: BorderRadius.circular(14.r),
                 ),
                 child: Text(
-                  '$totalCount Transaksi',
+                  '${rawTxList.length} Transaksi',
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
@@ -519,7 +595,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                 color: cs.onSurface,
               ),
             ),
-            _buildSortFilterButton(cs),
+            if (rawTxList.isNotEmpty) _buildSortFilterButton(cs),
           ],
         ),
         SizedBox(height: 8.h),
@@ -574,38 +650,41 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   }
 
   Widget _buildEmptyState(ColorScheme cs) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            padding: EdgeInsets.all(20.w),
-            decoration: BoxDecoration(
-              color: widget.color.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 36.h),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(18.w),
+              decoration: BoxDecoration(
+                color: widget.color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: CategoryIcon(
+                iconName: widget.iconName,
+                size: 36.sp,
+                color: widget.color,
+              ),
             ),
-            child: CategoryIcon(
-              iconName: widget.iconName,
-              size: 40.sp,
-              color: widget.color,
+            SizedBox(height: 14.h),
+            Text(
+              'Belum ada transaksi',
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface,
+              ),
             ),
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'Belum ada transaksi',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface,
+            SizedBox(height: 4.h),
+            Text(
+              'Tidak ada transaksi pada periode ${_period == 'All' ? 'keseluruhan' : _period.toLowerCase()}',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12.sp, color: cs.onSurfaceVariant),
             ),
-          ),
-          SizedBox(height: 6.h),
-          Text(
-            'Transaksi untuk kategori ${widget.categoryName}\nakan muncul di sini',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.sp, color: cs.onSurfaceVariant),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

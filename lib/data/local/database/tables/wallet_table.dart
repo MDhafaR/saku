@@ -19,4 +19,5 @@ class Wallets extends Table {
   BoolColumn get isMain => boolean().withDefault(const Constant(false))();
   BoolColumn get isNumberMasked =>
       boolean().withDefault(const Constant(false))();
+  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
 }

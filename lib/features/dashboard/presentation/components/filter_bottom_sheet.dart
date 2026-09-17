@@ -7,24 +7,22 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../data/local/database/app_database.dart';
 
-enum DashboardTransactionType { all, income, expense }
-
 enum DashboardDateRange { selectedMonth, last30Days, customRange }
 
 class DashboardFilterResult {
-  final DashboardTransactionType transactionType;
+  final Set<String> transactionTypes; // empty = all, {'income'}, {'expense'}, or {'income', 'expense'}
   final DashboardDateRange dateRange;
-  final int? walletId;
-  final Set<int> categoryIds;
+  final Set<int> walletIds; // empty = all
+  final Set<int> categoryIds; // empty = all
   final RangeValues amountRange;
   final DateTime? customStartDate;
   final DateTime? customEndDate;
   final double amountUpperBound;
 
   const DashboardFilterResult({
-    this.transactionType = DashboardTransactionType.all,
+    this.transactionTypes = const <String>{},
     this.dateRange = DashboardDateRange.selectedMonth,
-    this.walletId,
+    this.walletIds = const <int>{},
     this.categoryIds = const <int>{},
     this.amountRange = const RangeValues(0, 100),
     this.customStartDate,
@@ -33,9 +31,9 @@ class DashboardFilterResult {
   });
 
   bool get hasActiveFilters {
-    return transactionType != DashboardTransactionType.all ||
+    return (transactionTypes.isNotEmpty && transactionTypes.length < 3) ||
         dateRange != DashboardDateRange.selectedMonth ||
-        walletId != null ||
+        walletIds.isNotEmpty ||
         categoryIds.isNotEmpty ||
         (amountUpperBound > 0 &&
             (amountRange.start > 0 || amountRange.end < amountUpperBound)) ||
@@ -64,9 +62,9 @@ class FilterBottomSheet extends StatefulWidget {
 }
 
 class _FilterBottomSheetState extends State<FilterBottomSheet> {
-  late DashboardTransactionType _selectedTransactionType;
+  late Set<String> _selectedTransactionTypes;
   late DashboardDateRange _selectedDateRange;
-  int? _selectedWalletId;
+  late Set<int> _selectedWalletIds;
   late Set<int> _selectedCategoryIds;
   late RangeValues _currentRangeValues;
   late double _amountUpperBound;
@@ -76,9 +74,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   @override
   void initState() {
     super.initState();
-    _selectedTransactionType = widget.initialFilter.transactionType;
+    _selectedTransactionTypes =
+        Set<String>.from(widget.initialFilter.transactionTypes);
     _selectedDateRange = widget.initialFilter.dateRange;
-    _selectedWalletId = widget.initialFilter.walletId;
+    _selectedWalletIds = Set<int>.from(widget.initialFilter.walletIds);
     _selectedCategoryIds = Set<int>.from(widget.initialFilter.categoryIds);
     _amountUpperBound = widget.maxSelectableAmount;
     if (widget.initialFilter.amountUpperBound > 0) {
@@ -146,7 +145,17 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionTitle('Tipe Transaksi'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionTitle('Tipe Transaksi'),
+                      if (_selectedTransactionTypes.isNotEmpty &&
+                          _selectedTransactionTypes.length < 3)
+                        _buildResetButton(
+                          () => setState(() => _selectedTransactionTypes.clear()),
+                        ),
+                    ],
+                  ),
                   SizedBox(height: 12.h),
                   Wrap(
                     spacing: 8.w,
@@ -154,38 +163,62 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     children: [
                       _buildChip(
                         'Semua',
-                        isSelected:
-                            _selectedTransactionType ==
-                            DashboardTransactionType.all,
+                        isSelected: _selectedTransactionTypes.isEmpty ||
+                            _selectedTransactionTypes.length == 3,
                         onTap: () => setState(
-                          () =>
-                              _selectedTransactionType =
-                                  DashboardTransactionType.all,
+                          () => _selectedTransactionTypes.clear(),
                         ),
                       ),
                       _buildChip(
                         'Pemasukan',
                         icon: Icons.south_west_rounded,
                         isSelected:
-                            _selectedTransactionType ==
-                            DashboardTransactionType.income,
-                        onTap: () => setState(
-                          () =>
-                              _selectedTransactionType =
-                                  DashboardTransactionType.income,
-                        ),
+                            _selectedTransactionTypes.contains('income') &&
+                            _selectedTransactionTypes.length < 3,
+                        onTap: () => setState(() {
+                          if (_selectedTransactionTypes.contains('income')) {
+                            _selectedTransactionTypes.remove('income');
+                          } else {
+                            _selectedTransactionTypes.add('income');
+                            if (_selectedTransactionTypes.length == 3) {
+                              _selectedTransactionTypes.clear();
+                            }
+                          }
+                        }),
                       ),
                       _buildChip(
                         'Pengeluaran',
                         icon: Icons.north_east_rounded,
                         isSelected:
-                            _selectedTransactionType ==
-                            DashboardTransactionType.expense,
-                        onTap: () => setState(
-                          () =>
-                              _selectedTransactionType =
-                                  DashboardTransactionType.expense,
-                        ),
+                            _selectedTransactionTypes.contains('expense') &&
+                            _selectedTransactionTypes.length < 3,
+                        onTap: () => setState(() {
+                          if (_selectedTransactionTypes.contains('expense')) {
+                            _selectedTransactionTypes.remove('expense');
+                          } else {
+                            _selectedTransactionTypes.add('expense');
+                            if (_selectedTransactionTypes.length == 3) {
+                              _selectedTransactionTypes.clear();
+                            }
+                          }
+                        }),
+                      ),
+                      _buildChip(
+                        'Transfer',
+                        icon: Icons.swap_horiz_rounded,
+                        isSelected:
+                            _selectedTransactionTypes.contains('transfer') &&
+                            _selectedTransactionTypes.length < 3,
+                        onTap: () => setState(() {
+                          if (_selectedTransactionTypes.contains('transfer')) {
+                            _selectedTransactionTypes.remove('transfer');
+                          } else {
+                            _selectedTransactionTypes.add('transfer');
+                            if (_selectedTransactionTypes.length == 3) {
+                              _selectedTransactionTypes.clear();
+                            }
+                          }
+                        }),
                       ),
                     ],
                   ),
@@ -235,7 +268,16 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     _buildCustomDateRangePicker(),
                   ],
                   SizedBox(height: 24.h),
-                  _buildSectionTitle('Dompet'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSectionTitle('Dompet'),
+                      if (_selectedWalletIds.isNotEmpty)
+                        _buildResetButton(
+                          () => setState(() => _selectedWalletIds.clear()),
+                        ),
+                    ],
+                  ),
                   SizedBox(height: 12.h),
                   Wrap(
                     spacing: 8.w,
@@ -244,18 +286,27 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                       _buildChip(
                         'Semua',
                         icon: Icons.account_balance_wallet_outlined,
-                        isSelected: _selectedWalletId == null,
-                        onTap: () => setState(() => _selectedWalletId = null),
+                        isSelected: _selectedWalletIds.isEmpty,
+                        onTap: () => setState(() => _selectedWalletIds.clear()),
                       ),
                       ...widget.wallets.map(
-                        (wallet) => _buildChip(
-                          wallet.name,
-                          iconName: wallet.icon,
-                          iconColor: wallet.iconColor,
-                          isSelected: _selectedWalletId == wallet.id,
-                          onTap: () =>
-                              setState(() => _selectedWalletId = wallet.id),
-                        ),
+                        (wallet) {
+                          final selected =
+                              _selectedWalletIds.contains(wallet.id);
+                          return _buildChip(
+                            wallet.name,
+                            iconName: wallet.icon,
+                            iconColor: wallet.iconColor,
+                            isSelected: selected,
+                            onTap: () => setState(() {
+                              if (selected) {
+                                _selectedWalletIds.remove(wallet.id);
+                              } else {
+                                _selectedWalletIds.add(wallet.id);
+                              }
+                            }),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -264,49 +315,44 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildSectionTitle('Kategori'),
-                      TextButton(
-                        onPressed: () =>
-                            setState(() => _selectedCategoryIds.clear()),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      if (_selectedCategoryIds.isNotEmpty)
+                        _buildResetButton(
+                          () => setState(() => _selectedCategoryIds.clear()),
                         ),
-                        child: Text(
-                          'Reset',
-                          style: TextStyle(
-                            color: Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white.withValues(alpha: 0.45)
-                                : AppTheme.primaryBlue,
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                   SizedBox(height: 12.h),
                   Wrap(
                     spacing: 8.w,
                     runSpacing: 8.h,
-                    children: widget.categories.map((category) {
-                      final selected = _selectedCategoryIds.contains(category.id);
-                      return _buildChip(
-                        category.name,
-                        iconName: category.icon,
-                        iconColor: category.iconColor,
-                        isSelected: selected,
-                        onTap: () {
-                          setState(() {
-                            if (selected) {
-                              _selectedCategoryIds.remove(category.id);
-                            } else {
-                              _selectedCategoryIds.add(category.id);
-                            }
-                          });
-                        },
-                      );
-                    }).toList(),
+                    children: [
+                      _buildChip(
+                        'Semua',
+                        icon: Icons.category_outlined,
+                        isSelected: _selectedCategoryIds.isEmpty,
+                        onTap: () =>
+                            setState(() => _selectedCategoryIds.clear()),
+                      ),
+                      ...widget.categories.map((category) {
+                        final selected =
+                            _selectedCategoryIds.contains(category.id);
+                        return _buildChip(
+                          category.name,
+                          iconName: category.icon,
+                          iconColor: category.iconColor,
+                          isSelected: selected,
+                          onTap: () {
+                            setState(() {
+                              if (selected) {
+                                _selectedCategoryIds.remove(category.id);
+                              } else {
+                                _selectedCategoryIds.add(category.id);
+                              }
+                            });
+                          },
+                        );
+                      }),
+                    ],
                   ),
                   SizedBox(height: 24.h),
                   _buildSectionTitle('Nominal'),
@@ -471,11 +517,32 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     );
   }
 
+  Widget _buildResetButton(VoidCallback onPressed) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        'Reset',
+        style: TextStyle(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.45)
+              : AppTheme.primaryBlue,
+          fontSize: 12.sp,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
   void _resetFilter() {
     setState(() {
-      _selectedTransactionType = DashboardTransactionType.all;
+      _selectedTransactionTypes.clear();
       _selectedDateRange = DashboardDateRange.selectedMonth;
-      _selectedWalletId = null;
+      _selectedWalletIds.clear();
       _selectedCategoryIds.clear();
       _currentRangeValues = RangeValues(0, _amountUpperBound);
       _customStartDate = null;
@@ -495,9 +562,9 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
     Navigator.pop(
       context,
       DashboardFilterResult(
-        transactionType: _selectedTransactionType,
+        transactionTypes: _selectedTransactionTypes,
         dateRange: _selectedDateRange,
-        walletId: _selectedWalletId,
+        walletIds: _selectedWalletIds,
         categoryIds: _selectedCategoryIds,
         amountRange: _currentRangeValues,
         customStartDate: _customStartDate,

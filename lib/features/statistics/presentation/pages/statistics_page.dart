@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/injection.dart';
 import '../components/time_period_selector.dart';
@@ -72,6 +73,8 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocProvider(
       create: (context) =>
           locator<StatisticsCubit>()..loadStatistics('Monthly'),
@@ -108,7 +111,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Statistics',
+                          l10n.statisticsTitle,
                           style: TextStyle(
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w800,
@@ -210,7 +213,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Income vs Expense',
+                                  l10n.incomeVsExpense,
                                   style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w700,
@@ -359,7 +362,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Text(
-                                      'Category Breakdown',
+                                      l10n.categoryBreakdown,
                                       style: TextStyle(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.w700,
@@ -410,7 +413,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                                     );
                                   },
                                   child: Text(
-                                    'View Details',
+                                    l10n.viewDetails,
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
@@ -439,7 +442,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                             Row(
                               children: [
                                 Text(
-                                  'Top Categories',
+                                  l10n.topCategories,
                                   style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w700,

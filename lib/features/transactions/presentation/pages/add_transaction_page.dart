@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -148,7 +149,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     }
   }
 
-  String _getDateLabel() {
+  String _getDateLabel(BuildContext context) {
+    final l10n = context.l10n;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -159,11 +161,11 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     );
 
     if (selectedDay == today) {
-      return 'Hari Ini';
+      return l10n.today;
     } else if (selectedDay == yesterday) {
-      return 'Kemarin';
+      return l10n.yesterday;
     } else {
-      return DateFormat('dd MMM yyyy', 'id').format(selectedDate);
+      return DateFormat('dd MMM yyyy', l10n.dateLocaleCode).format(selectedDate);
     }
   }
 
@@ -200,10 +202,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     }
   }
 
-  String _getTimeLabel() {
+  String _getTimeLabel(BuildContext context) {
     final now = TimeOfDay.now();
     if (selectedTime.hour == now.hour && selectedTime.minute == now.minute) {
-      return 'Sekarang';
+      return context.l10n.isIndonesian ? 'Sekarang' : 'Now';
     } else {
       final hour = selectedTime.hour.toString().padLeft(2, '0');
       final minute = selectedTime.minute.toString().padLeft(2, '0');
@@ -212,17 +214,18 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 
   Future<void> _saveTransaction() async {
+    final l10n = context.l10n;
     // Validate
     if (amount == '0' || double.tryParse(amount) == null) {
-      _showError('Masukkan jumlah yang valid');
+      _showError(l10n.enterAmount);
       return;
     }
     if (selectedCategory == null) {
-      _showError('Pilih kategori terlebih dahulu');
+      _showError(l10n.selectCategory);
       return;
     }
     if (selectedWallet == null) {
-      _showError('Pilih wallet terlebih dahulu');
+      _showError(l10n.selectWallet);
       return;
     }
 
@@ -265,7 +268,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         Navigator.pop(context);
       }
     } catch (e) {
-      _showError('Gagal menyimpan transaksi: $e');
+      _showError('${l10n.failed}: $e');
     }
   }
 
@@ -298,7 +301,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         centerTitle: true,
         title: isEditMode
             ? Text(
-                'Edit Transaksi',
+                context.l10n.editTransactionTitle,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -361,7 +364,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   child: Container(
                                     padding: EdgeInsets.symmetric(vertical: 6.h),
                                     child: Text(
-                                      'Pengeluaran',
+                                      context.l10n.typeExpense,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: isExpense
@@ -390,7 +393,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   child: Container(
                                     padding: EdgeInsets.symmetric(vertical: 6.h),
                                     child: Text(
-                                      'Pemasukan',
+                                      context.l10n.typeIncome,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                         color: !isExpense
@@ -449,7 +452,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Masukkan Jumlah',
+                                      context.l10n.enterAmount,
                                       style: TextStyle(
                                         color: AppTheme.lightTextSecondary,
                                         fontSize: 12.sp,
@@ -534,7 +537,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   Expanded(
                                     child: _buildInputChip(
                                       icon: Icons.calendar_today_outlined,
-                                      label: _getDateLabel(),
+                                      label: _getDateLabel(context),
                                       onTap: () {
                                         _noteFocusNode.unfocus();
                                         FocusScope.of(context).unfocus();
@@ -551,7 +554,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   Expanded(
                                     child: _buildInputChip(
                                       icon: Icons.access_time_outlined,
-                                      label: _getTimeLabel(),
+                                      label: _getTimeLabel(context),
                                       onTap: () {
                                         _noteFocusNode.unfocus();
                                         FocusScope.of(context).unfocus();
@@ -584,10 +587,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                       )
                                     : null,
                                 icon: Icons.category_outlined,
-                                label: 'Kategori',
+                                label: context.l10n.categoryLabel,
                                 value: selectedCategory != null
                                     ? selectedCategory!['name'] as String
-                                    : 'Pilih kategori...',
+                                    : (context.l10n.isIndonesian ? 'Pilih kategori...' : 'Select category...'),
                                 isPlaceholder: selectedCategory == null,
                                 onTap: () async {
                                   _noteFocusNode.unfocus();
@@ -637,10 +640,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                       )
                                     : null,
                                 icon: Icons.account_balance_wallet_outlined,
-                                label: 'Wallet',
+                                label: context.l10n.walletLabel,
                                 value: selectedWallet != null
                                     ? '${selectedWallet!['name']} (Rp ${CurrencyFormatter.format((selectedWallet!['balance'] as double).toStringAsFixed(0))})'
-                                    : 'Pilih wallet...',
+                                    : (context.l10n.isIndonesian ? 'Pilih dompet...' : 'Select wallet...'),
                                 isPlaceholder: selectedWallet == null,
                                 onTap: () async {
                                   _noteFocusNode.unfocus();
@@ -725,7 +728,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                           context,
                                         ).colorScheme.primary,
                                         decoration: InputDecoration(
-                                          hintText: 'Tulis catatan...',
+                                          hintText: context.l10n.noteOptionalHint,
                                           hintStyle: TextStyle(
                                             color: Theme.of(context)
                                                 .colorScheme
@@ -817,7 +820,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         elevation: 0,
                       ),
                       child: Text(
-                        isEditMode ? 'Simpan Perubahan' : 'Simpan',
+                        isEditMode ? context.l10n.saveChangesButton : context.l10n.saveButton,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14.sp,

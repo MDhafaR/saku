@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/backup_cubit.dart';
 import '../cubit/backup_state.dart';
 
@@ -26,11 +27,13 @@ class _BackupView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Cloud Backup',
+          l10n.cloudBackupTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
@@ -57,17 +60,17 @@ class _BackupView extends StatelessWidget {
               context: context,
               barrierDismissible: false,
               builder: (_) => AlertDialog(
-                title: const Text('Restore Berhasil ✅'),
-                content: const Text(
-                  'Data berhasil dipulihkan. Aplikasi perlu ditutup dan dibuka ulang agar perubahan aktif.',
+                title: Text(l10n.restoreSuccessTitle),
+                content: Text(
+                  l10n.restoreSuccessDesc,
                 ),
                 actions: [
                   TextButton(
                     onPressed: () => exit(0),
                     style: TextButton.styleFrom(foregroundColor: Colors.black),
-                    child: const Text(
-                      'Tutup Aplikasi',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    child: Text(
+                      l10n.closeAppButton,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
@@ -103,6 +106,8 @@ class _BackupView extends StatelessWidget {
   }
 
   Widget _buildSignedOutView(BuildContext context) {
+    final l10n = context.l10n;
+
     return Center(
       child: Padding(
         padding: EdgeInsets.all(32.w),
@@ -125,7 +130,7 @@ class _BackupView extends StatelessWidget {
             ),
             SizedBox(height: 24.h),
             Text(
-              'Belum Terhubung',
+              l10n.notConnectedTitle,
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -134,7 +139,7 @@ class _BackupView extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
             Text(
-              'Hubungkan akun Google untuk backup data keuanganmu ke cloud secara aman.',
+              l10n.notConnectedDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
@@ -149,7 +154,7 @@ class _BackupView extends StatelessWidget {
                 onPressed: () => context.read<BackupCubit>().signIn(),
                 icon: Icon(Icons.login, color: Colors.white, size: 20.sp),
                 label: Text(
-                  'Hubungkan Google Drive',
+                  l10n.connectGoogleButton,
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -174,6 +179,7 @@ class _BackupView extends StatelessWidget {
   }
 
   Widget _buildSignedInView(BuildContext context, BackupState state) {
+    final l10n = context.l10n;
     final isProcessing =
         state.status == BackupStatus.backingUp ||
         state.status == BackupStatus.restoring;
@@ -184,7 +190,7 @@ class _BackupView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Account status card
-          _buildAccountCard(state),
+          _buildAccountCard(context, state),
 
           SizedBox(height: 24.h),
 
@@ -212,9 +218,9 @@ class _BackupView extends StatelessWidget {
               label: Text(
                 isProcessing
                     ? (state.status == BackupStatus.restoring
-                          ? 'Memulihkan...'
-                          : 'Menyinkronkan...')
-                    : 'Backup Sekarang',
+                          ? l10n.restoringData
+                          : l10n.syncingData)
+                    : l10n.backupNowButton,
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -251,13 +257,13 @@ class _BackupView extends StatelessWidget {
                     : const Color(0xFF111111),
               ),
               label: Text(
-                'Restore dari Cloud',
+                l10n.restoreDataButton,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16.sp,
                   color: isProcessing
-                      ? const Color(0xFF9CA3AF)
-                      : const Color(0xFF111111),
+                    ? const Color(0xFF9CA3AF)
+                    : const Color(0xFF111111),
                 ),
               ),
               style: OutlinedButton.styleFrom(
@@ -281,7 +287,7 @@ class _BackupView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'INFO BACKUP',
+                l10n.infoBackupHeader,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                   fontSize: 12.sp,
@@ -302,7 +308,7 @@ class _BackupView extends StatelessWidget {
                 ? null
                 : () => _showDisconnectConfirmation(context),
             child: Text(
-              'Putuskan Akun',
+              l10n.disconnectAccount,
               style: TextStyle(
                 color: isProcessing ? Colors.grey : Colors.red,
                 fontWeight: FontWeight.bold,
@@ -311,7 +317,7 @@ class _BackupView extends StatelessWidget {
             ),
           ),
           Text(
-            'Data lokal tidak akan terhapus',
+            l10n.localDataSafeNote,
             style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
           ),
         ],
@@ -319,7 +325,8 @@ class _BackupView extends StatelessWidget {
     );
   }
 
-  Widget _buildAccountCard(BackupState state) {
+  Widget _buildAccountCard(BuildContext context, BackupState state) {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(24.w),
@@ -378,17 +385,18 @@ class _BackupView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Terakhir backup: ',
+                '${l10n.lastBackupLabel}: ',
                 style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
               ),
               Text(
                 _formatLastBackup(
+                  context,
                   state.remoteBackupInfo?.modifiedTime?.toLocal() ??
                       state.lastBackupTime,
                 ),
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.greenAccent,
-                  fontSize: 12.sp,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -400,6 +408,7 @@ class _BackupView extends StatelessWidget {
   }
 
   Widget _buildInfoCard(BuildContext context, BackupState state) {
+    final l10n = context.l10n;
     final info = state.remoteBackupInfo;
     if (info == null) return const SizedBox.shrink();
 
@@ -421,10 +430,11 @@ class _BackupView extends StatelessWidget {
           _buildInfoRow(
             context: context,
             icon: Icons.calendar_today,
-            label: 'Tanggal Backup',
+            label: l10n.backupDateLabel,
             value: info.modifiedTime != null
                 ? DateFormat(
                     'dd MMM yyyy, HH:mm',
+                    l10n.dateLocaleCode,
                   ).format(info.modifiedTime!.toLocal())
                 : '-',
           ),
@@ -432,7 +442,7 @@ class _BackupView extends StatelessWidget {
           _buildInfoRow(
             context: context,
             icon: Icons.storage,
-            label: 'Ukuran File',
+            label: l10n.fileSizeLabel,
             value: info.sizeBytes != null
                 ? _formatFileSize(info.sizeBytes!)
                 : '-',
@@ -482,18 +492,19 @@ class _BackupView extends StatelessWidget {
     );
   }
 
-  String _formatLastBackup(DateTime? time) {
-    if (time == null) return 'Belum pernah';
+  String _formatLastBackup(BuildContext context, DateTime? time) {
+    final l10n = context.l10n;
+    if (time == null) return l10n.neverBackedUp;
 
     final now = DateTime.now();
     final diff = now.difference(time);
 
-    if (diff.inMinutes < 1) return 'Baru saja';
-    if (diff.inMinutes < 60) return '${diff.inMinutes} menit lalu';
-    if (diff.inHours < 24) return '${diff.inHours} jam lalu';
-    if (diff.inDays < 7) return '${diff.inDays} hari lalu';
+    if (diff.inMinutes < 1) return l10n.justNow;
+    if (diff.inMinutes < 60) return l10n.minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l10n.daysAgoCount(diff.inDays);
 
-    return DateFormat('dd MMM yyyy').format(time);
+    return DateFormat('dd MMM yyyy', l10n.dateLocaleCode).format(time);
   }
 
   String _formatFileSize(int bytes) {
@@ -503,18 +514,16 @@ class _BackupView extends StatelessWidget {
   }
 
   void _showRestoreConfirmation(BuildContext context) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Restore Data?'),
-        content: const Text(
-          'Data lokal akan diganti dengan data dari backup cloud. '
-          'Aplikasi perlu di-restart setelah restore. Lanjutkan?',
-        ),
+        title: Text(l10n.restoreDataTitle),
+        content: Text(l10n.restoreDataConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Batal'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -522,7 +531,7 @@ class _BackupView extends StatelessWidget {
               context.read<BackupCubit>().restoreBackup();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Ya, Restore'),
+            child: Text(l10n.yesRestore),
           ),
         ],
       ),
@@ -530,18 +539,16 @@ class _BackupView extends StatelessWidget {
   }
 
   void _showDisconnectConfirmation(BuildContext context) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Putuskan Akun?'),
-        content: const Text(
-          'Akun Google Drive akan diputuskan. '
-          'Data lokal tidak akan terhapus. Lanjutkan?',
-        ),
+        title: Text(l10n.disconnectAccountTitle),
+        content: Text(l10n.disconnectAccountConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Batal'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -549,7 +556,7 @@ class _BackupView extends StatelessWidget {
               context.read<BackupCubit>().signOut();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Ya, Putuskan'),
+            child: Text(l10n.yesDisconnect),
           ),
         ],
       ),

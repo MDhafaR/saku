@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/services/import_service.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -63,7 +64,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Gagal memilih file: $e')));
+        ).showSnackBar(SnackBar(content: Text('Error picking file: $e')));
       }
     } finally {
       if (mounted) setState(() => _isPickingFile = false);
@@ -72,11 +73,13 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Import Data',
+          l10n.importDataTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
@@ -110,7 +113,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                   ),
                   SizedBox(height: 24.h),
                   Text(
-                    'Pindahkan Data Keuangan',
+                    l10n.transferFinancialDataTitle,
                     style: TextStyle(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -120,7 +123,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                   ),
                   SizedBox(height: 12.h),
                   Text(
-                    'Pindahkan data keuanganmu dari aplikasi lain atau rekening koran bank dengan mudah.',
+                    l10n.transferFinancialDataDesc,
                     style: TextStyle(
                       fontSize: 14.sp,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
@@ -135,7 +138,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Riwayat Import',
+                          l10n.importHistoryTitle,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -150,7 +153,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.h),
                       child: Text(
-                        'Belum ada riwayat import.',
+                        l10n.noImportHistoryYet,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           fontSize: 13.sp,
@@ -183,8 +186,8 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                     : Icon(Icons.add, color: Theme.of(context).colorScheme.onPrimary, size: 24.sp),
                 label: Text(
                   _isPickingFile
-                      ? 'Memilih file...'
-                      : 'Pilih File dari Penyimpanan',
+                      ? l10n.selectingFile
+                      : l10n.selectFileFromStorage,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                     fontWeight: FontWeight.bold,
@@ -208,7 +211,8 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
   }
 
   Widget _buildHistoryItem(ImportHistory history) {
-    final dateFormat = DateFormat('dd MMM yyyy, HH:mm', 'id_ID');
+    final l10n = context.l10n;
+    final dateFormat = DateFormat('dd MMM yyyy, HH:mm', l10n.dateLocaleCode);
     final dateStr = dateFormat.format(history.importedAt);
 
     return Container(
@@ -254,7 +258,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
                 ),
                 if (history.isSuccess)
                   Text(
-                    '${history.importedCount} transaksi${history.skippedDuplicates > 0 ? ', ${history.skippedDuplicates} duplikat' : ''}',
+                    '${history.importedCount} ${l10n.navTransactions.toLowerCase()}${history.skippedDuplicates > 0 ? ', ${history.skippedDuplicates} duplicates' : ''}',
                     style: TextStyle(fontSize: 11.sp, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
               ],
@@ -269,7 +273,7 @@ class _ImportMenuPageState extends State<ImportMenuPage> {
               borderRadius: BorderRadius.circular(4.r),
             ),
             child: Text(
-              history.isSuccess ? 'Sukses' : 'Gagal',
+              history.isSuccess ? l10n.success : l10n.failed,
               style: TextStyle(
                 fontSize: 10.sp,
                 fontWeight: FontWeight.bold,
@@ -628,10 +632,11 @@ class _ImportWizardPageState extends State<ImportWizardPage> {
 
   @override
   Widget build(BuildContext context) {
-    String title = 'Petakan Kolom';
-    if (_currentStep == 2) title = 'Petakan Kategori';
-    if (_currentStep == 3) title = 'Petakan Wallet';
-    if (_currentStep == 4) title = 'Konfirmasi Import';
+    final l10n = context.l10n;
+    String title = l10n.mapColumnsStep;
+    if (_currentStep == 2) title = l10n.mapCategoriesStep;
+    if (_currentStep == 3) title = l10n.mapWalletsStep;
+    if (_currentStep == 4) title = l10n.confirmImportStep;
 
     final totalSteps = _hasWalletColumn ? 4 : 3;
     final displayStep = _hasWalletColumn

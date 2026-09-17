@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -127,6 +128,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final cardBgColor =
@@ -200,7 +202,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Cari & Gabungkan Transaksi',
+                                l10n.searchAndMergeTitle,
                                 style: TextStyle(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w700,
@@ -209,7 +211,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                'Pilih satu atau lebih transaksi untuk disatukan datanya',
+                                l10n.searchAndMergeModalSubtitle,
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: cs.onSurfaceVariant,
@@ -234,8 +236,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                     TextField(
                       controller: _searchController,
                       decoration: InputDecoration(
-                        hintText:
-                            'Cari nama transaksi (misal: sat, padang)...',
+                        hintText: l10n.searchTransactionPlaceholder,
                         hintStyle: TextStyle(
                           fontSize: 12.sp,
                           color: cs.outline,
@@ -296,8 +297,8 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                   children: [
                     Text(
                       _selectedItems.isEmpty
-                          ? '${suggestions.length} Transaksi Ditemukan'
-                          : '${_selectedItems.length} Transaksi Dipilih',
+                          ? l10n.transactionsFound(suggestions.length)
+                          : l10n.transactionsSelected(_selectedItems.length),
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w700,
@@ -327,8 +328,8 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                         },
                         child: Text(
                           _selectedItems.length == suggestions.length
-                              ? 'Batal Pilih Semua'
-                              : 'Pilih Semua',
+                              ? l10n.deselectAllLong
+                              : l10n.selectAll,
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w700,
@@ -354,7 +355,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                             ),
                             SizedBox(height: 8.h),
                             Text(
-                              'Tidak ada transaksi bernama "$_searchQuery"',
+                              l10n.noTransactionNamed(_searchQuery),
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 fontWeight: FontWeight.w600,
@@ -376,7 +377,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                               ),
                               icon: const Icon(Icons.add_rounded, size: 16),
                               label: Text(
-                                'Gunakan "$_searchQuery" sebagai kata kunci',
+                                l10n.useKeywordAsSearch(_searchQuery),
                                 style: TextStyle(fontSize: 11.sp),
                               ),
                               onPressed: () {
@@ -454,7 +455,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              'Gunakan kata: "$_searchQuery"',
+                                              l10n.useWordPrefix(_searchQuery),
                                               style: TextStyle(
                                                 fontSize: 12.sp,
                                                 fontWeight: FontWeight.w700,
@@ -462,7 +463,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                                               ),
                                             ),
                                             Text(
-                                              'Cocokkan semua transaksi yang memuat kata ini',
+                                              l10n.matchAllTransactionsWithWord,
                                               style: TextStyle(
                                                 fontSize: 10.sp,
                                                 color: cs.onSurfaceVariant,
@@ -507,7 +508,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                                 decoration: BoxDecoration(
                                   color: isSelected
                                       ? widget.categoryColor
-                                          .withValues(alpha: 0.12)
+                                      .withValues(alpha: 0.12)
                                       : cardBgColor,
                                   borderRadius: BorderRadius.circular(12.r),
                                   border: Border.all(
@@ -556,7 +557,7 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                                           ),
                                           SizedBox(height: 2.h),
                                           Text(
-                                            '${item.count} Transaksi',
+                                            l10n.transactionCount(item.count),
                                             style: TextStyle(
                                               fontSize: 10.sp,
                                               color: cs.onSurfaceVariant,
@@ -617,8 +618,8 @@ class _SearchAndMergeModalState extends State<SearchAndMergeModal> {
                             },
                       child: Text(
                         _selectedItems.isEmpty
-                            ? 'Pilih Transaksi untuk Digabungkan'
-                            : 'Gabungkan (${_selectedItems.length}) Kata / Data',
+                            ? l10n.selectTransactionsToMerge
+                            : l10n.mergeSelectedCount(_selectedItems.length),
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,

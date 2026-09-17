@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/statistics_state.dart';
 
 class PeriodDateNavigator extends StatelessWidget {
@@ -65,23 +66,39 @@ class PeriodDateNavigator extends StatelessWidget {
 
   Future<void> _showMonthYearPicker(BuildContext context) async {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     int tempYear = targetDate.year;
     int tempMonth = targetDate.month;
 
-    final shortMonthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
+    final shortMonthNames = l10n.isIndonesian
+        ? [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'Mei',
+            'Jun',
+            'Jul',
+            'Agu',
+            'Sep',
+            'Okt',
+            'Nov',
+            'Des',
+          ]
+        : [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+          ];
 
     await showModalBottomSheet(
       context: context,
@@ -205,11 +222,12 @@ class PeriodDateNavigator extends StatelessWidget {
   }
 
   Future<void> _showYearPicker(BuildContext context) async {
+    final l10n = context.l10n;
     final picked = await showDialog<DateTime>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Pilih Tahun'),
+          title: Text(l10n.isIndonesian ? 'Pilih Tahun' : 'Select Year'),
           content: SizedBox(
             width: 300.w,
             height: 300.h,
@@ -230,12 +248,13 @@ class PeriodDateNavigator extends StatelessWidget {
     }
   }
 
-  String _formatDateLabel() {
+  String _formatDateLabel(BuildContext context) {
+    final l10n = context.l10n;
     switch (period) {
       case 'Daily':
-        return DateFormat('d MMMM yyyy', 'id_ID').format(targetDate);
+        return DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate);
       case 'Monthly':
-        return DateFormat('MMMM yyyy', 'id_ID').format(targetDate);
+        return DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate);
       case 'Yearly':
         return DateFormat('yyyy').format(targetDate);
       case 'Custom':
@@ -244,7 +263,7 @@ class PeriodDateNavigator extends StatelessWidget {
           final end = DateFormat('dd/MM/yyyy').format(customRange!.end);
           return '$start - $end';
         }
-        return 'Pilih Rentang Tanggal';
+        return l10n.selectDateRangeTitle;
       default:
         return '';
     }
@@ -287,7 +306,7 @@ class PeriodDateNavigator extends StatelessWidget {
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    _formatDateLabel(),
+                    _formatDateLabel(context),
                     style: TextStyle(
                       fontSize: 13.5.sp,
                       fontWeight: FontWeight.w600,
@@ -349,7 +368,7 @@ class PeriodDateNavigator extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    _formatDateLabel(),
+                    _formatDateLabel(context),
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,

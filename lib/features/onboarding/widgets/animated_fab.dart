@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../debts/presentation/pages/add_loan_page.dart';
 import '../../transactions/presentation/pages/transfer_page.dart';
@@ -199,6 +200,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
     // FAB utama — putih di light, dark slate di dark
     final fabBg = isDark ? const Color(0xFF1E293B) : Colors.white;
     final fabIconColor = isDark ? Colors.white : Colors.black;
+    final l10n = context.l10n;
 
     // Arrow indicator — adaptif
     final arrowColor = isDark
@@ -217,7 +219,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
               context: context,
               icon: Icons.add,
               iconColor: const Color(0xFF10B981), // hijau seperti income card
-              label: 'Transaction',
+              label: l10n.navTransactions,
               onTap: () {
                 _toggleFabExpansion();
                 widget.onPressed();
@@ -233,7 +235,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
               context: context,
               icon: Icons.swap_horiz,
               iconColor: const Color(0xFF6366F1), // ungu seperti total card
-              label: 'Transfer',
+              label: l10n.transferTitle,
               onTap: () async {
                 _toggleFabExpansion();
                 final db = locator<AppDatabase>();
@@ -243,15 +245,17 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: const Text('Wallet Tidak Cukup'),
-                      content: const Text(
-                        'Anda memerlukan minimal 2 wallet untuk melakukan transfer antar akun. Silakan tambahkan wallet baru terlebih dahulu.',
+                      title: Text(l10n.isIndonesian ? 'Wallet Tidak Cukup' : 'Not Enough Wallets'),
+                      content: Text(
+                        l10n.isIndonesian
+                            ? 'Anda memerlukan minimal 2 wallet untuk melakukan transfer antar akun. Silakan tambahkan wallet baru terlebih dahulu.'
+                            : 'You need at least 2 wallets to perform a transfer between accounts. Please add a new wallet first.',
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           child: Text(
-                            'Nanti',
+                            l10n.isIndonesian ? 'Nanti' : 'Later',
                             style: TextStyle(
                               color: const Color(0xFF9CA3AF),
                               fontWeight: FontWeight.w500,
@@ -270,7 +274,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
                             );
                           },
                           child: Text(
-                            'Tambah Wallet',
+                            l10n.isIndonesian ? 'Tambah Wallet' : 'Add Wallet',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.onSurface,
                               fontWeight: FontWeight.w600,
@@ -300,7 +304,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
               context: context,
               icon: Icons.account_balance_wallet,
               iconColor: const Color(0xFFEF4444), // merah seperti expense card
-              label: 'Loan',
+              label: l10n.navDebts,
               onTap: () {
                 _toggleFabExpansion();
                 Navigator.push(
@@ -320,7 +324,7 @@ class _AnimatedFabState extends State<AnimatedFab> {
               context: context,
               icon: Icons.tune_rounded,
               iconColor: const Color(0xFF0D9488), // teal modern
-              label: 'Ngepasin',
+              label: l10n.adjustBalanceTitle,
               onTap: () {
                 _toggleFabExpansion();
                 Navigator.push(

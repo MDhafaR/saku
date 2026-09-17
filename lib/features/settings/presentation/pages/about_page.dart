@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../../core/localization/app_localizations.dart';
+
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'About',
+          l10n.aboutAppTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
@@ -73,7 +77,7 @@ class AboutPage extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
             Text(
-              'Your personal finance companion.',
+              l10n.appTagline,
               style: TextStyle(fontSize: 14.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
             ),
             SizedBox(height: 16.h),
@@ -115,24 +119,44 @@ class AboutPage extends StatelessWidget {
                   _buildMenuItem(
                     context,
                     Icons.privacy_tip_outlined,
-                    'Privacy Policy',
+                    l10n.privacyPolicy,
                     false,
+                    onTap: () {},
                   ),
                   Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                   _buildMenuItem(
                     context,
                     Icons.description_outlined,
-                    'Terms of Service',
+                    l10n.termsOfService,
                     false,
+                    onTap: () {},
                   ),
                   Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
-                  _buildMenuItem(context, Icons.code, 'Open Source Licenses', false),
+                  _buildMenuItem(
+                    context,
+                    Icons.code,
+                    l10n.openSourceLicenses,
+                    false,
+                    onTap: () => showLicensePage(
+                      context: context,
+                      applicationName: 'Saku App',
+                      applicationVersion: 'v1.2.3 (Build 45)',
+                    ),
+                  ),
                   Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                   _buildMenuItem(
                     context,
                     Icons.cloud_sync_outlined,
-                    'Check for Updates',
+                    l10n.checkForUpdates,
                     true,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(l10n.appUpToDate),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),
@@ -142,7 +166,7 @@ class AboutPage extends StatelessWidget {
 
             // Footer
             Text(
-              '© 2026 Saku Team.',
+              l10n.copyrightTeam,
               style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
             ),
             SizedBox(height: 4.h),
@@ -150,12 +174,12 @@ class AboutPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  'Made with ',
+                  l10n.madeWithPrefix,
                   style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                 ),
                 Icon(Icons.favorite, size: 12.sp, color: Colors.red[400]),
                 Text(
-                  ' in Indonesia.',
+                  l10n.inIndonesia,
                   style: TextStyle(fontSize: 12.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
                 ),
               ],
@@ -166,9 +190,15 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMenuItem(BuildContext context, IconData icon, String title, bool isAction) {
+  Widget _buildMenuItem(
+    BuildContext context,
+    IconData icon,
+    String title,
+    bool isAction, {
+    VoidCallback? onTap,
+  }) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
         child: Row(

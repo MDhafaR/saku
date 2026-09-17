@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -159,19 +160,22 @@ class _TransferPageState extends State<TransferPage> {
   }
 
   Future<void> _submitTransfer() async {
+    final l10n = context.l10n;
     _noteFocusNode.unfocus();
     FocusScope.of(context).unfocus();
     if (_isSubmitting) return;
 
     // Validate wallets selected
     if (sourceWallet == null || destinationWallet == null) {
-      _showError('Pilih sumber dana dan penerima terlebih dahulu.');
+      _showError(l10n.isIndonesian
+          ? 'Pilih sumber dana dan penerima terlebih dahulu.'
+          : 'Please select source and destination wallets first.');
       return;
     }
 
     // Validate not same wallet
     if (sourceWallet!.id == destinationWallet!.id) {
-      _showError('Sumber dana dan penerima tidak boleh sama.');
+      _showError(l10n.sameWalletError);
       return;
     }
 
@@ -179,7 +183,7 @@ class _TransferPageState extends State<TransferPage> {
     final amountStr = CurrencyFormatter.parse(_amountController.text);
     final amount = double.tryParse(amountStr) ?? 0;
     if (amount <= 0) {
-      _showError('Masukkan nominal transfer yang valid.');
+      _showError(l10n.minTransferAmountError);
       return;
     }
 
@@ -208,7 +212,7 @@ class _TransferPageState extends State<TransferPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Transfer Rp ${CurrencyFormatter.format(amount.toStringAsFixed(0))} berhasil!',
+              '${l10n.transferTitle} Rp ${CurrencyFormatter.format(amount.toStringAsFixed(0))} ${l10n.success}!',
             ),
             backgroundColor: const Color(0xFF43A047),
             behavior: SnackBarBehavior.floating,
@@ -221,7 +225,7 @@ class _TransferPageState extends State<TransferPage> {
       }
     } catch (e) {
       if (mounted) {
-        _showError('Gagal melakukan transfer: $e');
+        _showError('${l10n.failed}: $e');
         setState(() => _isSubmitting = false);
       }
     }
@@ -260,6 +264,7 @@ class _TransferPageState extends State<TransferPage> {
   }
 
   Widget _buildWalletRow(Wallet wallet) {
+    final l10n = context.l10n;
     return Row(
       children: [
         Container(
@@ -291,7 +296,7 @@ class _TransferPageState extends State<TransferPage> {
               ),
               SizedBox(height: 2.h),
               Text(
-                'Saldo: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
+                '${l10n.isIndonesian ? 'Saldo' : 'Balance'}: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -418,6 +423,7 @@ class _TransferPageState extends State<TransferPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -431,7 +437,7 @@ class _TransferPageState extends State<TransferPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Pindah Buku',
+          l10n.transferTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16.sp,
@@ -491,7 +497,7 @@ class _TransferPageState extends State<TransferPage> {
                               ),
                               SizedBox(width: 6.w),
                               Text(
-                                'Total Aset',
+                                l10n.totalAssets,
                                 style: TextStyle(
                                   color: AppTheme.lightTextSecondary,
                                   fontSize: 12.sp,
@@ -542,7 +548,9 @@ class _TransferPageState extends State<TransferPage> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'SUMBER DANA',
+                                        l10n.isIndonesian
+                                            ? 'SUMBER DANA'
+                                            : 'SOURCE ACCOUNT',
                                         style: TextStyle(
                                           color: AppTheme.lightTextSecondary,
                                           fontSize: 10.sp,
@@ -600,7 +608,7 @@ class _TransferPageState extends State<TransferPage> {
                                               ),
                                               SizedBox(width: 10.w),
                                               Text(
-                                                'Pilih Sumber Dana',
+                                                l10n.sourceWalletLabel,
                                                 style: TextStyle(
                                                   color: AppTheme
                                                       .lightTextSecondary,
@@ -710,7 +718,9 @@ class _TransferPageState extends State<TransferPage> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'PENERIMA',
+                                        l10n.isIndonesian
+                                            ? 'PENERIMA'
+                                            : 'DESTINATION ACCOUNT',
                                         style: TextStyle(
                                           color: AppTheme.lightTextSecondary,
                                           fontSize: 10.sp,
@@ -768,7 +778,7 @@ class _TransferPageState extends State<TransferPage> {
                                               ),
                                               SizedBox(width: 10.w),
                                               Text(
-                                                'Pilih Penerima',
+                                                l10n.destinationWalletLabel,
                                                 style: TextStyle(
                                                   color: AppTheme
                                                       .lightTextSecondary,
@@ -821,7 +831,7 @@ class _TransferPageState extends State<TransferPage> {
                               Row(
                                 children: [
                                   Text(
-                                    'Nominal Transfer',
+                                    l10n.transferAmountLabel,
                                     style: TextStyle(
                                       color: AppTheme.lightTextSecondary,
                                       fontSize: 11.sp,
@@ -973,7 +983,7 @@ class _TransferPageState extends State<TransferPage> {
                                 Row(
                                   children: [
                                     Text(
-                                      'Biaya Admin : ',
+                                      '${l10n.adminFeeLabel} : ',
                                       style: TextStyle(
                                         color: AppTheme.lightTextSecondary,
                                         fontSize: 11.sp,
@@ -1003,7 +1013,7 @@ class _TransferPageState extends State<TransferPage> {
                                       borderRadius: BorderRadius.circular(8.r),
                                     ),
                                     child: Text(
-                                      'Gratis',
+                                      l10n.freeAdminFee,
                                       style: TextStyle(
                                         color: const Color(0xFF43A047),
                                         fontSize: 10.sp,
@@ -1038,7 +1048,9 @@ class _TransferPageState extends State<TransferPage> {
                                         ),
                                       ),
                                       child: Text(
-                                        'Reset (Gratis)',
+                                        l10n.isIndonesian
+                                            ? 'Reset (Gratis)'
+                                            : 'Reset (Free)',
                                         style: TextStyle(
                                           color: AppTheme.lightTextSecondary,
                                           fontSize: 10.sp,
@@ -1150,7 +1162,7 @@ class _TransferPageState extends State<TransferPage> {
                       padding: EdgeInsets.only(left: 4.w, bottom: 6.h),
                       child: RichText(
                         text: TextSpan(
-                          text: 'Catatan ',
+                          text: '${l10n.noteLabel} ',
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.onSurface,
                             fontSize: 12.sp,
@@ -1159,7 +1171,9 @@ class _TransferPageState extends State<TransferPage> {
                           ),
                           children: [
                             TextSpan(
-                              text: '(Opsional)',
+                              text: l10n.isIndonesian
+                                  ? '(Opsional)'
+                                  : '(Optional)',
                               style: TextStyle(
                                 color: AppTheme.lightTextSecondary,
                                 fontWeight: FontWeight.w400,
@@ -1200,8 +1214,7 @@ class _TransferPageState extends State<TransferPage> {
                               height: 1.4,
                             ),
                             decoration: InputDecoration(
-                              hintText:
-                                  'Tulis catatan transfer, keperluan, atau keterangan di sini...',
+                              hintText: l10n.writeTransferNoteHint,
                               hintStyle: TextStyle(
                                 color: AppTheme.lightTextSecondary.withValues(
                                   alpha: 0.8,
@@ -1301,7 +1314,7 @@ class _TransferPageState extends State<TransferPage> {
                               ),
                             )
                           : Text(
-                              'Lanjut Transfer',
+                              l10n.transferNowButton,
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,

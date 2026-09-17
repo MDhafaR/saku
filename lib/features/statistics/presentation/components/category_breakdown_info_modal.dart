@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../cubit/statistics_state.dart';
 import '../pages/category_detail_page.dart';
@@ -44,51 +45,75 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
     );
   }
 
-  String _formatPeriodTitle(String period, DateTime date, AppDateTimeRange? range) {
+  String _formatPeriodTitle(
+      String period, DateTime date, AppDateTimeRange? range, AppLocalizations l10n) {
     switch (period.toLowerCase()) {
       case 'daily':
-        return DateFormat('d MMMM yyyy', 'id_ID').format(date);
+        return DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(date);
       case 'monthly':
-        return DateFormat('MMMM yyyy', 'id_ID').format(date);
+        return DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(date);
       case 'yearly':
-        return DateFormat('yyyy', 'id_ID').format(date);
+        return DateFormat('yyyy', l10n.dateLocaleCode).format(date);
       case 'custom':
         if (range != null) {
-          final s = DateFormat('dd/MM/yyyy', 'id_ID').format(range.start);
-          final e = DateFormat('dd/MM/yyyy', 'id_ID').format(range.end);
+          final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(range.start);
+          final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(range.end);
           return '$s - $e';
         }
-        return 'Kustom';
+        return l10n.periodCustom;
       case 'all':
       default:
-        return 'Semua Waktu';
+        return l10n.periodAll;
     }
   }
 
-  String _getPeriodContextLabel(String period, DateTime targetDate, AppDateTimeRange? customRange) {
-    switch (period.toLowerCase()) {
-      case 'yearly':
-        return 'tahun ${DateFormat('yyyy', 'id_ID').format(targetDate)}';
-      case 'daily':
-        return 'hari ini (${DateFormat('d MMMM yyyy', 'id_ID').format(targetDate)})';
-      case 'monthly':
-        return 'bulan ${DateFormat('MMMM yyyy', 'id_ID').format(targetDate)}';
-      case 'custom':
-        if (customRange != null) {
-          final s = DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.start);
-          final e = DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.end);
-          return 'rentang waktu ($s - $e)';
-        }
-        return 'rentang waktu terpilih';
-      case 'all':
-      default:
-        return 'seluruh riwayat keuangan';
+  String _getPeriodContextLabel(
+      String period, DateTime targetDate, AppDateTimeRange? customRange, AppLocalizations l10n) {
+    if (l10n.isIndonesian) {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+          return 'tahun ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'daily':
+          return 'hari ini (${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)})';
+        case 'monthly':
+          return 'bulan ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'custom':
+          if (customRange != null) {
+            final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
+            final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+            return 'rentang waktu ($s - $e)';
+          }
+          return 'rentang waktu terpilih';
+        case 'all':
+        default:
+          return 'seluruh riwayat keuangan';
+      }
+    } else {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+          return 'year ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'daily':
+          return 'today (${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)})';
+        case 'monthly':
+          return 'month ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'custom':
+          if (customRange != null) {
+            final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
+            final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+            return 'date range ($s - $e)';
+          }
+          return 'selected date range';
+        case 'all':
+        default:
+          return 'all-time financial history';
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final cardBgColor =
@@ -96,8 +121,8 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
     final borderColor =
         isDark ? cs.outline.withValues(alpha: 0.15) : const Color(0xFFE5E7EB);
 
-    final periodLabel = _formatPeriodTitle(period, targetDate, customRange);
-    final periodCtx = _getPeriodContextLabel(period, targetDate, customRange);
+    final periodLabel = _formatPeriodTitle(period, targetDate, customRange, l10n);
+    final periodCtx = _getPeriodContextLabel(period, targetDate, customRange, l10n);
 
     // Dynamic real data analysis
     final bool hasData = categories.isNotEmpty && totalExpense > 0;
@@ -105,17 +130,32 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
     final secondCategory = (categories.length > 1) ? categories[1] : null;
 
     final String narrativeText;
-    if (hasData && topCategory != null) {
-      if (secondCategory != null) {
-        narrativeText =
-            'Pada $periodCtx, pengeluaran Anda didominasi oleh kategori ${topCategory.name} (${topCategory.percentage.toStringAsFixed(1)}% • Rp ${CurrencyFormatter.format(topCategory.amount.toStringAsFixed(0))}) dan disusul oleh ${secondCategory.name} (${secondCategory.percentage.toStringAsFixed(1)}%). Sebanyak ${categories.length} kategori pengeluaran aktif tercatat.';
+    if (l10n.isIndonesian) {
+      if (hasData && topCategory != null) {
+        if (secondCategory != null) {
+          narrativeText =
+              'Pada $periodCtx, pengeluaran Anda didominasi oleh kategori ${topCategory.name} (${topCategory.percentage.toStringAsFixed(1)}% • ${CurrencyFormatter.formatRupiah(topCategory.amount)}) dan disusul oleh ${secondCategory.name} (${secondCategory.percentage.toStringAsFixed(1)}%). Sebanyak ${categories.length} kategori pengeluaran aktif tercatat.';
+        } else {
+          narrativeText =
+              'Seluruh pengeluaran Anda pada $periodCtx terkonsentrasi 100% pada kategori ${topCategory.name} sebesar ${CurrencyFormatter.formatRupiah(topCategory.amount)}.';
+        }
       } else {
         narrativeText =
-            'Seluruh pengeluaran Anda pada $periodCtx terkonsentrasi 100% pada kategori ${topCategory.name} sebesar Rp ${CurrencyFormatter.format(topCategory.amount.toStringAsFixed(0))}.';
+            'Belum ada transaksi pengeluaran yang tercatat pada $periodCtx.';
       }
     } else {
-      narrativeText =
-          'Belum ada transaksi pengeluaran yang tercatat pada $periodCtx.';
+      if (hasData && topCategory != null) {
+        if (secondCategory != null) {
+          narrativeText =
+              'During $periodCtx, your spending is led by ${topCategory.name} (${topCategory.percentage.toStringAsFixed(1)}% • ${CurrencyFormatter.formatRupiah(topCategory.amount)}), followed by ${secondCategory.name} (${secondCategory.percentage.toStringAsFixed(1)}%). A total of ${categories.length} active spending categories were recorded.';
+        } else {
+          narrativeText =
+              'All of your spending during $periodCtx is concentrated 100% in ${topCategory.name} totaling ${CurrencyFormatter.formatRupiah(topCategory.amount)}.';
+        }
+      } else {
+        narrativeText =
+            'No expense transactions have been recorded during $periodCtx.';
+      }
     }
 
     return DraggableScrollableSheet(
@@ -174,7 +214,7 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Category Breakdown',
+                          l10n.categoryBreakdown,
                           style: TextStyle(
                             fontSize: 16.5.sp,
                             fontWeight: FontWeight.w800,
@@ -184,7 +224,7 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Komposisi Pengeluaran • $periodLabel',
+                          '${l10n.expenseComposition} • $periodLabel',
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
@@ -242,7 +282,9 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                 ),
                                 SizedBox(width: 6.w),
                                 Text(
-                                  'Temuan Nyata Distribusi Belanja',
+                                  l10n.isIndonesian
+                                      ? 'Temuan Nyata Distribusi Belanja'
+                                      : 'Real Spending Distribution Findings',
                                   style: TextStyle(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w800,
@@ -275,7 +317,9 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Pos Terbesar',
+                                          l10n.isIndonesian
+                                              ? 'Pos Terbesar'
+                                              : 'Top Category',
                                           style: TextStyle(
                                             fontSize: 10.5.sp,
                                             fontWeight: FontWeight.w600,
@@ -286,7 +330,9 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                         Text(
                                           topCategory != null
                                               ? topCategory.name
-                                              : 'Belum ada',
+                                              : (l10n.isIndonesian
+                                                  ? 'Belum ada'
+                                                  : 'None'),
                                           style: TextStyle(
                                             fontSize: 13.5.sp,
                                             fontWeight: FontWeight.w800,
@@ -298,8 +344,8 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                         SizedBox(height: 2.h),
                                         Text(
                                           topCategory != null
-                                              ? '${topCategory.percentage.toStringAsFixed(1)}% (Rp ${CurrencyFormatter.format(topCategory.amount.toStringAsFixed(0))})'
-                                              : 'Rp 0',
+                                              ? '${topCategory.percentage.toStringAsFixed(1)}% (${CurrencyFormatter.formatRupiah(topCategory.amount)})'
+                                              : CurrencyFormatter.formatRupiah(0),
                                           style: TextStyle(
                                             fontSize: 10.5.sp,
                                             fontWeight: FontWeight.w600,
@@ -332,7 +378,9 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          'Kategori Aktif',
+                                          l10n.isIndonesian
+                                              ? 'Kategori Aktif'
+                                              : 'Active Categories',
                                           style: TextStyle(
                                             fontSize: 10.5.sp,
                                             fontWeight: FontWeight.w600,
@@ -341,7 +389,9 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                         ),
                                         SizedBox(height: 4.h),
                                         Text(
-                                          '${categories.length} Kategori',
+                                          l10n.isIndonesian
+                                              ? '${categories.length} Kategori'
+                                              : '${categories.length} Categories',
                                           style: TextStyle(
                                             fontSize: 13.5.sp,
                                             fontWeight: FontWeight.w800,
@@ -350,7 +400,7 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                         ),
                                         SizedBox(height: 2.h),
                                         Text(
-                                          'Total: Rp ${CurrencyFormatter.format(totalExpense.toStringAsFixed(0))}',
+                                          'Total: ${CurrencyFormatter.formatRupiah(totalExpense)}',
                                           style: TextStyle(
                                             fontSize: 10.5.sp,
                                             fontWeight: FontWeight.w600,
@@ -387,11 +437,14 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                         context,
                         icon: Icons.donut_large_rounded,
                         iconColor: const Color(0xFFF97316),
-                        title: 'Cara Membaca Diagram Donat',
-                        description:
-                            '• Pembagian Warna: Setiap potongan busur warna mewakili satu kategori pengeluaran tertentu.\n'
-                            '• Luas Potongan: Semakin lebar lengkungan busur, semakin besar persentase anggaran belanja yang diserap oleh kategori tersebut.\n'
-                            '• Angka di Tengah: Menunjukkan total nilai seluruh pengeluaran yang teragregasi pada periode aktif.',
+                        title: l10n.howToReadChart,
+                        description: l10n.isIndonesian
+                            ? '• Pembagian Warna: Setiap potongan busur warna mewakili satu kategori pengeluaran tertentu.\n'
+                              '• Luas Potongan: Semakin lebar lengkungan busur, semakin besar persentase anggaran belanja yang diserap oleh kategori tersebut.\n'
+                              '• Angka di Tengah: Menunjukkan total nilai seluruh pengeluaran yang teragregasi pada periode aktif.'
+                            : '• Color Slices: Each distinct arc color represents a specific expense category.\n'
+                              '• Slice Size: Wider arc slices indicate a higher percentage share of your total budget.\n'
+                              '• Center Value: Displays the aggregated total sum of expenses for the active period.',
                         bgColor: cardBgColor,
                         borderColor: borderColor,
                       ),
@@ -402,10 +455,14 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                         context,
                         icon: Icons.lightbulb_outline_rounded,
                         iconColor: const Color(0xFFF59E0B),
-                        title: 'Tips Budgeting & Deteksi Pos Bocor',
-                        description:
-                            '• Waspadai jika 1 kategori menghabiskan lebih dari 40-50% total anggaran belanja bulanan Anda.\n'
-                            '• Tekan pos sekunder dengan frekuensi transaksi tinggi untuk menghentikan efek "bocor halus" pada keuangan harian.',
+                        title: l10n.isIndonesian
+                            ? 'Tips Budgeting & Deteksi Pos Bocor'
+                            : 'Budgeting & Leak Detection Tips',
+                        description: l10n.isIndonesian
+                            ? '• Waspadai jika 1 kategori menghabiskan lebih dari 40-50% total anggaran belanja bulanan Anda.\n'
+                              '• Tekan pos sekunder dengan frekuensi transaksi tinggi untuk menghentikan efek "bocor halus" pada keuangan harian.'
+                            : '• Be cautious if a single category accounts for more than 40-50% of your total monthly budget.\n'
+                              '• Trim high-frequency secondary purchases to prevent gradual unnoticed cash drain.',
                         bgColor: const Color(0xFFF59E0B).withValues(alpha: 0.08),
                         borderColor:
                             const Color(0xFFF59E0B).withValues(alpha: 0.25),
@@ -441,7 +498,7 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'Lihat Rincian',
+                                  l10n.viewDetails,
                                   style: TextStyle(
                                     fontSize: 13.5.sp,
                                     fontWeight: FontWeight.w700,
@@ -465,7 +522,7 @@ class CategoryBreakdownInfoModal extends StatelessWidget {
                                   ),
                                 ),
                                 child: Text(
-                                  'Mengerti',
+                                  l10n.understood,
                                   style: TextStyle(
                                     fontSize: 13.5.sp,
                                     fontWeight: FontWeight.w700,

@@ -2,6 +2,7 @@ import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/custom_color_picker_dialog.dart';
 import '../../../../core/presentation/components/saku_card.dart';
@@ -87,8 +88,6 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     super.dispose();
   }
 
-
-
   void _save() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) return;
@@ -118,6 +117,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
 
   void _showDeleteDialog() {
     final categoryName = widget.category?.name ?? '';
+    final l10n = context.l10n;
 
     showDialog(
       context: context,
@@ -127,7 +127,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
           borderRadius: BorderRadius.circular(16.r),
         ),
         title: Text(
-          'Hapus Kategori',
+          l10n.deleteCategory,
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.w700,
@@ -146,21 +146,29 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   height: 1.5,
                 ),
                 children: [
-                  const TextSpan(text: 'Semua item yang berkategori '),
+                  TextSpan(
+                    text: l10n.isIndonesian
+                        ? 'Semua item yang berkategori '
+                        : 'All items categorized as ',
+                  ),
                   TextSpan(
                     text: '"$categoryName"',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF111111),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
-                  const TextSpan(text: ' akan menjadi '),
-                  const TextSpan(
+                  TextSpan(
+                    text: l10n.isIndonesian
+                        ? ' akan menjadi '
+                        : ' will become ',
+                  ),
+                  TextSpan(
                     text: 'Uncategorized',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontStyle: FontStyle.italic,
-                      color: Color(0xFF111111),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const TextSpan(text: '.'),
@@ -169,10 +177,12 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Apakah Anda yakin ingin menghapus kategori ini?',
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: const Color(0xFF6B7280),
+              l10n.isIndonesian
+                  ? 'Apakah Anda yakin ingin menghapus kategori ini?'
+                  : 'Are you sure you want to delete this category?',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF6B7280),
                 height: 1.5,
               ),
             ),
@@ -183,7 +193,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(
-              'Batal',
+              l10n.cancel,
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -208,7 +218,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
               elevation: 0,
             ),
             child: Text(
-              'Hapus',
+              l10n.delete,
               style: TextStyle(
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w600,
@@ -222,6 +232,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
   }
 
   void _showMoveDialog() async {
+    final l10n = context.l10n;
     // Fetch categories of the same type, excluding current
     final allCategories = await _db.categoryDao.getCategoriesByType(
       widget.type,
@@ -233,8 +244,8 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
     if (otherCategories.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tidak ada kategori lain untuk dipindahkan.'),
+          SnackBar(
+            content: Text(l10n.noOtherCategoriesToMove),
           ),
         );
       }
@@ -254,7 +265,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             borderRadius: BorderRadius.circular(16.r),
           ),
           title: Text(
-            'Pindahkan Kategori',
+            l10n.moveCategory,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -266,7 +277,9 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Kategori ini akan dihapus, tetapi semua item dengan kategori ini akan dipindahkan ke kategori lain.',
+                l10n.isIndonesian
+                    ? 'Kategori ini akan dihapus, tetapi semua item dengan kategori ini akan dipindahkan ke kategori lain.'
+                    : 'This category will be deleted, but all items in this category will be moved to another category.',
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: const Color(0xFF6B7280),
@@ -275,11 +288,11 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Pindahkan ke:',
+                l10n.moveToLabel,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: const Color(0xFF111111),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               SizedBox(height: 8.h),
@@ -289,7 +302,9 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFE5E7EB)),
                   borderRadius: BorderRadius.circular(10.r),
-                  color: const Color(0xFFF9FAFB),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Theme.of(context).colorScheme.surfaceContainerLow
+                      : const Color(0xFFF9FAFB),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<Category>(
@@ -302,7 +317,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                     ),
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: const Color(0xFF111111),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     items: otherCategories
                         .map(
@@ -357,7 +372,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: Text(
-                'Batal',
+                l10n.cancel,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -384,7 +399,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                 elevation: 0,
               ),
               child: Text(
-                'Pindahkan',
+                l10n.moveButton,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -400,6 +415,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isEditing = widget.category != null;
 
     return Scaffold(
@@ -418,7 +434,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          isEditing ? 'Edit Kategori' : 'Tambah Kategori',
+          isEditing ? l10n.editCategoryTitle : l10n.addCategoryTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16.sp,
@@ -475,7 +491,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                       ),
                       SizedBox(width: 12.w),
                       Text(
-                        'Riwayat Transaksi',
+                        l10n.transactionHistory,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -496,7 +512,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                       ),
                       SizedBox(width: 12.w),
                       Text(
-                        'Pindahkan Kategori',
+                        l10n.moveCategory,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -517,7 +533,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                       ),
                       SizedBox(width: 12.w),
                       Text(
-                        'Hapus Kategori',
+                        l10n.deleteCategory,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -539,7 +555,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
           children: [
             // Name Input
             Text(
-              'Nama Kategori',
+              l10n.categoryNameLabel,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -558,7 +574,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
                 decoration: InputDecoration(
-                  hintText: 'Contoh: Makanan, Transportasi',
+                  hintText: l10n.categoryNameHint,
                   hintStyle: TextStyle(
                     fontSize: 13.sp,
                     color: Theme.of(context)
@@ -582,7 +598,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Ikon',
+                  l10n.iconLabel,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -611,7 +627,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                     color: Color(_selectedColor),
                   ),
                   label: Text(
-                    'Katalog Lengkap (4.000+)',
+                    l10n.fullCatalogLabel,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -683,7 +699,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
 
             // Color Selector Header
             Text(
-              'Warna',
+              l10n.colorLabel,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -821,7 +837,7 @@ class _AddEditCategoryPageState extends State<AddEditCategoryPage> {
                   elevation: 0,
                 ),
                 child: Text(
-                  'Simpan',
+                  l10n.saveButton,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 15.sp,

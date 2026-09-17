@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:drift/drift.dart' show Value;
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/custom_color_picker_dialog.dart';
 import '../../../../core/presentation/components/saku_card.dart';
@@ -91,10 +92,11 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nama wallet tidak boleh kosong')),
+        SnackBar(content: Text(l10n.walletNameCannotBeEmpty)),
       );
       return;
     }
@@ -140,6 +142,8 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -156,7 +160,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          _isEdit ? 'Edit Wallet' : 'Tambah Wallet',
+          _isEdit ? l10n.editWalletTitle : l10n.addWalletTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 16.sp,
@@ -198,7 +202,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                       ),
                       SizedBox(width: 10.w),
                       Text(
-                        'Hapus Wallet',
+                        l10n.isIndonesian ? 'Hapus Wallet' : 'Delete Wallet',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
@@ -219,7 +223,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                       ),
                       SizedBox(width: 10.w),
                       Text(
-                        'Pindahkan Wallet',
+                        l10n.isIndonesian ? 'Pindahkan Wallet' : 'Move Wallet',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
@@ -244,7 +248,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             SizedBox(height: 12.h),
 
             // Name
-            _buildSectionLabel('Nama Wallet'),
+            _buildSectionLabel(l10n.walletNameLabel),
             SizedBox(height: 6.h),
             _buildTextField(
               controller: _nameController,
@@ -255,7 +259,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
 
             // Initial Balance (Only for new wallets)
             if (!_isEdit) ...[
-              _buildSectionLabel('Saldo Awal'),
+              _buildSectionLabel(l10n.initialBalanceLabel),
               SizedBox(height: 6.h),
               _buildTextField(
                 controller: _initialBalanceController,
@@ -285,17 +289,17 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             SizedBox(height: 12.h),
 
             // Color Selection
-            _buildSectionLabel('Warna'),
+            _buildSectionLabel(l10n.colorLabel),
             SizedBox(height: 6.h),
             _buildColorSelector(),
             SizedBox(height: 12.h),
 
             // Preferences Section
-            _buildSectionLabel('Preferensi'),
+            _buildSectionLabel(l10n.preferencesLabel),
             SizedBox(height: 6.h),
 
             _buildSwitchTile(
-              title: 'Sembunyikan Saldo',
+              title: l10n.hideBalanceLabel,
               value: _isHidden,
               onChanged: (val) => setState(() => _isHidden = val),
             ),
@@ -316,8 +320,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Widget _buildPreviewCard() {
+    final l10n = context.l10n;
     final name = _nameController.text.trim().isEmpty
-        ? 'Nama Wallet'
+        ? l10n.walletNameLabel
         : _nameController.text.trim();
 
     return SakuCard(
@@ -426,13 +431,14 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Widget _buildIconSelector() {
+    final l10n = context.l10n;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildSectionLabel('Ikon'),
+            _buildSectionLabel(l10n.iconLabel),
             TextButton.icon(
               onPressed: () async {
                 final selected = await CategoryIconPickerModal.show(
@@ -455,7 +461,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                 color: Color(_selectedColor),
               ),
               label: Text(
-                'Katalog Lengkap (4.000+)',
+                l10n.fullCatalogLabel,
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w600,
@@ -678,6 +684,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Widget _buildAccountNumberSection() {
+    final l10n = context.l10n;
     return SakuCard(
       borderRadius: 14,
       margin: EdgeInsets.zero,
@@ -686,7 +693,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nomor Rekening / ID (Opsional)',
+            l10n.accountNumberLabel,
             style: TextStyle(
               fontSize: 12.sp,
               fontWeight: FontWeight.w600,
@@ -735,7 +742,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Sensor & Kunci Nomor',
+                      l10n.maskAndLockNumber,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -744,7 +751,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      'Jika aktif, nomor akan disensor dan membutuhkan PIN/FaceID untuk menyalin.',
+                      l10n.maskAndLockNumberDesc,
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: Theme.of(
@@ -782,6 +789,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   Widget _buildSaveButton() {
+    final l10n = context.l10n;
     return SizedBox(
       width: double.infinity,
       height: 46.h,
@@ -796,7 +804,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
           ),
         ),
         child: Text(
-          _isEdit ? 'Simpan Perubahan' : 'Tambah Wallet',
+          _isEdit ? l10n.saveChangesButton : l10n.addWalletTitle,
           style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
         ),
       ),
@@ -807,6 +815,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   void _showDeleteDialog() async {
     final db = locator<AppDatabase>();
     final walletName = widget.wallet?.name ?? '';
+    final l10n = context.l10n;
 
     if (!mounted) return;
 
@@ -840,7 +849,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      'Hapus Wallet',
+                      l10n.isIndonesian ? 'Hapus Wallet' : 'Delete Wallet',
                       style: TextStyle(
                         fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
@@ -863,7 +872,11 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                           height: 1.5,
                         ),
                         children: [
-                          const TextSpan(text: 'Anda akan menghapus wallet '),
+                          TextSpan(
+                            text: l10n.isIndonesian
+                                ? 'Anda akan menghapus wallet '
+                                : 'You are about to delete wallet ',
+                          ),
                           TextSpan(
                             text: '"$walletName"',
                             style: const TextStyle(
@@ -871,8 +884,10 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                               color: Color(0xFF111111),
                             ),
                           ),
-                          const TextSpan(
-                            text: '. Tindakan ini tidak dapat dibatalkan.',
+                          TextSpan(
+                            text: l10n.isIndonesian
+                                ? '. Tindakan ini tidak dapat dibatalkan.'
+                                : '. This action cannot be undone.',
                           ),
                         ],
                       ),
@@ -890,7 +905,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Data berikut akan DIHAPUS PERMANEN:',
+                            l10n.isIndonesian
+                                ? 'Data berikut akan DIHAPUS PERMANEN:'
+                                : 'The following data will be PERMANENTLY DELETED:',
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,
@@ -900,29 +917,37 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                           SizedBox(height: 8.h),
                           _buildDeleteInfoRow(
                             Icons.receipt_long_outlined,
-                            'Semua transaksi di wallet ini',
+                            l10n.isIndonesian
+                                ? 'Semua transaksi di wallet ini'
+                                : 'All transactions in this wallet',
                           ),
                           SizedBox(height: 4.h),
                           _buildDeleteInfoRow(
                             Icons.money_off_outlined,
-                            'Semua hutang/piutang terkait',
+                            l10n.isIndonesian
+                                ? 'Semua hutang/piutang terkait'
+                                : 'All related debts/loans',
                           ),
                           SizedBox(height: 4.h),
                           _buildDeleteInfoRow(
                             Icons.payments_outlined,
-                            'Semua pembayaran hutang terkait',
+                            l10n.isIndonesian
+                                ? 'Semua pembayaran hutang terkait'
+                                : 'All related debt payments',
                           ),
                           SizedBox(height: 4.h),
                           _buildDeleteInfoRow(
                             Icons.account_balance_wallet_outlined,
-                            'Saldo wallet',
+                            l10n.isIndonesian ? 'Saldo wallet' : 'Wallet balance',
                           ),
                         ],
                       ),
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      'Ketik "delete wallet" untuk konfirmasi:',
+                      l10n.isIndonesian
+                          ? 'Ketik "delete wallet" untuk konfirmasi:'
+                          : 'Type "delete wallet" to confirm:',
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -988,7 +1013,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
                   child: Text(
-                    'Batal',
+                    l10n.cancel,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -1018,7 +1043,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                     elevation: 0,
                   ),
                   child: Text(
-                    'Hapus Semua',
+                    l10n.isIndonesian ? 'Hapus Semua' : 'Delete All',
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
@@ -1054,6 +1079,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
   }
 
   void _showMoveDialog() async {
+    final l10n = context.l10n;
     final db = locator<AppDatabase>();
     final allWallets = await db.walletDao.getAllWallets();
     final otherWallets = allWallets
@@ -1063,8 +1089,8 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
     if (otherWallets.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tidak ada wallet lain untuk dipindahkan.'),
+          SnackBar(
+            content: Text(l10n.noOtherWalletsToMove),
           ),
         );
       }
@@ -1084,7 +1110,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             borderRadius: BorderRadius.circular(16.r),
           ),
           title: Text(
-            'Pindahkan Wallet',
+            l10n.isIndonesian ? 'Pindahkan Wallet' : 'Move Wallet',
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w700,
@@ -1096,7 +1122,9 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Wallet ini akan dihapus, tetapi semua transaksi dan saldo akan dipindahkan ke wallet lain.',
+                l10n.isIndonesian
+                    ? 'Wallet ini akan dihapus, tetapi semua transaksi dan saldo akan dipindahkan ke wallet lain.'
+                    : 'This wallet will be deleted, but all transactions and balance will be moved to another wallet.',
                 style: TextStyle(
                   fontSize: 14.sp,
                   color: const Color(0xFF6B7280),
@@ -1105,7 +1133,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Pindahkan ke:',
+                l10n.moveToLabel,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -1186,7 +1214,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
             TextButton(
               onPressed: () => Navigator.pop(ctx),
               child: Text(
-                'Batal',
+                l10n.cancel,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -1215,7 +1243,7 @@ class _AddEditWalletPageState extends State<AddEditWalletPage> {
                 elevation: 0,
               ),
               child: Text(
-                'Pindahkan',
+                l10n.moveButton,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,

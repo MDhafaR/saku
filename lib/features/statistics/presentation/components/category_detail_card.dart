@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -28,6 +29,7 @@ class CategoryDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = Color(item.color);
+    final l10n = context.l10n;
 
     return GestureDetector(
       onTap: onTap,
@@ -83,7 +85,7 @@ class CategoryDetailCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${item.transactionCount} Transaksi',
+                            l10n.transactionsCount(item.transactionCount),
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -163,6 +165,8 @@ class CategoryDetailCard extends StatelessWidget {
     BuildContext context,
     Color color,
   ) {
+    final l10n = context.l10n;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -196,7 +200,7 @@ class CategoryDetailCard extends StatelessWidget {
           Divider(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3), height: 1.h),
           SizedBox(height: 8.h),
           Text(
-            'Top 3 Transaksi Terbesar',
+            l10n.top3LargestTransactions,
             style: TextStyle(
               fontSize: 10.sp,
               color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -236,7 +240,7 @@ class CategoryDetailCard extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text(
-              'Lihat Semua',
+              l10n.viewAll,
               style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.w600,

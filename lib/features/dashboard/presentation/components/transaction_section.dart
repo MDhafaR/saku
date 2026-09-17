@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import 'transaction_item.dart';
@@ -129,12 +130,17 @@ class TransactionWithDetails {
 
 /// Groups transactions and transfers by date (Today, Yesterday, or formatted date)
 Map<String, List<TransactionWithDetails>> groupTransactionsByDate(
-  List<TransactionWithDetails> transactions,
-) {
+  List<TransactionWithDetails> transactions, [
+  AppLocalizations? l10n,
+]) {
   final Map<String, List<TransactionWithDetails>> grouped = {};
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final yesterday = today.subtract(const Duration(days: 1));
+
+  final todayLabel = l10n?.today ?? 'Hari Ini';
+  final yesterdayLabel = l10n?.yesterday ?? 'Kemarin';
+  final dateLocale = l10n?.dateLocaleCode ?? 'id';
 
   // Sort items newest first by date
   final sorted = List<TransactionWithDetails>.from(transactions)
@@ -149,13 +155,13 @@ Map<String, List<TransactionWithDetails>> groupTransactionsByDate(
 
     String key;
     if (itemDay == today) {
-      key = 'Hari Ini';
+      key = todayLabel;
     } else if (itemDay == yesterday) {
-      key = 'Kemarin';
+      key = yesterdayLabel;
     } else {
       key = DateFormat(
         'dd MMMM yyyy',
-        'id',
+        dateLocale,
       ).format(item.date);
     }
 

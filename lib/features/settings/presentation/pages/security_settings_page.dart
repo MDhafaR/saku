@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/security_cubit.dart';
 import '../cubit/security_state.dart';
 import 'package:saku/features/settings/presentation/pages/pin_page.dart';
@@ -18,6 +19,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
   final LocalAuthentication auth = LocalAuthentication();
 
   Future<void> _checkBiometrics(SecurityCubit cubit, bool value) async {
+    final l10n = context.l10n;
     if (value) {
       try {
         final bool canAuthenticateWithBiometrics =
@@ -27,7 +29,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
         if (canAuthenticate) {
           final bool didAuthenticate = await auth.authenticate(
-            localizedReason: 'Verifikasi biometrik untuk mengaktifkan',
+            localizedReason: l10n.biometricAuthReason,
             biometricOnly: true,
           );
 
@@ -38,9 +40,9 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
           // Handle not supported or no biometrics enrolled
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Text(
-                'Perangkat tidak mendukung biometrik atau tidak ada sidik jari yang terdaftar.',
+                l10n.biometricNotSupported,
               ),
             ),
           );
@@ -59,6 +61,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocProvider.value(
       value: locator<SecurityCubit>(),
       child: BlocBuilder<SecurityCubit, SecurityState>(
@@ -69,7 +73,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
               title: Text(
-                'Pengaturan Keamanan',
+                l10n.securitySettingsTitle,
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurface,
                   fontSize: 18.sp,
@@ -93,7 +97,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader('AKSES APLIKASI'),
+                  _buildSectionHeader(l10n.appAccessHeader),
                   SizedBox(height: 12.h),
                   Container(
                     decoration: BoxDecoration(
@@ -112,7 +116,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                       children: [
                         _buildToggleItem(
                           icon: Icons.lock_outline,
-                          title: 'Kunci Aplikasi',
+                          title: l10n.appLockTitle,
                           value: state.isAppLockEnabled,
                           onChanged: (val) async {
                             if (val) {
@@ -152,7 +156,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         _buildDivider(),
                         _buildToggleItem(
                           icon: Icons.fingerprint,
-                          title: 'ID Biometrik',
+                          title: l10n.biometricIdTitle,
                           value: state.isBiometricEnabled,
                           onChanged: (val) => _checkBiometrics(cubit, val),
                         ),
@@ -161,8 +165,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         _buildNavItem(
                           icon: Icons.dialpad,
                           title: state.hashedPin == null
-                              ? 'Set PIN'
-                              : 'Ganti PIN',
+                              ? l10n.setPin
+                              : l10n.changePin,
                           onTap: () async {
                             if (state.hashedPin == null) {
                               Navigator.push(
@@ -197,8 +201,8 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                         _buildDivider(),
                         _buildNavItem(
                           icon: Icons.timer_outlined,
-                          title: 'Waktu Kunci Otomatis',
-                          valueText: 'Segera',
+                          title: l10n.autoLockTime,
+                          valueText: l10n.immediately,
                           isDisabled: true,
                           onTap: () {},
                         ),
@@ -207,7 +211,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                   ),
 
                   SizedBox(height: 24.h),
-                  _buildSectionHeader('PRIVASI VISUAL'),
+                  _buildSectionHeader(l10n.visualPrivacyHeader),
                   SizedBox(height: 12.h),
                   Container(
                     decoration: BoxDecoration(
@@ -226,17 +230,16 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                       children: [
                         _buildToggleItem(
                           icon: Icons.security_update_good,
-                          title: 'Layar Aman',
-                          subtitle:
-                              'Cegah screenshot & sembunyikan preview aplikasi.',
+                          title: l10n.secureScreenTitle,
+                          subtitle: l10n.secureScreenSub,
                           value: state.isSecureScreenEnabled,
                           onChanged: (val) => cubit.toggleSecureScreen(val),
                         ),
                         _buildDivider(),
                         _buildToggleItem(
                           icon: Icons.account_balance_wallet_outlined,
-                          title: 'Sensor Saldo',
-                          subtitle: 'Samarkan saldo di dashboard utama.',
+                          title: l10n.balanceSensorTitle,
+                          subtitle: l10n.balanceSensorSub,
                           value: state.isBalanceSensorEnabled,
                           onChanged: (val) => cubit.toggleBalanceSensor(val),
                         ),
@@ -247,7 +250,7 @@ class _SecuritySettingsPageState extends State<SecuritySettingsPage> {
                   SizedBox(height: 32.h),
                   Center(
                     child: Text(
-                      'Versi Keamanan 2.4.0 • Terlindungi Enkripsi AES-256',
+                      l10n.securityVersionFooter,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
                         fontSize: 12.sp,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/statistics_state.dart';
 
 class DonutChartWidget extends StatefulWidget {
@@ -17,13 +18,14 @@ class _DonutChartWidgetState extends State<DonutChartWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (widget.categories.isEmpty) {
       return SizedBox(
-        height: 160,
+        height: 160.h,
         child: Center(
           child: Text(
-            'No data available',
-            style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+            l10n.noDataAvailable,
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
           ),
         ),
       );

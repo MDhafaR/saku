@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../presentation/cubit/debt_cubit.dart';
 import '../presentation/cubit/debt_state.dart';
 import '../widgets/summary_card.dart';
@@ -11,6 +12,7 @@ class DebtPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return BlocBuilder<DebtCubit, DebtState>(
       builder: (context, state) {
         if (state is DebtLoading) {
@@ -46,7 +48,7 @@ class DebtPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SummaryCard(
-                        title: 'Total Utang',
+                        title: l10n.isIndonesian ? 'Total Utang' : 'Total Debts',
                         amount: 'Rp${_formatAmount(totalDebt)}',
                         icon: Icons.arrow_downward_rounded,
                         iconColor: const Color(0xFFEF4444),
@@ -56,7 +58,7 @@ class DebtPage extends StatelessWidget {
                     SizedBox(width: 10.w),
                     Expanded(
                       child: SummaryCard(
-                        title: 'Sudah Dibayar',
+                        title: l10n.isIndonesian ? 'Sudah Dibayar' : 'Already Paid',
                         amount: 'Rp${_formatAmount(totalPaid)}',
                         icon: Icons.check_circle_outline_rounded,
                         iconColor: const Color(0xFF10B981),
@@ -79,7 +81,7 @@ class DebtPage extends StatelessWidget {
                             if (unpaidDebts.isNotEmpty) ...[
                               _buildSectionHeader(
                                 context,
-                                'Belum Lunas',
+                                l10n.isIndonesian ? 'Belum Lunas' : 'Unpaid',
                                 unpaidDebts.length,
                                 const Color(0xFFF3F4F6),
                                 const Color(0xFF6B7280),
@@ -99,7 +101,7 @@ class DebtPage extends StatelessWidget {
                             if (paidDebts.isNotEmpty) ...[
                               _buildSectionHeader(
                                 context,
-                                'Sudah Lunas',
+                                l10n.isIndonesian ? 'Sudah Lunas' : 'Paid Off',
                                 paidDebts.length,
                                 const Color(0xFFDCFCE7),
                                 const Color(0xFF10B981),
@@ -166,6 +168,7 @@ class DebtPage extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(bottom: 75.h),
@@ -187,7 +190,7 @@ class DebtPage extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Belum ada utang',
+              l10n.isIndonesian ? 'Belum ada utang' : 'No debts yet',
               style: TextStyle(
                 color: cs.onSurface.withValues(alpha: 0.6),
                 fontSize: 14.sp,
@@ -196,7 +199,9 @@ class DebtPage extends StatelessWidget {
             ),
             SizedBox(height: 4.h),
             Text(
-              'Ketuk tombol + untuk mencatat utang baru',
+              l10n.isIndonesian
+                  ? 'Ketuk tombol + untuk mencatat utang baru'
+                  : 'Tap + button to record a new debt',
               style: TextStyle(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                 fontSize: 11.sp,

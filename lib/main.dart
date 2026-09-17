@@ -7,6 +7,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_service.dart';
+import 'core/localization/language_service.dart';
+import 'core/localization/app_localizations.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/sharing_intent_service.dart';
 import 'core/models/voice_intent_model.dart';
@@ -19,6 +21,7 @@ import 'package:home_widget/home_widget.dart';
 import 'features/settings/presentation/cubit/security_cubit.dart';
 import 'features/settings/presentation/cubit/security_state.dart';
 import 'features/settings/presentation/cubit/theme_cubit.dart';
+import 'features/settings/presentation/cubit/language_cubit.dart';
 import 'features/settings/presentation/pages/pin_page.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -27,7 +30,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupLocator();
   await ThemeService.init();
+  await LanguageService.init();
   await initializeDateFormatting('id_ID', null);
+  await initializeDateFormatting('en_US', null);
   await NotificationService().init();
   await SakuHomeWidgetService.updateAllWidgets();
   runApp(
@@ -35,6 +40,7 @@ void main() async {
       providers: [
         BlocProvider(create: (context) => locator<SecurityCubit>()),
         BlocProvider(create: (context) => locator<ThemeCubit>()),
+        BlocProvider(create: (context) => locator<LanguageCubit>()),
       ],
       child: const AppLifecycleObserver(child: SakuApp()),
     ),
@@ -135,33 +141,36 @@ class SakuApp extends StatelessWidget {
       designSize: const Size(360, 690),
       minTextAdapt: true,
       builder: (context, child) => BlocBuilder<ThemeCubit, ThemeMode>(
-        builder: (context, themeMode) => MaterialApp(
-          navigatorKey: rootNavigatorKey,
-          title: 'Saku',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
-          locale: const Locale('id'),
-          supportedLocales: const [Locale('id'), Locale('en')],
-          localizationsDelegates: const [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          builder: (context, child) {
-            return BlocBuilder<SecurityCubit, SecurityState>(
-              builder: (context, state) {
-                return Stack(
-                  children: [
-                    child!,
-                    if (state.isLocked) const PinPage(mode: PinMode.verify),
-                  ],
-                );
-              },
-            );
-          },
-          home: const OnboardingWrapper(),
+        builder: (context, themeMode) => BlocBuilder<LanguageCubit, Locale>(
+          builder: (context, currentLocale) => MaterialApp(
+            navigatorKey: rootNavigatorKey,
+            title: 'Saku',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            locale: currentLocale,
+            supportedLocales: const [Locale('id'), Locale('en')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            builder: (context, child) {
+              return BlocBuilder<SecurityCubit, SecurityState>(
+                builder: (context, state) {
+                  return Stack(
+                    children: [
+                      child!,
+                      if (state.isLocked) const PinPage(mode: PinMode.verify),
+                    ],
+                  );
+                },
+              );
+            },
+            home: const OnboardingWrapper(),
+          ),
         ),
       ),
     );

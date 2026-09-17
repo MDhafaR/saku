@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../cubit/statistics_state.dart';
@@ -12,6 +13,7 @@ class ExpenseComparisonChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
     return SakuCard(
       margin: EdgeInsets.zero,
@@ -20,7 +22,7 @@ class ExpenseComparisonChart extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Komparasi Pengeluaran',
+            l10n.expenseComparison,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
@@ -34,7 +36,7 @@ class ExpenseComparisonChart extends StatelessWidget {
               height: 80.h,
               child: Center(
                 child: Text(
-                  'Tidak ada data komparasi',
+                  l10n.noComparisonData,
                   style: TextStyle(
                     fontSize: 12.sp,
                     color: cs.onSurfaceVariant,

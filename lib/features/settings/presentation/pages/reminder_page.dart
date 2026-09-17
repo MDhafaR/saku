@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/services/notification_service.dart';
 
 class ReminderPage extends StatefulWidget {
@@ -45,6 +46,7 @@ class _ReminderPageState extends State<ReminderPage> {
 
   void _saveSettings() async {
     final notifService = NotificationService();
+    final l10n = context.l10n;
 
     // Save settings to SharedPreferences first
     await notifService.saveReminderSettings(
@@ -59,7 +61,7 @@ class _ReminderPageState extends State<ReminderPage> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pengaturan pengingat berhasil disimpan')),
+        SnackBar(content: Text(l10n.reminderSettingsSaved)),
       );
       Navigator.pop(context);
     }
@@ -98,12 +100,14 @@ class _ReminderPageState extends State<ReminderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     if (_isLoading) {
       return Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
-            'Pengingat Harian',
+            l10n.dailyReminderTitle,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface,
               fontSize: 18.sp,
@@ -131,7 +135,7 @@ class _ReminderPageState extends State<ReminderPage> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Pengingat Harian',
+          l10n.dailyReminderTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
@@ -176,7 +180,7 @@ class _ReminderPageState extends State<ReminderPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Aktifkan Pengingat',
+                          l10n.enableReminder,
                           style: TextStyle(
                             fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
@@ -185,7 +189,7 @@ class _ReminderPageState extends State<ReminderPage> {
                         ),
                         SizedBox(height: 4.h),
                         Text(
-                          'Terima notifikasi untuk membangun kebiasaan',
+                          l10n.enableReminderSub,
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
@@ -225,7 +229,7 @@ class _ReminderPageState extends State<ReminderPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'JADWAL FREKUENSI',
+                      l10n.frequencyScheduleHeader,
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -293,7 +297,7 @@ class _ReminderPageState extends State<ReminderPage> {
                             ),
                             SizedBox(width: 12.w),
                             Text(
-                              'Tambah Waktu Pengingat',
+                              l10n.addReminderTime,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
@@ -328,7 +332,7 @@ class _ReminderPageState extends State<ReminderPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'KONTEN PESAN',
+                      l10n.messageContentHeader,
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
@@ -338,10 +342,10 @@ class _ReminderPageState extends State<ReminderPage> {
                     ),
                     SizedBox(height: 16.h),
                     // Option 1
-                    _buildRadioOption(0, 'Kutipan Acak (Default)'),
+                    _buildRadioOption(0, l10n.randomQuoteOption),
                     SizedBox(height: 12.h),
                     // Option 2
-                    _buildRadioOption(1, 'Pesan Kustom'),
+                    _buildRadioOption(1, l10n.customMessageOption),
 
                     if (_selectedMessageType == 1) ...[
                       SizedBox(height: 16.h),
@@ -358,9 +362,9 @@ class _ReminderPageState extends State<ReminderPage> {
                             TextField(
                               controller: _customMessageController,
                               maxLines: 3,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: 'Tulis pesan penyemangatmu...',
+                                hintText: l10n.customMessageHint,
                               ),
                               style: TextStyle(
                                 fontSize: 14.sp,
@@ -380,7 +384,7 @@ class _ReminderPageState extends State<ReminderPage> {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Pesan ini akan dikirim sesuai jadwal di atas.',
+                        l10n.customMessageNote,
                         style: TextStyle(
                           fontSize: 12.sp,
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.35),
@@ -404,7 +408,7 @@ class _ReminderPageState extends State<ReminderPage> {
                     ),
                   ),
                   child: Text(
-                    'Simpan Pengaturan',
+                    l10n.saveSettingsButton,
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,

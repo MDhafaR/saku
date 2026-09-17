@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:skeletonizer/skeletonizer.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -864,7 +865,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 16.h),
               Text(
-                'Belum ada transaksi',
+                context.l10n.noTransactionsYet,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -873,7 +874,7 @@ class _DashboardPageState extends State<DashboardPage> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Tap tombol + untuk menambah transaksi',
+                context.l10n.noTransactionsSubtitle,
                 style: TextStyle(fontSize: 13.sp, color: Colors.grey[400]),
               ),
             ],
@@ -885,6 +886,7 @@ class _DashboardPageState extends State<DashboardPage> {
     // Group by date
     final groupedTransactions = groupTransactionsByDate(
       items,
+      context.l10n,
     );
 
     return SingleChildScrollView(

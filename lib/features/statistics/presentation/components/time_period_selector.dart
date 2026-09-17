@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/localization/app_localizations.dart';
 
 class TimePeriodSelector extends StatefulWidget {
   final String selectedPeriod;
@@ -19,6 +20,25 @@ class TimePeriodSelector extends StatefulWidget {
 
 class _TimePeriodSelectorState extends State<TimePeriodSelector> {
   final List<String> periods = ['All', 'Daily', 'Monthly', 'Yearly', 'Custom'];
+
+  String _getPeriodLabel(String period, AppLocalizations l10n) {
+    switch (period) {
+      case 'All':
+        return l10n.periodAll;
+      case 'Daily':
+        return l10n.periodDaily;
+      case 'Weekly':
+        return l10n.periodWeekly;
+      case 'Monthly':
+        return l10n.periodMonthly;
+      case 'Yearly':
+        return l10n.periodYearly;
+      case 'Custom':
+        return l10n.periodCustom;
+      default:
+        return period;
+    }
+  }
 
   Future<void> _showDateRangePicker() async {
     final now = DateTime.now();
@@ -55,6 +75,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
   Widget build(BuildContext context) {
     final selectedIndex = periods.indexOf(widget.selectedPeriod);
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
     return Container(
       padding: EdgeInsets.all(3.w),
@@ -109,7 +130,7 @@ class _TimePeriodSelectorState extends State<TimePeriodSelector> {
                           horizontal: 3.w,
                         ),
                         child: Text(
-                          period,
+                          _getPeriodLabel(period, l10n),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: isSelected

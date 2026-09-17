@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../presentation/pages/debt_detail_page.dart';
@@ -18,6 +20,7 @@ class DebtItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final remainingAmount = debt.totalAmount - debt.paidAmount;
 
     return SakuCard(
@@ -39,7 +42,7 @@ class DebtItem extends StatelessWidget {
             width: 40.w,
             height: 40.w,
             decoration: BoxDecoration(
-              color: _getAvatarBackgroundColor(personName).withOpacity(0.15),
+              color: _getAvatarBackgroundColor(personName).withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
@@ -70,14 +73,14 @@ class DebtItem extends StatelessWidget {
                 SizedBox(height: 3.h),
                 Row(
                   children: [
-                    _buildStatusBadge(debt.status),
+                    _buildStatusBadge(context, debt.status),
                     SizedBox(width: 6.w),
                     Text(
-                      debt.status == 'paid' && debt.updatedAt != null
-                          ? _formatDate(debt.updatedAt)
+                      debt.status == 'paid'
+                          ? _formatDate(debt.updatedAt, l10n.dateLocaleCode)
                           : debt.dueDate != null
-                          ? _formatDate(debt.dueDate!)
-                          : 'Tanpa jatuh tempo',
+                          ? _formatDate(debt.dueDate!, l10n.dateLocaleCode)
+                          : (l10n.isIndonesian ? 'Tanpa jatuh tempo' : 'No due date'),
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 10.sp,
@@ -110,15 +113,15 @@ class DebtItem extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(String status) {
+  Widget _buildStatusBadge(BuildContext context, String status) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: _getStatusColor(status).withOpacity(0.15),
+        color: _getStatusColor(status).withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(16.r),
       ),
       child: Text(
-        _getStatusDisplayName(status),
+        _getStatusDisplayName(context, status),
         style: TextStyle(
           color: _getStatusColor(status),
           fontSize: 10.sp,
@@ -128,16 +131,17 @@ class DebtItem extends StatelessWidget {
     );
   }
 
-  String _getStatusDisplayName(String status) {
+  String _getStatusDisplayName(BuildContext context, String status) {
+    final l10n = context.l10n;
     switch (status) {
       case 'overdue':
-        return 'Overdue';
+        return l10n.isIndonesian ? 'Jatuh Tempo' : 'Overdue';
       case 'due_soon':
-        return 'Due Soon';
+        return l10n.isIndonesian ? 'Segera' : 'Due Soon';
       case 'paid':
-        return 'Paid';
+        return l10n.isIndonesian ? 'Lunas' : 'Paid';
       default:
-        return 'Pending';
+        return l10n.isIndonesian ? 'Belum Lunas' : 'Pending';
     }
   }
 
@@ -183,21 +187,7 @@ class DebtItem extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
-    ];
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  String _formatDate(DateTime date, String localeCode) {
+    return DateFormat('d MMM yyyy', localeCode).format(date);
   }
 }

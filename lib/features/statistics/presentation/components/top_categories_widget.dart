@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/statistics_state.dart';
 import '../../../../core/utils/currency_formatter.dart';
 
@@ -10,12 +11,13 @@ class TopCategoriesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (categories.isEmpty) {
       return Container(
         height: 100.h,
         alignment: Alignment.center,
         child: Text(
-          'No categories recorded',
+          l10n.noCategoriesRecorded,
           style: TextStyle(color: Colors.grey[400], fontSize: 12.sp),
         ),
       );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -124,26 +125,35 @@ class _DescriptionTransactionsInfoModalState
     String period,
     DateTime targetDate,
     AppDateTimeRange? customRange,
+    AppLocalizations l10n,
   ) {
     switch (period.toLowerCase()) {
       case 'yearly':
-        return 'tahun ${DateFormat('yyyy', 'id_ID').format(targetDate)}';
+        return l10n.isIndonesian
+            ? 'tahun ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}'
+            : 'year ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}';
       case 'daily':
-        return 'hari ini (${DateFormat('d MMMM yyyy', 'id_ID').format(targetDate)})';
+        return l10n.isIndonesian
+            ? 'hari ini (${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)})'
+            : 'today (${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)})';
       case 'monthly':
-        return 'bulan ${DateFormat('MMMM yyyy', 'id_ID').format(targetDate)}';
+        return l10n.isIndonesian
+            ? 'bulan ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}'
+            : 'month ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
       case 'custom':
         if (customRange != null) {
           final s =
-              DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.start);
+              DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
           final e =
-              DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.end);
-          return 'rentang waktu ($s - $e)';
+              DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+          return l10n.isIndonesian
+              ? 'rentang waktu ($s - $e)'
+              : 'custom range ($s - $e)';
         }
-        return 'rentang waktu terpilih';
+        return l10n.customRangeDateShort;
       case 'all':
       default:
-        return 'seluruh riwayat keuangan';
+        return l10n.allTimeHistory;
     }
   }
 
@@ -170,6 +180,7 @@ class _DescriptionTransactionsInfoModalState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -204,11 +215,11 @@ class _DescriptionTransactionsInfoModalState
     final sortedByDate = List<Transaction>.from(matchingTxs)
       ..sort((a, b) => a.transactionDate.compareTo(b.transactionDate));
     final earliestDate = sortedByDate.isNotEmpty
-        ? DateFormat('d MMM yyyy', 'id_ID')
+        ? DateFormat('d MMM yyyy', l10n.dateLocaleCode)
             .format(sortedByDate.first.transactionDate)
         : '';
     final latestDate = sortedByDate.isNotEmpty
-        ? DateFormat('d MMM yyyy', 'id_ID')
+        ? DateFormat('d MMM yyyy', l10n.dateLocaleCode)
             .format(sortedByDate.last.transactionDate)
         : '';
 
@@ -295,7 +306,9 @@ class _DescriptionTransactionsInfoModalState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Transaksi "$displayTitle"',
+                                l10n.isIndonesian
+                                    ? 'Transaksi "$displayTitle"'
+                                    : '"$displayTitle" Transactions',
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w700,
@@ -306,7 +319,7 @@ class _DescriptionTransactionsInfoModalState
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                '${widget.categoryName} • ${_getPeriodContextLabel(widget.period, widget.targetDate, widget.customRange)}',
+                                '${widget.categoryName} • ${_getPeriodContextLabel(widget.period, widget.targetDate, widget.customRange, l10n)}',
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: cs.onSurfaceVariant,
@@ -350,7 +363,7 @@ class _DescriptionTransactionsInfoModalState
                             ),
                             SizedBox(width: 6.w),
                             Text(
-                              'Kata Kunci Aktif:',
+                              l10n.activeKeywordsTagLabel,
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w700,
@@ -379,7 +392,7 @@ class _DescriptionTransactionsInfoModalState
                                 ),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  'Cari & Gabungkan',
+                                  l10n.mergeKeywordsButton,
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w700,
@@ -467,7 +480,7 @@ class _DescriptionTransactionsInfoModalState
                                 SizedBox(width: 6.w),
                                 Expanded(
                                   child: Text(
-                                    'Saran Penggabungan Data Kata Serupa:',
+                                    l10n.suggestedRelatedWords,
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w700,
@@ -479,7 +492,9 @@ class _DescriptionTransactionsInfoModalState
                             ),
                             SizedBox(height: 6.h),
                             Text(
-                              'Ditemukan transaksi lain di kategori ${widget.categoryName} yang memuat kata berikut. Ingin disatukan?',
+                              l10n.isIndonesian
+                                  ? 'Ditemukan transaksi lain di kategori ${widget.categoryName} yang memuat kata berikut. Ingin disatukan?'
+                                  : 'Found other transactions in category ${widget.categoryName} containing these words. Merge them?',
                               style: TextStyle(
                                 fontSize: 10.sp,
                                 color: cs.onSurfaceVariant,
@@ -497,7 +512,7 @@ class _DescriptionTransactionsInfoModalState
                                     color: const Color(0xFF2563EB),
                                   ),
                                   label: Text(
-                                    '${entry.key} (+${entry.value} data)',
+                                    '${entry.key} (+${entry.value} ${l10n.isIndonesian ? 'data' : 'items'})',
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w600,
@@ -529,7 +544,7 @@ class _DescriptionTransactionsInfoModalState
 
                     // Section 1: Ringkasan Biaya Transaksi
                     Text(
-                      'Ringkasan Biaya Terakumulasi',
+                      l10n.totalAccumulatedExpense,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
@@ -545,7 +560,7 @@ class _DescriptionTransactionsInfoModalState
                             cs: cs,
                             bgColor: cardBgColor,
                             borderColor: borderColor,
-                            title: 'Total Pengeluaran',
+                            title: l10n.totalExpense,
                             value: CurrencyFormatter.formatRupiah(totalAmount),
                             valueColor: const Color(0xFFEF4444),
                             icon: Icons.account_balance_wallet_rounded,
@@ -559,8 +574,8 @@ class _DescriptionTransactionsInfoModalState
                             cs: cs,
                             bgColor: cardBgColor,
                             borderColor: borderColor,
-                            title: 'Frekuensi',
-                            value: '$count Kali',
+                            title: l10n.transactionFrequency,
+                            value: '$count ${l10n.timesUnit}',
                             valueColor: cs.onSurface,
                             icon: Icons.repeat_rounded,
                             iconColor: const Color(0xFF3B82F6),
@@ -573,19 +588,20 @@ class _DescriptionTransactionsInfoModalState
                       cs: cs,
                       bgColor: cardBgColor,
                       borderColor: borderColor,
-                      title: 'Rata-Rata Nominal per Transaksi',
+                      title: l10n.averagePerTxLabel.replaceAll(':', ''),
                       value: CurrencyFormatter.formatRupiah(avgAmount),
                       valueColor: cs.onSurface,
                       icon: Icons.analytics_rounded,
                       iconColor: const Color(0xFF8B5CF6),
-                      subtitle:
-                          'Berdasarkan $count transaksi yang memuat kata kunci terpilih',
+                      subtitle: l10n.isIndonesian
+                          ? 'Berdasarkan $count transaksi yang memuat kata kunci terpilih'
+                          : 'Based on $count transactions matching selected keywords',
                     ),
                     SizedBox(height: 14.h),
 
                     // Section 2: Porsi & Detail Insight
                     Text(
-                      'Analisis & Informasi Detail',
+                      l10n.comparativeAnalysis,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
@@ -613,7 +629,9 @@ class _DescriptionTransactionsInfoModalState
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: Text(
-                                  'Porsi terhadap Kategori ${widget.categoryName}',
+                                  l10n.isIndonesian
+                                      ? 'Porsi terhadap Kategori ${widget.categoryName}'
+                                      : 'Share of Category ${widget.categoryName}',
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w700,
@@ -656,7 +674,9 @@ class _DescriptionTransactionsInfoModalState
                           ),
                           SizedBox(height: 12.h),
                           Text(
-                            'Transaksi dengan kata kunci ini menyumbang ${percentageOfCategory.toStringAsFixed(1)}% dari total pengeluaran kategori ${widget.categoryName} (${CurrencyFormatter.formatRupiah(widget.categoryTotalAmount)}).',
+                            l10n.isIndonesian
+                                ? 'Transaksi dengan kata kunci ini menyumbang ${percentageOfCategory.toStringAsFixed(1)}% dari total pengeluaran kategori ${widget.categoryName} (${CurrencyFormatter.formatRupiah(widget.categoryTotalAmount)}).'
+                                : 'Transactions with these keywords contribute ${percentageOfCategory.toStringAsFixed(1)}% of total expenses in category ${widget.categoryName} (${CurrencyFormatter.formatRupiah(widget.categoryTotalAmount)}).',
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: cs.onSurfaceVariant,
@@ -677,7 +697,9 @@ class _DescriptionTransactionsInfoModalState
                                 SizedBox(width: 6.w),
                                 Expanded(
                                   child: Text(
-                                    'Rentang: $earliestDate s/d $latestDate',
+                                    l10n.isIndonesian
+                                        ? 'Rentang: $earliestDate s/d $latestDate'
+                                        : 'Range: $earliestDate to $latestDate',
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
@@ -695,14 +717,14 @@ class _DescriptionTransactionsInfoModalState
                                   MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Terbesar: ${CurrencyFormatter.formatRupiah(maxTx.amount)}',
+                                  '${l10n.highest}: ${CurrencyFormatter.formatRupiah(maxTx.amount)}',
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: cs.onSurfaceVariant,
                                   ),
                                 ),
                                 Text(
-                                  'Terkecil: ${CurrencyFormatter.formatRupiah(minTx.amount)}',
+                                  '${l10n.lowest}: ${CurrencyFormatter.formatRupiah(minTx.amount)}',
                                   style: TextStyle(
                                     fontSize: 10.sp,
                                     color: cs.onSurfaceVariant,
@@ -739,7 +761,9 @@ class _DescriptionTransactionsInfoModalState
                               SizedBox(width: 8.w),
                               Expanded(
                                 child: Text(
-                                  'Ingin melihat riwayat lengkap & menyesuaikan transaksi?',
+                                  l10n.isIndonesian
+                                      ? 'Ingin melihat riwayat lengkap & menyesuaikan transaksi?'
+                                      : 'Want to view full history & customize transactions?',
                                   style: TextStyle(
                                     fontSize: 12.sp,
                                     fontWeight: FontWeight.w700,
@@ -751,7 +775,9 @@ class _DescriptionTransactionsInfoModalState
                           ),
                           SizedBox(height: 6.h),
                           Text(
-                            'Jelajahi seluruh transaksi, keluarkan data yang kurang cocok (satuan atau pilih banyak), dan tambahkan kata kunci penggabungan lainnya.',
+                            l10n.isIndonesian
+                                ? 'Jelajahi seluruh transaksi, keluarkan data yang kurang cocok (satuan atau pilih banyak), dan tambahkan kata kunci penggabungan lainnya.'
+                                : 'Explore all transactions, exclude mismatched records (single or bulk), and merge additional keywords.',
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: cs.onSurfaceVariant,
@@ -796,7 +822,7 @@ class _DescriptionTransactionsInfoModalState
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Buka Rincian Transaksi Lengkap',
+                                    l10n.openFullTransactionDetails,
                                     style: TextStyle(
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w700,

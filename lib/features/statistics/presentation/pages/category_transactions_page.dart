@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -20,29 +21,29 @@ enum CategorySortOption {
 }
 
 extension CategorySortOptionExt on CategorySortOption {
-  String get label {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case CategorySortOption.dateDesc:
-        return 'Terbaru';
+        return l10n.sortNewest;
       case CategorySortOption.dateAsc:
-        return 'Terlama';
+        return l10n.sortOldest;
       case CategorySortOption.amountDesc:
-        return 'Terbesar';
+        return l10n.sortHighestAmount;
       case CategorySortOption.amountAsc:
-        return 'Terkecil';
+        return l10n.sortLowestAmount;
     }
   }
 
-  String get description {
+  String description(AppLocalizations l10n) {
     switch (this) {
       case CategorySortOption.dateDesc:
-        return 'Tanggal terbaru ke terlama';
+        return l10n.sortNewestToOldest;
       case CategorySortOption.dateAsc:
-        return 'Tanggal terlama ke terbaru';
+        return l10n.sortOldestToNewest;
       case CategorySortOption.amountDesc:
-        return 'Nominal pengeluaran tertinggi';
+        return l10n.sortHighestExpense;
       case CategorySortOption.amountAsc:
-        return 'Nominal pengeluaran terendah';
+        return l10n.sortLowestExpense;
     }
   }
 
@@ -231,6 +232,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   }
 
   void _showSortBottomSheet(BuildContext context, ColorScheme cs) {
+    final l10n = context.l10n;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -260,7 +262,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                   ),
                 ),
                 Text(
-                  'Urutkan Riwayat Transaksi',
+                  l10n.sortTransactionHistory,
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -269,7 +271,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Pilih prioritas tampilan data riwayat kategori ini',
+                  l10n.sortCategorySubtitle,
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: cs.onSurfaceVariant,
@@ -327,7 +329,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    option.label,
+                                    option.label(l10n),
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: isSelected
@@ -340,7 +342,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                                   ),
                                   SizedBox(height: 1.h),
                                   Text(
-                                    option.description,
+                                    option.description(l10n),
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: cs.onSurfaceVariant,
@@ -474,6 +476,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   }
 
   Widget _buildHeader(ColorScheme cs, List<Transaction> rawTxList) {
+    final l10n = context.l10n;
     final dynamicTotal = rawTxList.fold<double>(0.0, (sum, tx) => sum + tx.amount);
 
     return Column(
@@ -570,7 +573,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                   borderRadius: BorderRadius.circular(14.r),
                 ),
                 child: Text(
-                  '${rawTxList.length} Transaksi',
+                  l10n.transactionsCount(rawTxList.length),
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
@@ -588,7 +591,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Riwayat Transaksi',
+              l10n.transactionHistory,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
@@ -604,6 +607,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   }
 
   Widget _buildSortFilterButton(ColorScheme cs) {
+    final l10n = context.l10n;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -629,7 +633,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
               ),
               SizedBox(width: 5.w),
               Text(
-                _selectedSort.label,
+                _selectedSort.label(l10n),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
@@ -650,6 +654,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   }
 
   Widget _buildEmptyState(ColorScheme cs) {
+    final l10n = context.l10n;
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 36.h),
       child: Center(
@@ -670,7 +675,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
             ),
             SizedBox(height: 14.h),
             Text(
-              'Belum ada transaksi',
+              l10n.noTransactionsFound,
               style: TextStyle(
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
@@ -679,7 +684,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
             ),
             SizedBox(height: 4.h),
             Text(
-              'Tidak ada transaksi pada periode ${_period == 'All' ? 'keseluruhan' : _period.toLowerCase()}',
+              l10n.noChartData,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 12.sp, color: cs.onSurfaceVariant),
             ),
@@ -694,8 +699,9 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
     Transaction tx,
     List<Transaction> allCategoryTransactions,
   ) {
+    final l10n = context.l10n;
     final formattedDate =
-        DateFormat('d MMMM yyyy', 'id_ID').format(tx.transactionDate);
+        DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(tx.transactionDate);
     final targetDescription = tx.description.isNotEmpty
         ? tx.description
         : 'Transaksi ${widget.categoryName}';

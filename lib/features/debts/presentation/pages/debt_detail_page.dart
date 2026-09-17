@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -32,12 +33,17 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
   Debt? _debt;
 
   Future<void> _handleCall() async {
+    final l10n = context.l10n;
     final phone = widget.phone;
     if (phone == null || phone.trim().isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nomor telepon tidak tersimpan'),
+          SnackBar(
+            content: Text(
+              l10n.isIndonesian
+                  ? 'Nomor telepon tidak tersimpan'
+                  : 'Phone number not saved',
+            ),
           ),
         );
       }
@@ -75,22 +81,25 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
   }
 
   Future<void> _handleDelete() async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Hapus Data?'),
-        content: const Text(
-          'Data yang dihapus tidak dapat dikembalikan. Lanjutkan?',
+        title: Text(l10n.isIndonesian ? 'Hapus Data?' : 'Delete Record?'),
+        content: Text(
+          l10n.isIndonesian
+              ? 'Data yang dihapus tidak dapat dikembalikan. Lanjutkan?'
+              : 'Deleted data cannot be recovered. Continue?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Batal'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.semanticRed),
-            child: const Text('Hapus'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -105,12 +114,17 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
   }
 
   Future<void> _handleMarkAsPaid(double remaining) async {
+    final l10n = context.l10n;
     final wallets = await _cubit.getWallets();
     if (wallets.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Belum ada wallet')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.isIndonesian ? 'Belum ada wallet' : 'No wallet available',
+            ),
+          ),
+        );
       }
       return;
     }
@@ -124,18 +138,24 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return AlertDialog(
-            title: const Text('Konfirmasi Pelunasan'),
+            title: Text(
+              l10n.isIndonesian ? 'Konfirmasi Pelunasan' : 'Confirm Settlement',
+            ),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Catat pelunasan sebesar Rp ${_formatPrice(remaining)}?'),
+                Text(
+                  l10n.isIndonesian
+                      ? 'Catat pelunasan sebesar Rp ${_formatPrice(remaining)}?'
+                      : 'Record settlement of Rp ${_formatPrice(remaining)}?',
+                ),
                 SizedBox(height: 16.h),
                 DropdownButtonFormField<Wallet>(
                   value: selectedWallet,
-                  decoration: const InputDecoration(
-                    labelText: 'Sumber Dana',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: l10n.isIndonesian ? 'Sumber Dana' : 'Source Wallet',
+                    border: const OutlineInputBorder(),
                   ),
                   items: wallets.map((w) {
                     return DropdownMenuItem(value: w, child: Text(w.name));
@@ -149,11 +169,11 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Batal'),
+                child: Text(l10n.cancel),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Bayar'),
+                child: Text(l10n.isIndonesian ? 'Bayar' : 'Pay'),
               ),
             ],
           );
@@ -167,29 +187,34 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
         walletId: selectedWallet!.id,
         amount: remaining,
         paymentDate: DateTime.now(),
-        note: 'Pelunasan Otomatis',
+        note: l10n.isIndonesian ? 'Pelunasan Otomatis' : 'Automatic Settlement',
       );
       _loadData();
     }
   }
 
   Future<void> _handleUndoPayment() async {
+    final l10n = context.l10n;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Batalkan Pelunasan?'),
-        content: const Text(
-          'Pembayaran terakhir akan dihapus dan status akan kembali ke sebelumnya.',
+        title: Text(
+          l10n.isIndonesian ? 'Batalkan Pelunasan?' : 'Cancel Settlement?',
+        ),
+        content: Text(
+          l10n.isIndonesian
+              ? 'Pembayaran terakhir akan dihapus dan status akan kembali ke sebelumnya.'
+              : 'The last payment will be removed and status will revert.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Tidak'),
+            child: Text(l10n.isIndonesian ? 'Tidak' : 'No'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.semanticRed),
-            child: const Text('Ya, Batalkan'),
+            child: Text(l10n.isIndonesian ? 'Ya, Batalkan' : 'Yes, Undo'),
           ),
         ],
       ),
@@ -202,12 +227,17 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
   }
 
   Future<void> _showPaymentDialog() async {
+    final l10n = context.l10n;
     final wallets = await _cubit.getWallets();
     if (wallets.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Belum ada wallet')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.isIndonesian ? 'Belum ada wallet' : 'No wallet available',
+            ),
+          ),
+        );
       }
       return;
     }
@@ -238,25 +268,25 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Catat Pembayaran',
+                l10n.isIndonesian ? 'Catat Pembayaran' : 'Record Payment',
                 style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20.h),
               TextField(
                 controller: amountController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Jumlah',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.amountLabel,
+                  border: const OutlineInputBorder(),
                   prefixText: 'Rp ',
                 ),
               ),
               SizedBox(height: 12.h),
               DropdownButtonFormField<Wallet>(
                 value: selectedWallet,
-                decoration: const InputDecoration(
-                  labelText: 'Wallet / Akun',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.isIndonesian ? 'Wallet / Akun' : 'Wallet / Account',
+                  border: const OutlineInputBorder(),
                 ),
                 items: wallets.map((w) {
                   return DropdownMenuItem(value: w, child: Text(w.name));
@@ -270,9 +300,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
               SizedBox(height: 12.h),
               TextField(
                 controller: noteController,
-                decoration: const InputDecoration(
-                  labelText: 'Catatan (Opsional)',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: l10n.isIndonesian ? 'Catatan (Opsional)' : 'Note (Optional)',
+                  border: const OutlineInputBorder(),
                 ),
               ),
               SizedBox(height: 20.h),
@@ -296,9 +326,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                   backgroundColor: AppTheme.primaryBlue,
                   padding: EdgeInsets.symmetric(vertical: 12.h),
                 ),
-                child: const Text(
-                  'Simpan',
-                  style: TextStyle(color: Colors.white),
+                child: Text(
+                  l10n.saveButton,
+                  style: const TextStyle(color: Colors.white),
                 ),
               ),
             ],
@@ -310,6 +340,7 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final debt = _debt ?? widget.debt;
     final remaining = debt.totalAmount - debt.paidAmount;
     final percentPaid = debt.totalAmount > 0
@@ -317,24 +348,27 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
         : 0.0;
 
     // Status text logic
-    String statusText = 'Pending';
+    String statusText = l10n.isIndonesian ? 'Belum Lunas' : 'Pending';
     Color statusColor = AppTheme.primaryBlue;
     Color statusBg = const Color(0xFFEFF6FF);
 
     if (debt.status == 'paid') {
-      statusText = 'Lunas';
+      statusText = l10n.statusPaid;
       statusColor = AppTheme.semanticGreen;
       statusBg = const Color(0xFFECFDF5);
     } else if (debt.dueDate != null) {
       final now = DateTime.now();
       final diff = debt.dueDate!.difference(now).inDays;
       if (diff < 0) {
-        statusText = 'Terlambat ${diff.abs()} Hari';
+        statusText = l10n.isIndonesian
+            ? 'Terlambat ${diff.abs()} Hari'
+            : 'Overdue ${diff.abs()} Days';
         statusColor = AppTheme.semanticRed;
         statusBg = const Color(0xFFFFF0F0);
       } else if (diff <= 7) {
-        statusText =
-            'Jatuh Tempo ${diff == 0 ? "Hari Ini" : "$diff Hari Lagi"}';
+        statusText = l10n.isIndonesian
+            ? 'Jatuh Tempo ${diff == 0 ? "Hari Ini" : "$diff Hari Lagi"}'
+            : 'Due ${diff == 0 ? "Today" : "in $diff Days"}';
         statusColor = const Color(0xFFF59E0B);
         statusBg = const Color(0xFFFFFBEB);
       }
@@ -356,7 +390,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          debt.type == 'debt' ? 'Detail Utang' : 'Detail Piutang',
+          debt.type == 'debt'
+              ? (l10n.isIndonesian ? 'Detail Hutang' : 'Debt Details')
+              : (l10n.isIndonesian ? 'Detail Pinjaman' : 'Loan Details'),
           style: const TextStyle(
             color: Colors.black,
             fontSize: 16,
@@ -447,9 +483,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Sisa Tagihan',
-                                style: TextStyle(
+                              Text(
+                                l10n.isIndonesian ? 'Sisa Tagihan' : 'Remaining Balance',
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF6B7280),
                                 ),
@@ -468,9 +504,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              const Text(
-                                'Total',
-                                style: TextStyle(
+                              Text(
+                                l10n.isIndonesian ? 'Total' : 'Total',
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFF6B7280),
                                 ),
@@ -503,9 +539,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Status Pelunasan',
-                            style: TextStyle(
+                          Text(
+                            l10n.isIndonesian ? 'Status Pelunasan' : 'Payment Status',
+                            style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF6B7280),
@@ -547,14 +583,14 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                                   const SizedBox(width: 4),
                                   Text(
                                     percentPaid >= 1.0
-                                        ? 'Batalkan'
-                                        : 'Tandai Lunas',
+                                        ? (l10n.isIndonesian ? 'Batalkan' : 'Undo')
+                                        : l10n.markAsPaid,
                                     style: TextStyle(
                                       fontSize: 10,
                                       fontWeight: FontWeight.bold,
                                       color: percentPaid >= 1.0
-                                          ? Colors.orange
-                                          : AppTheme.semanticGreen,
+                                        ? Colors.orange
+                                        : AppTheme.semanticGreen,
                                     ),
                                   ),
                                 ],
@@ -580,7 +616,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '${(percentPaid * 100).toInt()}% Terbayar',
+                            l10n.isIndonesian
+                                ? '${(percentPaid * 100).toInt()}% Terbayar'
+                                : '${(percentPaid * 100).toInt()}% Paid',
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -588,7 +626,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                             ),
                           ),
                           Text(
-                            'Sisa ${(100 - (percentPaid * 100)).toInt()}%',
+                            l10n.isIndonesian
+                                ? 'Sisa ${(100 - (percentPaid * 100)).toInt()}%'
+                                : 'Remaining ${(100 - (percentPaid * 100)).toInt()}%',
                             style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF9CA3AF),
@@ -610,7 +650,7 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                     _buildActionButton(
                       icon: Icons.call,
                       color: AppTheme.semanticGreen,
-                      label: 'Hubungi',
+                      label: l10n.isIndonesian ? 'Hubungi' : 'Contact',
                       bgColor: const Color(0xFFECFDF5),
                       onTap: _handleCall,
                     ),
@@ -619,7 +659,7 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                     _buildActionButton(
                       icon: Icons.delete,
                       color: AppTheme.semanticRed,
-                      label: 'Hapus',
+                      label: l10n.delete,
                       bgColor: const Color(0xFFFFF0F0),
                       onTap: _handleDelete,
                     ),
@@ -631,9 +671,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                 // History Section
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: const Text(
-                    'Riwayat Pembayaran',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.isIndonesian ? 'Riwayat Pembayaran' : 'Payment History',
+                    style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF111111),
@@ -648,16 +688,20 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                   Padding(
                     padding: const EdgeInsets.all(20.0),
                     child: Text(
-                      'Belum ada pembayaran',
+                      l10n.isIndonesian
+                          ? 'Belum ada pembayaran'
+                          : 'No payments yet',
                       style: TextStyle(color: Colors.grey[500]),
                     ),
                   )
                 else
                   ..._payments.map(
                     (payment) => _buildHistoryItem(
-                      title: payment.note ?? 'Pembayaran',
+                      title: payment.note ??
+                          (l10n.isIndonesian ? 'Pembayaran' : 'Payment'),
                       date: intl.DateFormat(
                         'dd MMM yyyy',
+                        l10n.dateLocaleCode,
                       ).format(payment.paymentDate),
                       amount: '+Rp ${_formatPrice(payment.amount)}',
                       isSuccess: true,
@@ -688,9 +732,9 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
                       ),
                       elevation: 0,
                     ),
-                    child: const Text(
-                      'Catat Pembayaran',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.isIndonesian ? 'Catat Pembayaran' : 'Record Payment',
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,

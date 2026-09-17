@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../core/injection.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../presentation/cubit/debt_cubit.dart';
-import '../presentation/pages/add_loan_page.dart';
 import 'debt_page.dart';
 import 'loan_page.dart';
 
@@ -19,6 +19,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return BlocProvider<DebtCubit>(
       create: (_) => locator<DebtCubit>()..start(),
       child: Scaffold(
@@ -31,7 +32,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
               Padding(
                 padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 16.h),
                 child: Text(
-                  'Utang & Piutang',
+                  l10n.isIndonesian ? 'Utang & Piutang' : 'Debts & Loans',
                   style: TextStyle(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
@@ -107,7 +108,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                                         ),
                                         SizedBox(width: 6.w),
                                         Text(
-                                          'Utang',
+                                          l10n.isIndonesian ? 'Utang' : 'Debts',
                                           style: TextStyle(
                                             color: _selectedTab == 0
                                                 ? const Color(0xFFEF4444)
@@ -146,7 +147,7 @@ class _DebtsLoanPageState extends State<DebtsLoanPage> {
                                         ),
                                         SizedBox(width: 6.w),
                                         Text(
-                                          'Piutang',
+                                          l10n.isIndonesian ? 'Piutang' : 'Loans',
                                           style: TextStyle(
                                             color: _selectedTab == 1
                                                 ? const Color(0xFF10B981)

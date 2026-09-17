@@ -5,6 +5,7 @@ import 'package:saku/features/statistics/presentation/cubit/statistics_cubit.dar
 import 'package:saku/features/settings/presentation/cubit/security_cubit.dart';
 import 'package:saku/features/settings/presentation/cubit/backup_cubit.dart';
 import 'package:saku/features/settings/presentation/cubit/theme_cubit.dart';
+import 'package:saku/features/settings/presentation/cubit/language_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../data/local/database/app_database.dart';
 import 'services/google_drive_service.dart';
@@ -52,6 +53,7 @@ Future<void> setupLocator() async {
   );
 
   locator.registerLazySingleton<ThemeCubit>(() => ThemeCubit());
+  locator.registerLazySingleton<LanguageCubit>(() => LanguageCubit());
 
   // Mind Space & External Sharing Intent Services
   locator.registerLazySingleton<SmartTransactionParser>(() => SmartTransactionParser());

@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/services/saku_home_widget_service.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../widgets/account_card.dart';
@@ -42,12 +43,13 @@ class _WalletListPageState extends State<WalletListPage> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'My Wallets',
+          l10n.myWallets,
           style: TextStyle(
             color: colorScheme.onSurface,
             fontSize: 20.sp,
@@ -224,6 +226,7 @@ class _WalletListPageState extends State<WalletListPage> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -237,7 +240,7 @@ class _WalletListPageState extends State<WalletListPage> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Belum ada wallet',
+            l10n.noWalletsYet,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -250,7 +253,7 @@ class _WalletListPageState extends State<WalletListPage> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 40.w),
             child: Text(
-              'Tambahkan wallet pertamamu dengan menekan tombol + di bawah',
+              l10n.noWalletsSubtitle,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.sp,

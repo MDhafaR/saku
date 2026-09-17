@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -34,11 +35,13 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Pilih Wallet',
+          l10n.selectWalletTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14.sp,
@@ -179,6 +182,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
   }
 
   Widget _buildEmptyState() {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +194,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Belum ada wallet',
+            l10n.noWalletsYet,
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w600,
@@ -199,7 +203,7 @@ class _WalletSelectionPageState extends State<WalletSelectionPage> {
           ),
           SizedBox(height: 8.h),
           Text(
-            'Tap tombol + untuk menambah wallet',
+            l10n.tapPlusToAddWallet,
             style: TextStyle(fontSize: 13.sp, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4)),
           ),
         ],

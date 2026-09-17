@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:local_auth/local_auth.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/security_cubit.dart';
 
 enum PinMode { setup, verify, verifyForChange }
@@ -23,28 +24,36 @@ class _PinPageState extends State<PinPage> {
   String? _firstPin; // For setup mode
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_message.isEmpty) {
+      _setInitialMessage();
+    }
+  }
+
+  @override
   void initState() {
     super.initState();
-    _setInitialMessage();
     if (widget.mode == PinMode.verify) {
       _checkBiometrics();
     }
   }
 
   void _setInitialMessage() {
+    final l10n = context.l10n;
     setState(() {
       switch (widget.mode) {
         case PinMode.setup:
-          _message = 'Buat PIN baru Anda';
+          _message = l10n.createNewPin;
           break;
         case PinMode.verify:
           final securityCubit = context.read<SecurityCubit>();
           _message = securityCubit.state.hashedPin == null
-              ? 'Gunakan ID Biometrik'
-              : 'Masukkan PIN Anda';
+              ? l10n.useBiometricId
+              : l10n.enterYourPin;
           break;
         case PinMode.verifyForChange:
-          _message = 'Masukkan PIN Lama';
+          _message = l10n.enterOldPin;
           break;
       }
     });
@@ -59,9 +68,10 @@ class _PinPageState extends State<PinPage> {
       final bool canAuthenticate =
           canAuthenticateWithBiometrics || await auth.isDeviceSupported();
 
-      if (canAuthenticate) {
+      if (canAuthenticate && mounted) {
+        final l10n = context.l10n;
         final bool didAuthenticate = await auth.authenticate(
-          localizedReason: 'Gunakan biometrik untuk masuk',
+          localizedReason: l10n.biometricLoginReason,
           biometricOnly: true,
         );
 
@@ -83,9 +93,10 @@ class _PinPageState extends State<PinPage> {
       final securityCubit = context.read<SecurityCubit>();
       if (widget.mode == PinMode.verify &&
           securityCubit.state.hashedPin == null) {
+        final l10n = context.l10n;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PIN belum diatur, gunakan ID Biometrik.'),
+          SnackBar(
+            content: Text(l10n.pinNotSetUseBiometric),
           ),
         );
         return;
@@ -112,6 +123,7 @@ class _PinPageState extends State<PinPage> {
   void _processPin() {
     final pinStr = _pin.join();
     final cubit = context.read<SecurityCubit>();
+    final l10n = context.l10n;
 
     Future.delayed(const Duration(milliseconds: 200), () {
       if (widget.mode == PinMode.setup) {
@@ -119,7 +131,7 @@ class _PinPageState extends State<PinPage> {
           _firstPin = pinStr;
           setState(() {
             _pin.clear();
-            _message = 'Konfirmasi PIN Anda';
+            _message = l10n.confirmYourPin;
           });
         } else {
           if (_firstPin == pinStr) {
@@ -129,7 +141,7 @@ class _PinPageState extends State<PinPage> {
           } else {
             setState(() {
               _pin.clear();
-              _message = 'PIN tidak cocok, coba lagi';
+              _message = l10n.pinMismatch;
               _firstPin = null;
             });
           }
@@ -143,7 +155,7 @@ class _PinPageState extends State<PinPage> {
         } else {
           setState(() {
             _pin.clear();
-            _message = 'PIN salah, silakan coba lagi';
+            _message = l10n.pinWrong;
           });
         }
       }
@@ -152,6 +164,7 @@ class _PinPageState extends State<PinPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       body: SafeArea(
@@ -225,7 +238,7 @@ class _PinPageState extends State<PinPage> {
                 child: TextButton(
                   onPressed: _onDeletePin,
                   child: Text(
-                    'Hapus PIN',
+                    l10n.deletePin,
                     style: TextStyle(
                       color: Colors.red,
                       fontSize: 14.sp,
@@ -242,25 +255,24 @@ class _PinPageState extends State<PinPage> {
   }
 
   void _onDeletePin() {
+    final l10n = context.l10n;
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Hapus PIN?'),
-        content: const Text(
-          'Apakah Anda yakin ingin menghapus PIN? Kunci aplikasi akan tetap aktif jika Biometrik aktif.',
-        ),
+      builder: (dialogCtx) => AlertDialog(
+        title: Text(l10n.deletePinConfirmTitle),
+        content: Text(l10n.deletePinConfirmDesc),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () {
               context.read<SecurityCubit>().deletePin();
-              Navigator.pop(context); // Close dialog
+              Navigator.pop(dialogCtx); // Close dialog
               Navigator.pop(context); // Close PinPage
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

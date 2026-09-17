@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/models/financial_target_model.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/services/spending_planner_service.dart';
@@ -46,6 +47,7 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
+    final l10n = context.l10n;
 
     if (_isLoading) {
       return const SizedBox.shrink();
@@ -91,11 +93,11 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
 
     String countdownBadge;
     if (calculation.status == RunwayStatus.noTarget) {
-      countdownBadge = 'Atur Tanggal Target';
+      countdownBadge = l10n.setTargetDate;
     } else if (calculation.status == RunwayStatus.reachedToday) {
-      countdownBadge = 'Hari Ini Target Tiba! 🎉';
+      countdownBadge = l10n.targetReachedToday;
     } else {
-      countdownBadge = '${calculation.daysRemaining} hari lagi';
+      countdownBadge = l10n.daysLeftCount(calculation.daysRemaining);
     }
 
     final formattedDaily = CurrencyFormatter.format(calculation.dailyAllowance.toStringAsFixed(0));
@@ -129,7 +131,7 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
                     Text(
                       calculation.nextTarget != null
                           ? calculation.nextTarget!.title
-                          : 'Alokasi Belanja Harian',
+                          : l10n.dailySpendingAllocation,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w700,
@@ -141,8 +143,8 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
                     SizedBox(height: 2.h),
                     Text(
                       calculation.targetDate != null
-                          ? 'Target: ${DateFormat('d MMMM yyyy', 'id_ID').format(calculation.targetDate!)}'
-                          : 'Belum ada target aktif',
+                          ? 'Target: ${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(calculation.targetDate!)}'
+                          : l10n.noActiveTarget,
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: cs.onSurface.withValues(alpha: 0.55),
@@ -208,7 +210,7 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
                 ),
                 SizedBox(width: 4.w),
                 Text(
-                  '/ hari',
+                  l10n.perDay,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
@@ -217,7 +219,7 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
                 ),
                 const Spacer(),
                 Text(
-                  'Saldo: Rp $formattedTotal',
+                  '${l10n.balancePrefix} Rp $formattedTotal',
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w500,
@@ -230,7 +232,7 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
             Row(
               children: [
                 Text(
-                  'Hari Pemasukan Tiba!',
+                  l10n.targetIncomeDay,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -239,7 +241,7 @@ class _SpendingPlannerCardState extends State<SpendingPlannerCard> {
                 ),
                 const Spacer(),
                 Text(
-                  'Sisa Saldo: Rp $formattedTotal',
+                  '${l10n.remainingBalanceLabel} Rp $formattedTotal',
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w600,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -69,30 +70,53 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
     );
   }
 
-  String _getPeriodContextLabel(String period, DateTime targetDate, AppDateTimeRange? customRange) {
-    switch (period.toLowerCase()) {
-      case 'yearly':
-        return 'tahun ${DateFormat('yyyy', 'id_ID').format(targetDate)}';
-      case 'daily':
-        return 'hari ini (${DateFormat('d MMMM yyyy', 'id_ID').format(targetDate)})';
-      case 'monthly':
-        return 'bulan ${DateFormat('MMMM yyyy', 'id_ID').format(targetDate)}';
-      case 'custom':
-        if (customRange != null) {
-          final s = DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.start);
-          final e = DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.end);
-          return 'rentang waktu ($s - $e)';
-        }
-        return 'rentang waktu terpilih';
-      case 'all':
-      default:
-        return 'seluruh riwayat keuangan';
+  String _getPeriodContextLabel(
+      String period, DateTime targetDate, AppDateTimeRange? customRange, AppLocalizations l10n) {
+    if (l10n.isIndonesian) {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+          return 'tahun ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'daily':
+          return 'hari ini (${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)})';
+        case 'monthly':
+          return 'bulan ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'custom':
+          if (customRange != null) {
+            final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
+            final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+            return 'rentang waktu ($s - $e)';
+          }
+          return 'rentang waktu terpilih';
+        case 'all':
+        default:
+          return 'seluruh riwayat keuangan';
+      }
+    } else {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+          return 'year ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'daily':
+          return 'today (${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)})';
+        case 'monthly':
+          return 'month ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'custom':
+          if (customRange != null) {
+            final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
+            final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+            return 'date range ($s - $e)';
+          }
+          return 'selected date range';
+        case 'all':
+        default:
+          return 'all-time financial history';
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final cardBgColor =
@@ -100,7 +124,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
     final borderColor =
         isDark ? cs.outline.withValues(alpha: 0.15) : const Color(0xFFE5E7EB);
 
-    final periodCtx = _getPeriodContextLabel(period, targetDate, customRange);
+    final periodCtx = _getPeriodContextLabel(period, targetDate, customRange, l10n);
 
     // Calculations
     final int count = transactions.length;
@@ -180,7 +204,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Rincian: $categoryName',
+                                '${l10n.isIndonesian ? 'Rincian' : 'Details'}: $categoryName',
                                 style: TextStyle(
                                   fontSize: 16.sp,
                                   fontWeight: FontWeight.w800,
@@ -190,7 +214,9 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                'Analisis transaksi pada $periodCtx',
+                                l10n.isIndonesian
+                                    ? 'Analisis transaksi pada $periodCtx'
+                                    : 'Transaction analysis for $periodCtx',
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   fontWeight: FontWeight.w500,
@@ -240,7 +266,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Total Biaya',
+                                    l10n.isIndonesian ? 'Total Biaya' : 'Total Expense',
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w500,
@@ -277,7 +303,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Frekuensi',
+                                    l10n.transactionFrequency,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w500,
@@ -289,7 +315,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                     fit: BoxFit.scaleDown,
                                     alignment: Alignment.centerLeft,
                                     child: Text(
-                                      '$count Transaksi',
+                                      l10n.transactionCount(count),
                                       style: TextStyle(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w800,
@@ -314,7 +340,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Rata-rata',
+                                    l10n.isIndonesian ? 'Rata-rata' : 'Average',
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w500,
@@ -345,7 +371,9 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                       // Section: Highest Transaction (Peak Spending)
                       if (highestTx != null) ...[
                         Text(
-                          'Transaksi Terbesar (Peak Spending)',
+                          l10n.isIndonesian
+                              ? 'Transaksi Terbesar (Peak Spending)'
+                              : 'Largest Transaction (Peak Spending)',
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -384,7 +412,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                     Text(
                                       highestTx.description.isNotEmpty
                                           ? highestTx.description
-                                          : 'Transaksi $categoryName',
+                                          : '${l10n.isIndonesian ? 'Transaksi' : 'Transaction'} $categoryName',
                                       style: TextStyle(
                                         fontSize: 13.sp,
                                         fontWeight: FontWeight.w700,
@@ -395,7 +423,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                     ),
                                     SizedBox(height: 2.h),
                                     Text(
-                                      DateFormat('d MMMM yyyy', 'id_ID')
+                                      DateFormat('d MMMM yyyy', l10n.dateLocaleCode)
                                           .format(highestTx.transactionDate),
                                       style: TextStyle(
                                         fontSize: 10.sp,
@@ -421,7 +449,9 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
 
                       // Section: Budget Contribution & Trend
                       Text(
-                        'Porsi & Tren Pengeluaran',
+                        l10n.isIndonesian
+                            ? 'Porsi & Tren Pengeluaran'
+                            : 'Portion & Spending Trend',
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
@@ -443,7 +473,9 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'Kontribusi Anggaran',
+                                  l10n.isIndonesian
+                                      ? 'Kontribusi Anggaran'
+                                      : 'Budget Share',
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     color: cs.onSurfaceVariant,
@@ -460,7 +492,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Text(
-                                    '${percentage.toStringAsFixed(1)}% dari Total',
+                                    '${percentage.toStringAsFixed(1)}% ${l10n.shareOfTotalExpense}',
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       fontWeight: FontWeight.w700,
@@ -498,8 +530,12 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                               SizedBox(height: 8.h),
                               Text(
                                 isTrendUp
-                                    ? 'Pengeluaran di kategori ini meningkat $trendValue dibanding periode sebelumnya.'
-                                    : 'Pengeluaran di kategori ini berhasil ditekan sebesar $trendValue dibanding periode sebelumnya. Terus pertahankan!',
+                                    ? (l10n.isIndonesian
+                                        ? 'Pengeluaran di kategori ini meningkat $trendValue dibanding periode sebelumnya.'
+                                        : 'Expenses in this category increased by $trendValue compared to previous period.')
+                                    : (l10n.isIndonesian
+                                        ? 'Pengeluaran di kategori ini berhasil ditekan sebesar $trendValue dibanding periode sebelumnya. Terus pertahankan!'
+                                        : 'Expenses in this category decreased by $trendValue compared to previous period. Keep it up!'),
                                 style: TextStyle(
                                   fontSize: 11.sp,
                                   color: cs.onSurfaceVariant,
@@ -536,7 +572,9 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Tips Manajemen Kategori',
+                                    l10n.isIndonesian
+                                        ? 'Tips Manajemen Kategori'
+                                        : 'Category Management Tips',
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w700,
@@ -546,8 +584,12 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                                   SizedBox(height: 2.h),
                                   Text(
                                     percentage > 30
-                                        ? 'Kategori $categoryName menyerap lebih dari 30% anggaran Anda. Evaluasi apakah ada pos pengeluaran yang dapat dihemat atau dinegosiasikan.'
-                                        : 'Alokasi pengeluaran $categoryName terpantau proporsional. Pantau terus frekuensi transaksi agar pengeluaran tetap terkendali.',
+                                        ? (l10n.isIndonesian
+                                            ? 'Kategori $categoryName menyerap lebih dari 30% anggaran Anda. Evaluasi apakah ada pos pengeluaran yang dapat dihemat atau dinegosiasikan.'
+                                            : 'The $categoryName category takes over 30% of your total budget. Review if certain expenses can be trimmed or substituted.')
+                                        : (l10n.isIndonesian
+                                            ? 'Alokasi pengeluaran $categoryName terpantau proporsional. Pantau terus frekuensi transaksi agar pengeluaran tetap terkendali.'
+                                            : 'The $categoryName category allocation remains well-proportioned. Keep monitoring transaction frequency to stay within budget.'),
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       color: cs.onSurface,
@@ -577,7 +619,7 @@ class CategoryTransactionsInfoModal extends StatelessWidget {
                             elevation: 0,
                           ),
                           child: Text(
-                            'Mengerti',
+                            l10n.understood,
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w700,

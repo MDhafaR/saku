@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/services/export_service.dart';
 import '../../../../data/local/database/app_database.dart';
 
@@ -64,12 +66,13 @@ class _ExportPageState extends State<ExportPage> {
 
   Future<void> _pickDate({required bool isStart}) async {
     final initial = isStart ? _startDate : _endDate;
+    final l10n = context.l10n;
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      locale: const Locale('id'),
+      locale: Locale(l10n.dateLocaleCode),
     );
     if (picked != null) {
       setState(() {
@@ -92,6 +95,7 @@ class _ExportPageState extends State<ExportPage> {
   // ─── Export action ──────────────────────────────────────────────────
 
   Future<void> _doExport() async {
+    final l10n = context.l10n;
     // If password protection is enabled (PDF only), ask for password first
     String? password;
     if (_selectedFormat == 0 && _passwordProtection) {
@@ -113,7 +117,7 @@ class _ExportPageState extends State<ExportPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('File tersimpan: $filePath'),
+            content: Text('${l10n.fileSavedSuccess} $filePath'),
             duration: const Duration(seconds: 4),
           ),
         );
@@ -122,7 +126,7 @@ class _ExportPageState extends State<ExportPage> {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Gagal export: $e')));
+        ).showSnackBar(SnackBar(content: Text('${l10n.exportFailed} $e')));
       }
     } finally {
       if (mounted) setState(() => _isExporting = false);
@@ -131,6 +135,7 @@ class _ExportPageState extends State<ExportPage> {
 
   Future<String?> _showPasswordDialog() {
     final controller = TextEditingController();
+    final l10n = context.l10n;
     return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -138,14 +143,14 @@ class _ExportPageState extends State<ExportPage> {
           borderRadius: BorderRadius.circular(16.r),
         ),
         title: Text(
-          'Proteksi Password',
+          l10n.passwordProtectionTitle,
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
         ),
         content: TextField(
           controller: controller,
           obscureText: true,
           decoration: InputDecoration(
-            hintText: 'Masukkan password',
+            hintText: l10n.enterPasswordHint,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -158,7 +163,7 @@ class _ExportPageState extends State<ExportPage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, controller.text),
@@ -168,7 +173,7 @@ class _ExportPageState extends State<ExportPage> {
                 borderRadius: BorderRadius.circular(8.r),
               ),
             ),
-            child: const Text('OK', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.confirm, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -179,11 +184,13 @@ class _ExportPageState extends State<ExportPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Report Builder',
+          l10n.reportBuilderTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
@@ -213,7 +220,7 @@ class _ExportPageState extends State<ExportPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader('PILIH FORMAT'),
+            _buildSectionHeader(l10n.selectFormatHeader),
             SizedBox(height: 12.h),
             Row(
               children: [
@@ -223,7 +230,7 @@ class _ExportPageState extends State<ExportPage> {
                     Icons.picture_as_pdf,
                     const Color(0xFFEF4444),
                     'PDF',
-                    'Laporan Rapi',
+                    l10n.neatReportPdf,
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -233,7 +240,7 @@ class _ExportPageState extends State<ExportPage> {
                     Icons.table_view,
                     const Color(0xFF10B981),
                     'Excel',
-                    'Data Olahan',
+                    l10n.processedDataExcel,
                   ),
                 ),
                 SizedBox(width: 12.w),
@@ -243,26 +250,26 @@ class _ExportPageState extends State<ExportPage> {
                     Icons.code,
                     const Color(0xFF6B7280),
                     'CSV',
-                    'Backup',
+                    l10n.backupCsv,
                   ),
                 ),
               ],
             ),
 
             SizedBox(height: 24.h),
-            _buildSectionHeader('RENTANG WAKTU'),
+            _buildSectionHeader(l10n.timeRangeHeader),
             SizedBox(height: 12.h),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: [
-                  _buildFilterChip(0, 'Bulan Ini'),
+                  _buildFilterChip(0, l10n.thisMonth),
                   SizedBox(width: 8.w),
-                  _buildFilterChip(1, 'Bulan Lalu'),
+                  _buildFilterChip(1, l10n.lastMonth),
                   SizedBox(width: 8.w),
-                  _buildFilterChip(2, 'Tahun Ini'),
+                  _buildFilterChip(2, l10n.thisYear),
                   SizedBox(width: 8.w),
-                  _buildFilterChip(3, 'Semua'),
+                  _buildFilterChip(3, l10n.allTime),
                 ],
               ),
             ),
@@ -271,7 +278,7 @@ class _ExportPageState extends State<ExportPage> {
               children: [
                 Expanded(
                   child: _buildDatePicker(
-                    'Dari Tanggal',
+                    l10n.fromDateLabel,
                     _startDate,
                     onTap: () => _pickDate(isStart: true),
                   ),
@@ -279,7 +286,7 @@ class _ExportPageState extends State<ExportPage> {
                 SizedBox(width: 12.w),
                 Expanded(
                   child: _buildDatePicker(
-                    'Sampai Tanggal',
+                    l10n.toDateLabel,
                     _endDate,
                     onTap: () => _pickDate(isStart: false),
                   ),
@@ -288,7 +295,7 @@ class _ExportPageState extends State<ExportPage> {
             ),
 
             SizedBox(height: 24.h),
-            _buildSectionHeader('OPSI TAMBAHAN'),
+            _buildSectionHeader(l10n.additionalOptionsHeader),
             SizedBox(height: 12.h),
             Container(
               decoration: BoxDecoration(
@@ -306,8 +313,8 @@ class _ExportPageState extends State<ExportPage> {
                 children: [
                   _buildToggleItem(
                     icon: Icons.receipt_long,
-                    title: 'Sertakan Foto Struk',
-                    subtitle: 'Ukuran file akan lebih besar',
+                    title: l10n.includeReceiptsLabel,
+                    subtitle: l10n.includeReceiptsSub,
                     value: _includeReceipts,
                     onChanged: (val) => setState(() => _includeReceipts = val),
                   ),
@@ -315,8 +322,8 @@ class _ExportPageState extends State<ExportPage> {
                     Divider(height: 1.h, color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.15)),
                     _buildToggleItem(
                       icon: Icons.lock_outline,
-                      title: 'Proteksi Password',
-                      subtitle: 'Khusus format PDF',
+                      title: l10n.passwordProtectionTitle,
+                      subtitle: l10n.passwordProtectionSub,
                       value: _passwordProtection,
                       onChanged: (val) =>
                           setState(() => _passwordProtection = val),
@@ -353,7 +360,7 @@ class _ExportPageState extends State<ExportPage> {
                 )
               : Icon(Icons.share, color: Colors.white, size: 24.sp),
           label: Text(
-            _isExporting ? 'Memproses...' : 'Export & Share',
+            _isExporting ? l10n.processingExport : l10n.exportAndShare,
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -494,6 +501,7 @@ class _ExportPageState extends State<ExportPage> {
   }
 
   Widget _buildDatePicker(String label, DateTime date, {VoidCallback? onTap}) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -522,7 +530,7 @@ class _ExportPageState extends State<ExportPage> {
             ),
             SizedBox(height: 4.h),
             Text(
-              "${date.day} ${_getMonthName(date.month)} ${date.year}",
+              DateFormat('d MMM yyyy', l10n.dateLocaleCode).format(date),
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14.sp,
@@ -581,23 +589,5 @@ class _ExportPageState extends State<ExportPage> {
         ],
       ),
     );
-  }
-
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
   }
 }

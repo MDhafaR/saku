@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -56,7 +57,8 @@ class TransactionItem extends StatelessWidget {
 
   DateTime get _itemDate => isTransfer ? transfer!.transferDate : transaction!.transactionDate;
 
-  String _formatDateTime() {
+  String _formatDateTime(BuildContext context) {
+    final l10n = context.l10n;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
@@ -68,13 +70,13 @@ class TransactionItem extends StatelessWidget {
 
     String dateLabel;
     if (transactionDay == today) {
-      dateLabel = 'Hari ini';
+      dateLabel = l10n.today;
     } else if (transactionDay == yesterday) {
-      dateLabel = 'Kemarin';
+      dateLabel = l10n.yesterday;
     } else {
       dateLabel = DateFormat(
         'dd MMM yyyy',
-        'id',
+        l10n.dateLocaleCode,
       ).format(_itemDate);
     }
 
@@ -313,7 +315,7 @@ class TransactionItem extends StatelessWidget {
                         ),
                         SizedBox(width: 4.w),
                         Text(
-                          _formatDateTime(),
+                          _formatDateTime(context),
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: Colors.grey[500],
@@ -371,7 +373,7 @@ class TransactionItem extends StatelessWidget {
                   Icon(Icons.info_outline_rounded, size: 16.sp, color: Colors.amber.shade800),
                   SizedBox(width: 8.w),
                   Text(
-                    'Biaya Admin: Rp ${CurrencyFormatter.format(transfer!.fee.toStringAsFixed(0))}',
+                    '${context.l10n.adminFeeLabel}: Rp ${CurrencyFormatter.format(transfer!.fee.toStringAsFixed(0))}',
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
@@ -439,7 +441,7 @@ class TransactionItem extends StatelessWidget {
                       overlayColor: cs.onSurface.withValues(alpha: 0.05),
                     ),
                     child: Text(
-                      "Edit",
+                      context.l10n.isIndonesian ? "Ubah" : "Edit",
                       style: TextStyle(
                         color: cs.onSurface,
                         fontWeight: FontWeight.w600,
@@ -466,7 +468,7 @@ class TransactionItem extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    "Delete",
+                    context.l10n.delete,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
@@ -484,10 +486,13 @@ class TransactionItem extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context) {
-    final title = isTransfer ? 'Hapus Transfer' : 'Hapus Transaksi';
+    final l10n = context.l10n;
+    final title = isTransfer
+        ? (l10n.isIndonesian ? 'Hapus Transfer' : 'Delete Transfer')
+        : (l10n.isIndonesian ? 'Hapus Transaksi' : 'Delete Transaction');
     final content = isTransfer
-        ? 'Apakah Anda yakin ingin menghapus transfer ini? Saldo kedua rekening akan dikembalikan seperti semula.'
-        : 'Apakah Anda yakin ingin menghapus transaksi ini?';
+        ? l10n.deleteTransferConfirm
+        : l10n.deleteTransactionConfirm;
 
     showDialog(
       context: context,
@@ -507,7 +512,7 @@ class TransactionItem extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Batal',
+              l10n.cancel,
               style: TextStyle(
                 color: Colors.grey[600],
                 fontWeight: FontWeight.w500,
@@ -525,7 +530,7 @@ class TransactionItem extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8.r),
               ),
             ),
-            child: const Text('Hapus', style: TextStyle(color: Colors.white)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),

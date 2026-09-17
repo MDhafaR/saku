@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../cubit/statistics_state.dart';
 
 class ChartScale {
@@ -61,10 +62,16 @@ class BarChartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (data.isEmpty) {
       return SizedBox(
         height: 200.h,
-        child: const Center(child: Text('No data available')),
+        child: Center(
+          child: Text(
+            l10n.noDataAvailable,
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[400]),
+          ),
+        ),
       );
     }
 
@@ -144,10 +151,10 @@ class BarChartWidget extends StatelessWidget {
                   final label =
                       point.customLabel ??
                       (data.length <= 12
-                          ? DateFormat('MMM').format(point.date)
+                          ? DateFormat('MMM', l10n.dateLocaleCode).format(point.date)
                           : data.length <= 31
-                          ? DateFormat('d').format(point.date)
-                          : DateFormat('MM/yy').format(point.date));
+                          ? DateFormat('d', l10n.dateLocaleCode).format(point.date)
+                          : DateFormat('MM/yy', l10n.dateLocaleCode).format(point.date));
 
                   return Text(label, style: style);
                 },

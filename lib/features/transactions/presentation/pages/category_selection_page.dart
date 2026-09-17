@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../settings/presentation/pages/add_edit_category_page.dart';
@@ -36,11 +37,13 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
-          widget.isExpense ? 'Kategori Pengeluaran' : 'Kategori Pemasukan',
+          widget.isExpense ? l10n.categoryExpenseTitle : l10n.categoryIncomeTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 14.sp,
@@ -114,7 +117,7 @@ class _CategorySelectionPageState extends State<CategorySelectionPage> {
                                 width: 44.w,
                                 height: 44.w,
                                 decoration: BoxDecoration(
-                                  color: color.withOpacity(0.2),
+                                  color: color.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 alignment: Alignment.center,

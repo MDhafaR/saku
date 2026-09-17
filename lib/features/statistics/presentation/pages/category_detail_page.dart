@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../components/category_detail_card.dart';
 import '../components/expense_comparison_chart.dart';
@@ -41,24 +42,33 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
     currentCustomRange = widget.customRange;
   }
 
-  String _formatPeriodBadge(String period, DateTime date, AppDateTimeRange? range) {
+  String _formatPeriodBadge(
+    BuildContext context,
+    String period,
+    DateTime date,
+    AppDateTimeRange? range,
+  ) {
+    final l10n = context.l10n;
     switch (period.toLowerCase()) {
       case 'daily':
-        return DateFormat('d MMM yyyy', 'id_ID').format(date);
+        return DateFormat('d MMM yyyy', l10n.dateLocaleCode).format(date);
       case 'monthly':
-        return DateFormat('MMM yyyy', 'id_ID').format(date);
+        return DateFormat('MMM yyyy', l10n.dateLocaleCode).format(date);
       case 'yearly':
-        return DateFormat('yyyy', 'id_ID').format(date);
+        return DateFormat('yyyy', l10n.dateLocaleCode).format(date);
       case 'custom':
         if (range != null) {
-          final s = DateFormat('dd/MM', 'id_ID').format(range.start);
-          final e = DateFormat('dd/MM', 'id_ID').format(range.end);
+          final s = DateFormat(
+            'dd/MM',
+            l10n.dateLocaleCode,
+          ).format(range.start);
+          final e = DateFormat('dd/MM', l10n.dateLocaleCode).format(range.end);
           return '$s - $e';
         }
-        return 'Kustom';
+        return l10n.periodCustom;
       case 'all':
       default:
-        return 'Semua Waktu';
+        return l10n.allTimeHistory;
     }
   }
 
@@ -77,10 +87,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           setState(() {
             selectedDate = picked;
           });
-          cubit.loadStatistics(
-            'Daily',
-            targetDate: picked,
-          );
+          cubit.loadStatistics('Daily', targetDate: picked);
         }
         break;
 
@@ -91,14 +98,15 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
       case 'yearly':
         final pickedYear = await _showYearPicker(context, selectedDate);
         if (pickedYear != null && mounted) {
-          final newDate = DateTime(pickedYear, selectedDate.month, selectedDate.day);
+          final newDate = DateTime(
+            pickedYear,
+            selectedDate.month,
+            selectedDate.day,
+          );
           setState(() {
             selectedDate = newDate;
           });
-          cubit.loadStatistics(
-            'Yearly',
-            targetDate: newDate,
-          );
+          cubit.loadStatistics('Yearly', targetDate: newDate);
         }
         break;
 
@@ -122,10 +130,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           setState(() {
             currentCustomRange = appRange;
           });
-          cubit.loadStatistics(
-            'Custom',
-            customRange: appRange,
-          );
+          cubit.loadStatistics('Custom', customRange: appRange);
         }
         break;
 
@@ -161,7 +166,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     height: 4.h,
                     margin: EdgeInsets.only(bottom: 16.h),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -293,7 +300,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                                   : FontWeight.w500,
                               color: isSelected
                                   ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurfaceVariant,
+                                  : Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -312,14 +321,16 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                       },
                       style: TextButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        foregroundColor: Theme.of(
+                          context,
+                        ).colorScheme.onPrimary,
                         padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                       ),
                       child: Text(
-                        'Pilih',
+                        context.l10n.select,
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
@@ -343,14 +354,12 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
         selectedDate = picked;
       });
 
-      cubit.loadStatistics(
-        'Monthly',
-        targetDate: picked,
-      );
+      cubit.loadStatistics('Monthly', targetDate: picked);
     }
   }
 
   Future<int?> _showYearPicker(BuildContext context, DateTime tempDate) {
+    final l10n = context.l10n;
     return showModalBottomSheet<int>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -369,12 +378,14 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                 height: 4.h,
                 margin: EdgeInsets.only(bottom: 16.h),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2.r),
                 ),
               ),
               Text(
-                'Pilih Tahun',
+                l10n.selectYear,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
@@ -442,14 +453,15 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
+
     return BlocProvider(
       create: (context) {
-        return locator<StatisticsCubit>()
-          ..loadStatistics(
-            currentPeriod,
-            targetDate: selectedDate,
-            customRange: currentCustomRange,
-          );
+        return locator<StatisticsCubit>()..loadStatistics(
+          currentPeriod,
+          targetDate: selectedDate,
+          customRange: currentCustomRange,
+        );
       },
       child: Scaffold(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -467,7 +479,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Rincian Kategori',
+            l10n.categoryDetailTitle,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w700,
@@ -512,11 +524,13 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Total Pengeluaran',
+                              l10n.totalExpense,
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.w500,
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                             ),
                             SizedBox(height: 2.h),
@@ -543,13 +557,16 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                               vertical: 6.h,
                             ),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(16.r),
                             ),
                             child: Row(
                               children: [
                                 Text(
                                   _formatPeriodBadge(
+                                    context,
                                     currentPeriod,
                                     selectedDate,
                                     currentCustomRange,
@@ -557,7 +574,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                   ),
                                 ),
                                 if (currentPeriod.toLowerCase() != 'all') ...[
@@ -565,7 +584,9 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                                   Icon(
                                     Icons.keyboard_arrow_down,
                                     size: 14.sp,
-                                    color: Theme.of(context).colorScheme.onSurface,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                   ),
                                 ],
                               ],
@@ -584,9 +605,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
                     if (state.categoryBreakdown.isEmpty)
                       SizedBox(
                         height: 200.h,
-                        child: const Center(
-                          child: Text('Tidak ada data transaksi'),
-                        ),
+                        child: Center(child: Text(l10n.noTransactionsFound)),
                       )
                     else
                       ...List.generate(state.categoryBreakdown.length, (index) {

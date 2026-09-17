@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -75,7 +76,10 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
 
   void _updateDefaultNote() {
     if (_selectedWallet != null && _noteController.text.isEmpty) {
-      _noteController.text = 'Penyesuaian saldo ${_selectedWallet!.name}';
+      final isIndo = context.l10n.isIndonesian;
+      _noteController.text = isIndo
+          ? 'Penyesuaian saldo ${_selectedWallet!.name}'
+          : 'Balance adjustment ${_selectedWallet!.name}';
     }
   }
 
@@ -208,7 +212,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  'Pilih Rekening / Dompet',
+                  context.l10n.selectWallet,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -287,7 +291,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                                       ),
                                     ),
                                     Text(
-                                      'Saldo: Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
+                                      '${context.l10n.isIndonesian ? 'Saldo' : 'Balance'}: Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
                                       style: TextStyle(
                                         fontSize: 12.sp,
                                         color: Theme.of(context)
@@ -320,13 +324,12 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
   }
 
   Future<void> _saveAdjustment() async {
+    final l10n = context.l10n;
     if (_selectedWallet == null) return;
     if (_diff == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text(
-            'Saldo riil sama dengan saldo tercatat, tidak ada perubahan yang perlu disimpan.',
-          ),
+          content: Text(l10n.noAdjustmentNeeded),
           backgroundColor: Colors.grey.shade800,
           behavior: SnackBarBehavior.floating,
         ),
@@ -348,10 +351,13 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
     final noteText = _noteController.text.trim();
     final descriptionText = noteText.isNotEmpty
         ? noteText
-        : (_isIncome ? 'Penyesuaian Masuk' : 'Penyesuaian Keluar');
+        : (_isIncome
+            ? (l10n.isIndonesian ? 'Penyesuaian Masuk' : 'Adjustment In')
+            : (l10n.isIndonesian ? 'Penyesuaian Keluar' : 'Adjustment Out'));
 
-    final detailedNote =
-        'Penyesuaian saldo ${_selectedWallet!.name} dari Rp ${CurrencyFormatter.format(_currentBalance.toStringAsFixed(0))} ke Rp ${CurrencyFormatter.format(_targetBalance.toStringAsFixed(0))}${noteText.isNotEmpty ? ' ($noteText)' : ''}';
+    final detailedNote = l10n.isIndonesian
+        ? 'Penyesuaian saldo ${_selectedWallet!.name} dari Rp ${CurrencyFormatter.format(_currentBalance.toStringAsFixed(0))} ke Rp ${CurrencyFormatter.format(_targetBalance.toStringAsFixed(0))}${noteText.isNotEmpty ? ' ($noteText)' : ''}'
+        : 'Balance adjustment ${_selectedWallet!.name} from Rp ${CurrencyFormatter.format(_currentBalance.toStringAsFixed(0))} to Rp ${CurrencyFormatter.format(_targetBalance.toStringAsFixed(0))}${noteText.isNotEmpty ? ' ($noteText)' : ''}';
 
     await _db.transactionDao.createTransaction(
       TransactionsCompanion(
@@ -375,7 +381,10 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
             SizedBox(width: 8.w),
             Expanded(
               child: Text(
-                'Saldo ${_selectedWallet!.name} berhasil disesuaikan menjadi Rp ${CurrencyFormatter.format(_targetBalance.toStringAsFixed(0))}',
+                l10n.balanceAdjustedSuccess(
+                  _selectedWallet!.name,
+                  CurrencyFormatter.format(_targetBalance.toStringAsFixed(0)),
+                ),
               ),
             ),
           ],
@@ -390,6 +399,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -399,7 +409,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           elevation: 0,
-          title: const Text('Ngepasin Saldo'),
+          title: Text(l10n.adjustBalanceTitle),
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -428,7 +438,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Text(
-            'Ngepasin Saldo',
+            l10n.adjustBalanceTitle,
             style: TextStyle(
               color: cs.onSurface,
               fontSize: 16.sp,
@@ -502,7 +512,9 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Keypad Numerik',
+                                        l10n.isIndonesian
+                                            ? 'Keypad Numerik'
+                                            : 'Numeric Keypad',
                                         style: TextStyle(
                                           fontSize: 11.sp,
                                           fontWeight: FontWeight.w600,
@@ -555,6 +567,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
   Widget _buildWalletCard(ColorScheme cs, bool isDark) {
     if (_selectedWallet == null) return const SizedBox.shrink();
     final w = _selectedWallet!;
+    final l10n = context.l10n;
 
     return SakuCard(
       padding: EdgeInsets.all(14.w),
@@ -566,7 +579,9 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Rekening yang Disesuaikan',
+                l10n.isIndonesian
+                    ? 'Rekening yang Disesuaikan'
+                    : 'Account to Adjust',
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
@@ -581,7 +596,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                   child: Row(
                     children: [
                       Text(
-                        'Ganti',
+                        l10n.changeWallet,
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -641,7 +656,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Saldo Tercatat di Saku: Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
+                          '${l10n.recordedBalance}: Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: cs.onSurfaceVariant,
@@ -665,6 +680,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
   }
 
   Widget _buildTargetInputCard(ColorScheme cs, bool isDark) {
+    final l10n = context.l10n;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -692,7 +708,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                   Row(
                     children: [
                       Text(
-                        'Saldo Riil Sebenarnya',
+                        l10n.actualBalance,
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
@@ -716,7 +732,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
-                      'Uang Fisik / Bank',
+                      l10n.physicalBankMoney,
                       style: TextStyle(
                         fontSize: 10.sp,
                         fontWeight: FontWeight.bold,
@@ -769,6 +785,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
   }
 
   Widget _buildDifferenceCard(ColorScheme cs, bool isDark) {
+    final l10n = context.l10n;
     Color badgeColor;
     Color badgeBg;
     String badgeText;
@@ -780,25 +797,26 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
       badgeColor = const Color(0xFF10B981);
       badgeBg = const Color(0xFF10B981).withValues(alpha: 0.12);
       badgeText = '+ Rp ${CurrencyFormatter.format(_absDiff.toStringAsFixed(0))}';
-      statusTitle = 'Pendapatan Penyesuaian Saldo';
-      explanation =
-          'Saldo riil lebih besar dari saldo di aplikasi. Saku akan mencatat penyesuaian masuk sebesar Rp ${CurrencyFormatter.format(_absDiff.toStringAsFixed(0))} agar saldo menjadi pas.';
+      statusTitle = l10n.adjustIncome;
+      explanation = l10n.adjustIncomeDesc(
+        CurrencyFormatter.format(_absDiff.toStringAsFixed(0)),
+      );
       statusIcon = Icons.trending_up_rounded;
     } else if (_diff < 0) {
       badgeColor = const Color(0xFFEF4444);
       badgeBg = const Color(0xFFEF4444).withValues(alpha: 0.12);
       badgeText = '- Rp ${CurrencyFormatter.format(_absDiff.toStringAsFixed(0))}';
-      statusTitle = 'Pengeluaran Penyesuaian Saldo';
-      explanation =
-          'Saldo riil lebih kecil dari saldo di aplikasi. Saku akan mencatat penyesuaian keluar sebesar Rp ${CurrencyFormatter.format(_absDiff.toStringAsFixed(0))} agar saldo menjadi pas.';
+      statusTitle = l10n.adjustExpense;
+      explanation = l10n.adjustExpenseDesc(
+        CurrencyFormatter.format(_absDiff.toStringAsFixed(0)),
+      );
       statusIcon = Icons.trending_down_rounded;
     } else {
       badgeColor = cs.onSurfaceVariant;
       badgeBg = cs.surfaceContainerHighest;
-      badgeText = 'Rp 0 (Pas)';
-      statusTitle = 'Saldo Sudah Sesuai';
-      explanation =
-          'Saldo riil sama persis dengan saldo tercatat di aplikasi. Tidak ada transaksi penyesuaian yang perlu dibuat.';
+      badgeText = l10n.isIndonesian ? 'Rp 0 (Pas)' : 'Rp 0 (Matched)';
+      statusTitle = l10n.balanceMatched;
+      explanation = l10n.balanceMatchedDesc;
       statusIcon = Icons.check_circle_outline_rounded;
     }
 
@@ -885,7 +903,8 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
   }
 
   Widget _buildDetailsCard(ColorScheme cs, bool isDark) {
-    final dateFormat = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
+    final l10n = context.l10n;
+    final dateFormat = DateFormat('EEEE, d MMMM yyyy', l10n.dateLocaleCode);
     final timeFormat = DateFormat('HH:mm');
     final now = DateTime.now();
     final timeString = timeFormat.format(
@@ -972,7 +991,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
 
           // Catatan Field
           Text(
-            'Catatan (Opsional)',
+            l10n.noteOptional,
             style: TextStyle(
               fontSize: 11.sp,
               fontWeight: FontWeight.w600,
@@ -991,7 +1010,9 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               color: cs.onSurface,
             ),
             decoration: InputDecoration(
-              hintText: 'Tulis keterangan penyesuaian...',
+              hintText: l10n.isIndonesian
+                  ? 'Tulis keterangan penyesuaian...'
+                  : 'Write adjustment note...',
               hintStyle: TextStyle(
                 fontSize: 12.sp,
                 color: cs.onSurfaceVariant.withValues(alpha: 0.6),
@@ -1011,6 +1032,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
   }
 
   Widget _buildBottomButton(ColorScheme cs, bool isDark) {
+    final l10n = context.l10n;
     final canSave = _diff != 0 && _selectedWallet != null;
 
     return Container(
@@ -1049,7 +1071,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               ),
               SizedBox(width: 8.w),
               Text(
-                'Simpan Penyesuaian Saldo',
+                l10n.saveAdjustment,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,

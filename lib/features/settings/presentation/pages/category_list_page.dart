@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../statistics/presentation/pages/category_transactions_page.dart';
@@ -36,6 +37,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final type = _selectedTab == 0 ? 'expense' : 'income';
 
     return Scaffold(
@@ -54,7 +56,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Atur Kategori',
+          l10n.manageCategories,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 18.sp,
@@ -123,7 +125,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                               behavior: HitTestBehavior.opaque,
                               onTap: () {
                                 if (_selectedTab != 0) {
-                                  setState(() => _selectedTab = 0);
+                                   setState(() => _selectedTab = 0);
                                 }
                               },
                               child: Container(
@@ -140,7 +142,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                                     ),
                                     SizedBox(width: 8.w),
                                     Text(
-                                      'Pengeluaran',
+                                      l10n.typeExpense,
                                       style: TextStyle(
                                         color: _selectedTab == 0
                                             ? const Color(0xFFEF4444)
@@ -176,7 +178,7 @@ class _CategoryListPageState extends State<CategoryListPage> {
                                     ),
                                     SizedBox(width: 8.w),
                                     Text(
-                                      'Pemasukan',
+                                      l10n.typeIncome,
                                       style: TextStyle(
                                         color: _selectedTab == 1
                                             ? const Color(0xFF10B981)

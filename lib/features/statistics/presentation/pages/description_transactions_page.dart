@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -17,29 +18,29 @@ enum DescriptionSortOption {
 }
 
 extension DescriptionSortOptionExt on DescriptionSortOption {
-  String get label {
+  String label(AppLocalizations l10n) {
     switch (this) {
       case DescriptionSortOption.dateDesc:
-        return 'Terbaru';
+        return l10n.sortNewest;
       case DescriptionSortOption.dateAsc:
-        return 'Terlama';
+        return l10n.sortOldest;
       case DescriptionSortOption.amountDesc:
-        return 'Terbesar';
+        return l10n.sortHighestAmount;
       case DescriptionSortOption.amountAsc:
-        return 'Terkecil';
+        return l10n.sortLowestAmount;
     }
   }
 
-  String get description {
+  String description(AppLocalizations l10n) {
     switch (this) {
       case DescriptionSortOption.dateDesc:
-        return 'Tanggal terbaru ke terlama';
+        return l10n.sortNewestToOldest;
       case DescriptionSortOption.dateAsc:
-        return 'Tanggal terlama ke terbaru';
+        return l10n.sortOldestToNewest;
       case DescriptionSortOption.amountDesc:
-        return 'Nominal pengeluaran tertinggi';
+        return l10n.sortHighestExpense;
       case DescriptionSortOption.amountAsc:
-        return 'Nominal pengeluaran terendah';
+        return l10n.sortLowestExpense;
     }
   }
 
@@ -252,6 +253,7 @@ class _DescriptionTransactionsPageState
   }
 
   void _showSortBottomSheet(BuildContext context, ColorScheme cs) {
+    final l10n = context.l10n;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -281,7 +283,7 @@ class _DescriptionTransactionsPageState
                   ),
                 ),
                 Text(
-                  'Urutkan Riwayat Transaksi',
+                  l10n.sortTransactionHistory,
                   style: TextStyle(
                     fontSize: 15.sp,
                     fontWeight: FontWeight.w700,
@@ -290,7 +292,7 @@ class _DescriptionTransactionsPageState
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Pilih prioritas tampilan data riwayat transaksi ini',
+                  l10n.sortDescriptionSubtitle,
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: cs.onSurfaceVariant,
@@ -350,7 +352,7 @@ class _DescriptionTransactionsPageState
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    option.label,
+                                    option.label(l10n),
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: isSelected
@@ -363,7 +365,7 @@ class _DescriptionTransactionsPageState
                                   ),
                                   SizedBox(height: 1.h),
                                   Text(
-                                    option.description,
+                                    option.description(l10n),
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: cs.onSurfaceVariant,
@@ -407,6 +409,7 @@ class _DescriptionTransactionsPageState
   }
 
   void _excludeSingleTransaction(Transaction tx) {
+    final l10n = context.l10n;
     setState(() {
       _excludedTransactionIds.add(tx.id);
     });
@@ -415,11 +418,15 @@ class _DescriptionTransactionsPageState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '1 transaksi (${tx.description.isNotEmpty ? tx.description : 'Transaksi'}) dikeluarkan dari perhitungan',
+          l10n.excludeSingleItem(
+            tx.description.isNotEmpty
+                ? tx.description
+                : (l10n.isIndonesian ? 'Transaksi' : 'Transaction'),
+          ),
           style: TextStyle(fontSize: 12.sp),
         ),
         action: SnackBarAction(
-          label: 'Batalkan',
+          label: l10n.cancel,
           textColor: widget.categoryColor,
           onPressed: () {
             setState(() {
@@ -436,6 +443,7 @@ class _DescriptionTransactionsPageState
 
   void _excludeSelectedBatch() {
     if (_selectedForExclusionIds.isEmpty) return;
+    final l10n = context.l10n;
     final count = _selectedForExclusionIds.length;
     final copy = Set<int>.from(_selectedForExclusionIds);
 
@@ -449,11 +457,11 @@ class _DescriptionTransactionsPageState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          '$count transaksi dikeluarkan dari perhitungan',
+          l10n.excludeItemsCount(count),
           style: TextStyle(fontSize: 12.sp),
         ),
         action: SnackBarAction(
-          label: 'Batalkan',
+          label: l10n.cancel,
           textColor: widget.categoryColor,
           onPressed: () {
             setState(() {
@@ -471,6 +479,7 @@ class _DescriptionTransactionsPageState
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -498,7 +507,7 @@ class _DescriptionTransactionsPageState
         ),
         title: Text(
           _isSelectionMode
-              ? '${_selectedForExclusionIds.length} Dipilih'
+              ? l10n.selectedItemsCount(_selectedForExclusionIds.length)
               : (_activeKeywords.isNotEmpty
                   ? _activeKeywords.join(', ')
                   : widget.description),
@@ -519,7 +528,7 @@ class _DescriptionTransactionsPageState
                 color: cs.onSurface,
                 size: 22.sp,
               ),
-              tooltip: 'Mode Pilih Banyak',
+              tooltip: l10n.selectModeMulti,
               onPressed: () {
                 setState(() {
                   _isSelectionMode = true;
@@ -559,7 +568,7 @@ class _DescriptionTransactionsPageState
                             _selectedForExclusionIds.clear();
                           });
                         },
-                        child: const Text('Batal'),
+                        child: Text(l10n.cancel),
                       ),
                     ),
                     SizedBox(width: 12.w),
@@ -578,7 +587,7 @@ class _DescriptionTransactionsPageState
                         icon: const Icon(Icons.remove_circle_outline_rounded,
                             size: 18),
                         label: Text(
-                          'Keluarkan (${_selectedForExclusionIds.length}) Data',
+                          l10n.excludeSelectedDataButton(_selectedForExclusionIds.length),
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w700,
@@ -643,6 +652,7 @@ class _DescriptionTransactionsPageState
               if (index == 0) {
                 return _buildHeader(
                   cs: cs,
+                  l10n: l10n,
                   totalCount: activeTxs.length,
                   totalAmount: totalAmount,
                   recommendations: recommendations,
@@ -651,7 +661,7 @@ class _DescriptionTransactionsPageState
                 );
               }
               final tx = sortedActiveTxs[index - 1];
-              return _buildTransactionItem(cs, tx);
+              return _buildTransactionItem(cs, l10n, tx);
             },
           );
         },
@@ -661,6 +671,7 @@ class _DescriptionTransactionsPageState
 
   Widget _buildHeader({
     required ColorScheme cs,
+    required AppLocalizations l10n,
     required int totalCount,
     required double totalAmount,
     required Map<String, int> recommendations,
@@ -685,7 +696,7 @@ class _DescriptionTransactionsPageState
                 ),
                 SizedBox(width: 6.w),
                 Text(
-                  'Kata Kunci Penggabungan:',
+                  l10n.activeKeywordsLabel,
                   style: TextStyle(
                     fontSize: 11.sp,
                     fontWeight: FontWeight.w700,
@@ -705,7 +716,7 @@ class _DescriptionTransactionsPageState
                         size: 14.sp, color: widget.categoryColor),
                     SizedBox(width: 4.w),
                     Text(
-                      'Cari & Gabungkan',
+                      l10n.mergeKeywordsButton,
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
@@ -789,7 +800,7 @@ class _DescriptionTransactionsPageState
                     SizedBox(width: 6.w),
                     Expanded(
                       child: Text(
-                        'Saran Kata Terkait untuk Digabungkan:',
+                        l10n.suggestedRelatedWords,
                         style: TextStyle(
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w700,
@@ -801,7 +812,7 @@ class _DescriptionTransactionsPageState
                 ),
                 SizedBox(height: 4.h),
                 Text(
-                  'Ditemukan kata lain pada transaksi terpilih yang juga muncul di transaksi lain:',
+                  l10n.suggestedRelatedWordsDesc,
                   style: TextStyle(
                     fontSize: 10.sp,
                     color: cs.onSurfaceVariant,
@@ -819,7 +830,7 @@ class _DescriptionTransactionsPageState
                         color: const Color(0xFF2563EB),
                       ),
                       label: Text(
-                        '${entry.key} (+${entry.value} data)',
+                        '${entry.key} (+${entry.value} ${l10n.isIndonesian ? 'data' : 'items'})',
                         style: TextStyle(
                           fontSize: 10.sp,
                           fontWeight: FontWeight.w600,
@@ -870,7 +881,7 @@ class _DescriptionTransactionsPageState
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '${_excludedTransactionIds.length} transaksi dikeluarkan dari perhitungan',
+                    l10n.excludeItemsCount(_excludedTransactionIds.length),
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
@@ -890,7 +901,7 @@ class _DescriptionTransactionsPageState
                     });
                   },
                   child: Text(
-                    'Pulihkan Semua',
+                    l10n.restoreAll,
                     style: TextStyle(
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w700,
@@ -931,7 +942,7 @@ class _DescriptionTransactionsPageState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Total Pengeluaran Terakumulasi',
+                          l10n.totalAccumulatedExpense,
                           style: TextStyle(
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w500,
@@ -967,7 +978,7 @@ class _DescriptionTransactionsPageState
                       borderRadius: BorderRadius.circular(14.r),
                     ),
                     child: Text(
-                      '$totalCount Transaksi',
+                      l10n.transactionCount(totalCount),
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
@@ -988,7 +999,7 @@ class _DescriptionTransactionsPageState
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Rata-rata per transaksi:',
+                      l10n.averagePerTxLabel,
                       style: TextStyle(
                         fontSize: 11.sp,
                         color: cs.onSurfaceVariant,
@@ -1015,7 +1026,7 @@ class _DescriptionTransactionsPageState
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Riwayat Transaksi',
+              l10n.transactionHistory,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w700,
@@ -1047,8 +1058,8 @@ class _DescriptionTransactionsPageState
                     },
                     child: Text(
                       _selectedForExclusionIds.length == totalCount
-                          ? 'Batal Pilih'
-                          : 'Pilih Semua',
+                          ? l10n.deselectAll
+                          : l10n.selectAll,
                       style: TextStyle(
                         fontSize: 11.sp,
                         fontWeight: FontWeight.w700,
@@ -1057,7 +1068,7 @@ class _DescriptionTransactionsPageState
                     ),
                   )
                 else
-                  _buildSortFilterButton(cs),
+                  _buildSortFilterButton(cs, l10n),
               ],
             ),
           ],
@@ -1067,7 +1078,7 @@ class _DescriptionTransactionsPageState
     );
   }
 
-  Widget _buildSortFilterButton(ColorScheme cs) {
+  Widget _buildSortFilterButton(ColorScheme cs, AppLocalizations l10n) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -1093,7 +1104,7 @@ class _DescriptionTransactionsPageState
               ),
               SizedBox(width: 5.w),
               Text(
-                _selectedSort.label,
+                _selectedSort.label(l10n),
                 style: TextStyle(
                   fontSize: 11.sp,
                   fontWeight: FontWeight.w600,
@@ -1113,9 +1124,9 @@ class _DescriptionTransactionsPageState
     );
   }
 
-  Widget _buildTransactionItem(ColorScheme cs, Transaction tx) {
+  Widget _buildTransactionItem(ColorScheme cs, AppLocalizations l10n, Transaction tx) {
     final formattedDate =
-        DateFormat('d MMMM yyyy', 'id_ID').format(tx.transactionDate);
+        DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(tx.transactionDate);
     final isSelectedForExclusion = _selectedForExclusionIds.contains(tx.id);
 
     return Padding(
@@ -1179,7 +1190,7 @@ class _DescriptionTransactionsPageState
                   Text(
                     tx.description.isNotEmpty
                         ? tx.description
-                        : 'Transaksi ${widget.categoryName}',
+                        : '${l10n.isIndonesian ? 'Transaksi' : 'Transaction'} ${widget.categoryName}',
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w600,
@@ -1221,7 +1232,7 @@ class _DescriptionTransactionsPageState
                   color: cs.onSurfaceVariant.withValues(alpha: 0.6),
                   size: 18.sp,
                 ),
-                tooltip: 'Keluarkan transaksi ini',
+                tooltip: l10n.excludeSingleTooltip,
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () => _excludeSingleTransaction(tx),

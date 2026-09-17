@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../cubit/statistics_state.dart';
 
@@ -47,93 +48,131 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
     );
   }
 
-  String _formatPeriodTitle(String period, DateTime date, AppDateTimeRange? range) {
+  String _formatPeriodTitle(
+      String period, DateTime date, AppDateTimeRange? range, AppLocalizations l10n) {
     switch (period.toLowerCase()) {
       case 'daily':
-        return DateFormat('d MMMM yyyy', 'id_ID').format(date);
+        return DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(date);
       case 'monthly':
-        return DateFormat('MMMM yyyy', 'id_ID').format(date);
+        return DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(date);
       case 'yearly':
-        return DateFormat('yyyy', 'id_ID').format(date);
+        return DateFormat('yyyy', l10n.dateLocaleCode).format(date);
       case 'custom':
         if (range != null) {
-          final s = DateFormat('dd/MM/yyyy', 'id_ID').format(range.start);
-          final e = DateFormat('dd/MM/yyyy', 'id_ID').format(range.end);
+          final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(range.start);
+          final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(range.end);
           return '$s - $e';
         }
-        return 'Kustom';
+        return l10n.periodCustom;
       case 'all':
       default:
-        return 'Semua Waktu';
+        return l10n.periodAll;
     }
   }
 
-  String _formatPointDate(DateTime date, String period) {
+  String _formatPointDate(DateTime date, String period, AppLocalizations l10n) {
     switch (period.toLowerCase()) {
       case 'yearly':
       case 'all':
-        return DateFormat('MMMM yyyy', 'id_ID').format(date);
+        return DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(date);
       case 'daily':
-        return DateFormat('HH:mm', 'id_ID').format(date);
+        return DateFormat('HH:mm', l10n.dateLocaleCode).format(date);
       case 'monthly':
       case 'custom':
       default:
-        return DateFormat('d MMMM yyyy', 'id_ID').format(date);
+        return DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(date);
     }
   }
 
-  String _formatPointDateBadge(DateTime date, String period) {
+  String _formatPointDateBadge(DateTime date, String period, AppLocalizations l10n) {
     switch (period.toLowerCase()) {
       case 'yearly':
       case 'all':
-        return DateFormat('MMM yyyy', 'id_ID').format(date);
+        return DateFormat('MMM yyyy', l10n.dateLocaleCode).format(date);
       case 'daily':
-        return DateFormat('HH:mm', 'id_ID').format(date);
+        return DateFormat('HH:mm', l10n.dateLocaleCode).format(date);
       case 'monthly':
       case 'custom':
       default:
-        return DateFormat('d MMM yyyy', 'id_ID').format(date);
+        return DateFormat('d MMM yyyy', l10n.dateLocaleCode).format(date);
     }
   }
 
-  String _getTemporalPreposition(String period) {
-    switch (period.toLowerCase()) {
-      case 'yearly':
-      case 'all':
-        return 'pada bulan';
-      case 'daily':
-        return 'pada pukul';
-      case 'monthly':
-      case 'custom':
-      default:
-        return 'pada tanggal';
+  String _getTemporalPreposition(String period, AppLocalizations l10n) {
+    if (l10n.isIndonesian) {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+        case 'all':
+          return 'pada bulan';
+        case 'daily':
+          return 'pada pukul';
+        case 'monthly':
+        case 'custom':
+        default:
+          return 'pada tanggal';
+      }
+    } else {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+        case 'all':
+          return 'in';
+        case 'daily':
+          return 'at';
+        case 'monthly':
+        case 'custom':
+        default:
+          return 'on';
+      }
     }
   }
 
-  String _getPeriodContextLabel(String period, DateTime targetDate, AppDateTimeRange? customRange) {
-    switch (period.toLowerCase()) {
-      case 'yearly':
-        return 'grafik tahun ${DateFormat('yyyy', 'id_ID').format(targetDate)}';
-      case 'daily':
-        return 'grafik harian ${DateFormat('d MMMM yyyy', 'id_ID').format(targetDate)}';
-      case 'monthly':
-        return 'grafik bulan ${DateFormat('MMMM yyyy', 'id_ID').format(targetDate)}';
-      case 'custom':
-        if (customRange != null) {
-          final s = DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.start);
-          final e = DateFormat('dd/MM/yyyy', 'id_ID').format(customRange.end);
-          return 'rentang waktu ($s - $e)';
-        }
-        return 'rentang waktu terpilih';
-      case 'all':
-      default:
-        return 'seluruh riwayat keuangan';
+  String _getPeriodContextLabel(
+      String period, DateTime targetDate, AppDateTimeRange? customRange, AppLocalizations l10n) {
+    if (l10n.isIndonesian) {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+          return 'grafik tahun ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'daily':
+          return 'grafik harian ${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'monthly':
+          return 'grafik bulan ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)}';
+        case 'custom':
+          if (customRange != null) {
+            final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
+            final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+            return 'rentang waktu ($s - $e)';
+          }
+          return 'rentang waktu terpilih';
+        case 'all':
+        default:
+          return 'seluruh riwayat keuangan';
+      }
+    } else {
+      switch (period.toLowerCase()) {
+        case 'yearly':
+          return 'year ${DateFormat('yyyy', l10n.dateLocaleCode).format(targetDate)} chart';
+        case 'daily':
+          return 'daily ${DateFormat('d MMMM yyyy', l10n.dateLocaleCode).format(targetDate)} chart';
+        case 'monthly':
+          return 'month ${DateFormat('MMMM yyyy', l10n.dateLocaleCode).format(targetDate)} chart';
+        case 'custom':
+          if (customRange != null) {
+            final s = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.start);
+            final e = DateFormat('dd/MM/yyyy', l10n.dateLocaleCode).format(customRange.end);
+            return 'date range ($s - $e)';
+          }
+          return 'selected date range';
+        case 'all':
+        default:
+          return 'all-time financial history';
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = context.l10n;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     final cardBgColor =
@@ -162,30 +201,50 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
     final bool isSurplus = netBalance >= 0;
 
     // Smart contextual prepositions and context labels
-    final prep = _getTemporalPreposition(period);
-    final periodCtx = _getPeriodContextLabel(period, targetDate, customRange);
+    final prep = _getTemporalPreposition(period, l10n);
+    final periodCtx = _getPeriodContextLabel(period, targetDate, customRange, l10n);
 
     // Dynamic narrative construction
     final String narrativeText;
-    if (maxIncome > 0 && maxExpense > 0) {
-      final incDate = _formatPointDate(peakIncomePoint!.date, period);
-      final expDate = _formatPointDate(peakExpensePoint!.date, period);
-      narrativeText =
-          'Berdasarkan $periodCtx, garis hijau sempat melonjak mencapai puncaknya di angka Rp ${CurrencyFormatter.format(maxIncome.toStringAsFixed(0))} $prep $incDate. Sementara itu, titik pengeluaran tertinggi (garis merah) berada di angka Rp ${CurrencyFormatter.format(maxExpense.toStringAsFixed(0))} $prep $expDate.';
-    } else if (maxIncome > 0 && maxExpense == 0) {
-      final incDate = _formatPointDate(peakIncomePoint!.date, period);
-      narrativeText =
-          'Berdasarkan $periodCtx, garis hijau mencapai puncaknya di angka Rp ${CurrencyFormatter.format(maxIncome.toStringAsFixed(0))} $prep $incDate, tanpa adanya catatan pengeluaran.';
-    } else if (maxExpense > 0 && maxIncome == 0) {
-      final expDate = _formatPointDate(peakExpensePoint!.date, period);
-      narrativeText =
-          'Berdasarkan $periodCtx, garis merah mencapai titik belanja terbesar di angka Rp ${CurrencyFormatter.format(maxExpense.toStringAsFixed(0))} $prep $expDate, tanpa adanya catatan pemasukan.';
+    if (l10n.isIndonesian) {
+      if (maxIncome > 0 && maxExpense > 0) {
+        final incDate = _formatPointDate(peakIncomePoint!.date, period, l10n);
+        final expDate = _formatPointDate(peakExpensePoint!.date, period, l10n);
+        narrativeText =
+            'Berdasarkan $periodCtx, garis hijau sempat melonjak mencapai puncaknya di angka ${CurrencyFormatter.formatRupiah(maxIncome)} $prep $incDate. Sementara itu, titik pengeluaran tertinggi (garis merah) berada di angka ${CurrencyFormatter.formatRupiah(maxExpense)} $prep $expDate.';
+      } else if (maxIncome > 0 && maxExpense == 0) {
+        final incDate = _formatPointDate(peakIncomePoint!.date, period, l10n);
+        narrativeText =
+            'Berdasarkan $periodCtx, garis hijau mencapai puncaknya di angka ${CurrencyFormatter.formatRupiah(maxIncome)} $prep $incDate, tanpa adanya catatan pengeluaran.';
+      } else if (maxExpense > 0 && maxIncome == 0) {
+        final expDate = _formatPointDate(peakExpensePoint!.date, period, l10n);
+        narrativeText =
+            'Berdasarkan $periodCtx, garis merah mencapai titik belanja terbesar di angka ${CurrencyFormatter.formatRupiah(maxExpense)} $prep $expDate, tanpa adanya catatan pemasukan.';
+      } else {
+        narrativeText =
+            'Belum ada riwayat transaksi pemasukan maupun pengeluaran pada $periodCtx sehingga kurva tampak mendatar di angka 0.';
+      }
     } else {
-      narrativeText =
-          'Belum ada riwayat transaksi pemasukan maupun pengeluaran pada $periodCtx sehingga kurva tampak mendatar di angka 0.';
+      if (maxIncome > 0 && maxExpense > 0) {
+        final incDate = _formatPointDate(peakIncomePoint!.date, period, l10n);
+        final expDate = _formatPointDate(peakExpensePoint!.date, period, l10n);
+        narrativeText =
+            'Based on $periodCtx, the green curve peaked at ${CurrencyFormatter.formatRupiah(maxIncome)} $prep $incDate. Meanwhile, the highest expense point (red curve) reached ${CurrencyFormatter.formatRupiah(maxExpense)} $prep $expDate.';
+      } else if (maxIncome > 0 && maxExpense == 0) {
+        final incDate = _formatPointDate(peakIncomePoint!.date, period, l10n);
+        narrativeText =
+            'Based on $periodCtx, the green curve peaked at ${CurrencyFormatter.formatRupiah(maxIncome)} $prep $incDate, with no recorded expenses.';
+      } else if (maxExpense > 0 && maxIncome == 0) {
+        final expDate = _formatPointDate(peakExpensePoint!.date, period, l10n);
+        narrativeText =
+            'Based on $periodCtx, the red curve peaked at ${CurrencyFormatter.formatRupiah(maxExpense)} $prep $expDate, with no recorded income.';
+      } else {
+        narrativeText =
+            'No income or expense transactions have been recorded for $periodCtx, so the trendline remains flat at 0.';
+      }
     }
 
-    final periodLabel = _formatPeriodTitle(period, targetDate, customRange);
+    final periodLabel = _formatPeriodTitle(period, targetDate, customRange, l10n);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.84,
@@ -243,7 +302,7 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Income vs Expense',
+                          l10n.incomeVsExpense,
                           style: TextStyle(
                             fontSize: 16.5.sp,
                             fontWeight: FontWeight.w800,
@@ -253,7 +312,7 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                         ),
                         SizedBox(height: 2.h),
                         Text(
-                          'Analisis Riil • $periodLabel',
+                          '${l10n.realAnalysisPrefix} • $periodLabel',
                           style: TextStyle(
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
@@ -311,7 +370,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                 ),
                                 SizedBox(width: 6.w),
                                 Text(
-                                  'Temuan Nyata dari Grafik Anda',
+                                  l10n.isIndonesian
+                                      ? 'Temuan Nyata dari Grafik Anda'
+                                      : 'Real Findings from Your Chart',
                                   style: TextStyle(
                                     fontSize: 13.sp,
                                     fontWeight: FontWeight.w800,
@@ -364,7 +425,7 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                                 fit: BoxFit.scaleDown,
                                                 alignment: Alignment.centerLeft,
                                                 child: Text(
-                                                  'Puncak Pemasukan',
+                                                  l10n.peakIncome,
                                                   style: TextStyle(
                                                     fontSize: 10.5.sp,
                                                     fontWeight: FontWeight.w700,
@@ -381,8 +442,8 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                           alignment: Alignment.centerLeft,
                                           child: Text(
                                             maxIncome > 0
-                                                ? 'Rp ${CurrencyFormatter.format(maxIncome.toStringAsFixed(0))}'
-                                                : 'Rp 0',
+                                                ? CurrencyFormatter.formatRupiah(maxIncome)
+                                                : CurrencyFormatter.formatRupiah(0),
                                             style: TextStyle(
                                               fontSize: 14.sp,
                                               fontWeight: FontWeight.w800,
@@ -399,8 +460,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                                 ? _formatPointDateBadge(
                                                     peakIncomePoint.date,
                                                     period,
+                                                    l10n,
                                                   )
-                                                : 'Tidak ada data',
+                                                : l10n.noDataAvailable,
                                             style: TextStyle(
                                               fontSize: 10.5.sp,
                                               fontWeight: FontWeight.w600,
@@ -453,7 +515,7 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                                 fit: BoxFit.scaleDown,
                                                 alignment: Alignment.centerLeft,
                                                 child: Text(
-                                                  'Puncak Pengeluaran',
+                                                  l10n.peakExpense,
                                                   style: TextStyle(
                                                     fontSize: 10.5.sp,
                                                     fontWeight: FontWeight.w700,
@@ -470,8 +532,8 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                           alignment: Alignment.centerLeft,
                                           child: Text(
                                             maxExpense > 0
-                                                ? 'Rp ${CurrencyFormatter.format(maxExpense.toStringAsFixed(0))}'
-                                                : 'Rp 0',
+                                                ? CurrencyFormatter.formatRupiah(maxExpense)
+                                                : CurrencyFormatter.formatRupiah(0),
                                             style: TextStyle(
                                               fontSize: 14.sp,
                                               fontWeight: FontWeight.w800,
@@ -489,8 +551,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                                 ? _formatPointDateBadge(
                                                     peakExpensePoint.date,
                                                     period,
+                                                    l10n,
                                                   )
-                                                : 'Tidak ada data',
+                                                : l10n.noDataAvailable,
                                             style: TextStyle(
                                               fontSize: 10.5.sp,
                                               fontWeight: FontWeight.w600,
@@ -548,7 +611,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                 SizedBox(width: 8.w),
                                 Expanded(
                                   child: Text(
-                                    'Garis / Batang Hijau: Pemasukan (Income)',
+                                    l10n.isIndonesian
+                                        ? 'Garis / Batang Hijau: Pemasukan (Income)'
+                                        : 'Green Line / Bar: Income',
                                     style: TextStyle(
                                       fontSize: 12.5.sp,
                                       fontWeight: FontWeight.w700,
@@ -562,7 +627,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                               padding: EdgeInsets.only(
                                   left: 20.w, top: 4.h, bottom: 8.h),
                               child: Text(
-                                'Menunjukkan laju dan akumulasi uang yang masuk ke rekening pada setiap titik waktu. Total: Rp ${CurrencyFormatter.format(totalIncome.toStringAsFixed(0))}.',
+                                l10n.isIndonesian
+                                    ? 'Menunjukkan laju dan akumulasi uang yang masuk ke rekening pada setiap titik waktu. Total: ${CurrencyFormatter.formatRupiah(totalIncome)}.'
+                                    : 'Shows the flow and accumulation of incoming funds over time. Total: ${CurrencyFormatter.formatRupiah(totalIncome)}.',
                                 style: TextStyle(
                                   fontSize: 11.5.sp,
                                   color: cs.onSurfaceVariant,
@@ -591,7 +658,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                                 SizedBox(width: 8.w),
                                 Expanded(
                                   child: Text(
-                                    'Garis / Batang Merah: Pengeluaran (Expense)',
+                                    l10n.isIndonesian
+                                        ? 'Garis / Batang Merah: Pengeluaran (Expense)'
+                                        : 'Red Line / Bar: Expense',
                                     style: TextStyle(
                                       fontSize: 12.5.sp,
                                       fontWeight: FontWeight.w700,
@@ -604,7 +673,9 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                             Padding(
                               padding: EdgeInsets.only(left: 20.w, top: 4.h),
                               child: Text(
-                                'Menunjukkan total biaya konsumsi, tagihan, dan belanja yang dikeluarkan pada setiap titik waktu. Total: Rp ${CurrencyFormatter.format(totalExpense.toStringAsFixed(0))}.',
+                                l10n.isIndonesian
+                                    ? 'Menunjukkan total biaya konsumsi, tagihan, dan belanja yang dikeluarkan pada setiap titik waktu. Total: ${CurrencyFormatter.formatRupiah(totalExpense)}.'
+                                    : 'Shows total consumption, bills, and spending over time. Total: ${CurrencyFormatter.formatRupiah(totalExpense)}.',
                                 style: TextStyle(
                                   fontSize: 11.5.sp,
                                   color: cs.onSurfaceVariant,
@@ -627,11 +698,19 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                             ? const Color(0xFF10B981)
                             : const Color(0xFFEF4444),
                         title: isSurplus
-                            ? 'Status Riil: Surplus Kas (+Rp ${CurrencyFormatter.format(netBalance.abs().toStringAsFixed(0))})'
-                            : 'Status Riil: Defisit Kas (-Rp ${CurrencyFormatter.format(netBalance.abs().toStringAsFixed(0))})',
+                            ? (l10n.isIndonesian
+                                ? 'Status Riil: Surplus Kas (+${CurrencyFormatter.formatRupiah(netBalance.abs())})'
+                                : 'Actual Status: Cash Surplus (+${CurrencyFormatter.formatRupiah(netBalance.abs())})')
+                            : (l10n.isIndonesian
+                                ? 'Status Riil: Defisit Kas (-${CurrencyFormatter.formatRupiah(netBalance.abs())})'
+                                : 'Actual Status: Cash Deficit (-${CurrencyFormatter.formatRupiah(netBalance.abs())})'),
                         description: isSurplus
-                            ? 'Pada periode ini total pemasukan Anda lebih tinggi dari pengeluaran. Garis hijau dominan berada di atas garis merah, menandakan ada ruang saldo yang berhasil disisihkan.'
-                            : 'Pada periode ini total pengeluaran Anda melampaui total pemasukan. Garis merah berada di atas garis hijau, menandakan pengeluaran memakan tabungan saldo sebelumnya.',
+                            ? (l10n.isIndonesian
+                                ? 'Pada periode ini total pemasukan Anda lebih tinggi dari pengeluaran. Garis hijau dominan berada di atas garis merah, menandakan ada ruang saldo yang berhasil disisihkan.'
+                                : 'During this period, your total income exceeded expenses. The green curve stays above the red curve, showing positive net savings.')
+                            : (l10n.isIndonesian
+                                ? 'Pada periode ini total pengeluaran Anda melampaui total pemasukan. Garis merah berada di atas garis hijau, menandakan pengeluaran memakan tabungan saldo sebelumnya.'
+                                : 'During this period, total spending exceeded income. The red curve stays above the green curve, indicating spending from previous reserves.'),
                         bgColor: (isSurplus
                                 ? const Color(0xFF10B981)
                                 : const Color(0xFFEF4444))
@@ -648,11 +727,14 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                         context,
                         icon: Icons.bar_chart_rounded,
                         iconColor: const Color(0xFF0EA5E9),
-                        title: 'Mode Grafik Garis & Batang',
-                        description:
-                            'Gunakan tombol di pojok kanan atas grafik untuk berganti mode:\n'
-                            '• Line Chart: Cocok untuk melihat tren kontinuitas dan kelancaran arus kas.\n'
-                            '• Bar Chart: Memudahkan perbandingan volume nominal pemasukan vs pengeluaran secara berdampingan.',
+                        title: l10n.lineAndBarModeTitle,
+                        description: l10n.isIndonesian
+                            ? 'Gunakan tombol di pojok kanan atas grafik untuk berganti mode:\n'
+                              '• Line Chart: Cocok untuk melihat tren kontinuitas dan kelancaran arus kas.\n'
+                              '• Bar Chart: Memudahkan perbandingan volume nominal pemasukan vs pengeluaran secara berdampingan.'
+                            : 'Use the toggle in the upper right corner to switch chart styles:\n'
+                              '• Line Chart: Ideal for tracking continuous cash flow trends over time.\n'
+                              '• Bar Chart: Better for side-by-side volume comparison of income vs expense.',
                         bgColor: cardBgColor,
                         borderColor: borderColor,
                       ),
@@ -663,9 +745,10 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                         context,
                         icon: Icons.lightbulb_outline_rounded,
                         iconColor: const Color(0xFFF59E0B),
-                        title: 'Tips Cerdas',
-                        description:
-                            'Perhatikan titik lonjakan (spike) tajam pada garis merah untuk mendeteksi pengeluaran tak terduga, dan usahakan garis hijau selalu konsisten berada di atas garis merah.',
+                        title: l10n.smartTipTitle,
+                        description: l10n.isIndonesian
+                            ? 'Perhatikan titik lonjakan (spike) tajam pada garis merah untuk mendeteksi pengeluaran tak terduga, dan usahakan garis hijau selalu konsisten berada di atas garis merah.'
+                            : 'Watch out for sudden spikes in the red curve to spot unexpected expenses, and strive to keep the green curve consistently above the red.',
                         bgColor: const Color(0xFFF59E0B).withValues(alpha: 0.08),
                         borderColor:
                             const Color(0xFFF59E0B).withValues(alpha: 0.25),
@@ -687,7 +770,7 @@ class IncomeExpenseChartInfoModal extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'Mengerti',
+                            l10n.understood,
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w700,

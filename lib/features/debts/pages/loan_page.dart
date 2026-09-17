@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../presentation/cubit/debt_cubit.dart';
 import '../presentation/cubit/debt_state.dart';
 import '../widgets/summary_card.dart';
@@ -11,6 +12,7 @@ class LoanPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return BlocBuilder<DebtCubit, DebtState>(
       builder: (context, state) {
         if (state is DebtLoading) {
@@ -46,7 +48,7 @@ class LoanPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: SummaryCard(
-                        title: 'Total Piutang',
+                        title: l10n.isIndonesian ? 'Total Piutang' : 'Total Loans',
                         amount: 'Rp${_formatAmount(totalLoan)}',
                         icon: Icons.arrow_upward_rounded,
                         iconColor: const Color(0xFF10B981),
@@ -55,7 +57,7 @@ class LoanPage extends StatelessWidget {
                     SizedBox(width: 10.w),
                     Expanded(
                       child: SummaryCard(
-                        title: 'Sudah Diterima',
+                        title: l10n.isIndonesian ? 'Sudah Diterima' : 'Already Received',
                         amount: 'Rp${_formatAmount(totalReceived)}',
                         icon: Icons.check_circle_outline_rounded,
                         iconColor: const Color(0xFF3B82F6),
@@ -78,7 +80,7 @@ class LoanPage extends StatelessWidget {
                             if (unpaidLoans.isNotEmpty) ...[
                               _buildSectionHeader(
                                 context,
-                                'Belum Diterima',
+                                l10n.isIndonesian ? 'Belum Diterima' : 'Unreceived',
                                 unpaidLoans.length,
                                 const Color(0xFFF3F4F6),
                                 const Color(0xFF6B7280),
@@ -98,7 +100,7 @@ class LoanPage extends StatelessWidget {
                             if (paidLoans.isNotEmpty) ...[
                               _buildSectionHeader(
                                 context,
-                                'Sudah Diterima',
+                                l10n.isIndonesian ? 'Sudah Diterima' : 'Fully Received',
                                 paidLoans.length,
                                 const Color(0xFFDCFCE7),
                                 const Color(0xFF10B981),
@@ -165,6 +167,7 @@ class LoanPage extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: EdgeInsets.only(bottom: 75.h),
@@ -186,7 +189,7 @@ class LoanPage extends StatelessWidget {
             ),
             SizedBox(height: 12.h),
             Text(
-              'Belum ada piutang',
+              l10n.isIndonesian ? 'Belum ada piutang' : 'No loans yet',
               style: TextStyle(
                 color: cs.onSurface.withValues(alpha: 0.6),
                 fontSize: 14.sp,
@@ -195,7 +198,9 @@ class LoanPage extends StatelessWidget {
             ),
             SizedBox(height: 4.h),
             Text(
-              'Ketuk tombol + untuk mencatat piutang baru',
+              l10n.isIndonesian
+                  ? 'Ketuk tombol + untuk mencatat piutang baru'
+                  : 'Tap + button to record a new loan',
               style: TextStyle(
                 color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                 fontSize: 11.sp,

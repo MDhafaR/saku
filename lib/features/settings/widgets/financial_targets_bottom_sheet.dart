@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/models/financial_target_model.dart';
 import '../../../../core/services/spending_planner_service.dart';
 
@@ -75,6 +76,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
           final cs = theme.colorScheme;
           final isDark = theme.brightness == Brightness.dark;
           final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+          final l10n = ctx.l10n;
 
           return Container(
             decoration: BoxDecoration(
@@ -124,7 +126,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isEditing ? 'Edit Target Pemasukan' : 'Tambah Target Pemasukan',
+                                isEditing ? l10n.editTargetTitle : l10n.addNewTarget,
                                 style: TextStyle(
                                   fontSize: 17.sp,
                                   fontWeight: FontWeight.bold,
@@ -133,7 +135,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                'Tentukan tanggal gajian atau penerimaan dana',
+                                l10n.targetScheduleSub,
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   color: cs.onSurface.withValues(alpha: 0.6),
@@ -152,7 +154,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
 
                     // Title Field
                     Text(
-                      'Nama Target / Sumber Pemasukan',
+                      l10n.targetNameLabel,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -164,7 +166,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                       controller: titleController,
                       style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
                       decoration: InputDecoration(
-                        hintText: 'Contoh: Gaji Kantor, Project Freelance',
+                        hintText: l10n.targetNameHint,
                         hintStyle: TextStyle(
                           fontSize: 13.sp,
                           color: cs.onSurface.withValues(alpha: 0.35),
@@ -192,7 +194,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
 
                     // Type Selector Cards (Repeat vs Once)
                     Text(
-                      'Pilih Tipe Siklus',
+                      l10n.selectCycleType,
                       style: TextStyle(
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
@@ -237,7 +239,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                   ),
                                   SizedBox(height: 10.h),
                                   Text(
-                                    'Rutin Bulanan',
+                                    l10n.monthlyRoutine,
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.bold,
@@ -246,7 +248,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                   ),
                                   SizedBox(height: 2.h),
                                   Text(
-                                    'Gaji pokok, uang saku',
+                                    l10n.monthlyRoutineDesc,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: cs.onSurface.withValues(alpha: 0.5),
@@ -294,7 +296,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                   ),
                                   SizedBox(height: 10.h),
                                   Text(
-                                    'Sekali Saja',
+                                    l10n.oneTimeTarget,
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.bold,
@@ -303,7 +305,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                   ),
                                   SizedBox(height: 2.h),
                                   Text(
-                                    'Project lepas, bonus',
+                                    l10n.oneTimeTargetDesc,
                                     style: TextStyle(
                                       fontSize: 10.sp,
                                       color: cs.onSurface.withValues(alpha: 0.5),
@@ -321,7 +323,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                     // Date Selection Form
                     if (selectedType == FinancialTargetType.repeat) ...[
                       Text(
-                        'Pilih Tanggal Penggajian / Masuk',
+                        l10n.selectPayDate,
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -349,7 +351,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                     Icon(Icons.calendar_today_rounded, size: 16.sp, color: cs.primary),
                                     SizedBox(width: 10.w),
                                     Text(
-                                      'Setiap tanggal $day tiap bulan',
+                                      l10n.everyMonthDay(day),
                                       style: TextStyle(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w600,
@@ -370,7 +372,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                       ),
                     ] else ...[
                       Text(
-                        'Pilih Tanggal Target Terjadwal',
+                        l10n.selectScheduledDate,
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -385,7 +387,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                             initialDate: selectedSpecificDate,
                             firstDate: DateTime.now(),
                             lastDate: DateTime.now().add(const Duration(days: 730)),
-                            locale: const Locale('id', 'ID'),
+                            locale: Locale(l10n.dateLocaleCode),
                           );
                           if (picked != null) {
                             setSheetState(() => selectedSpecificDate = picked);
@@ -408,7 +410,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(selectedSpecificDate),
+                                      DateFormat('EEEE, d MMMM yyyy', l10n.dateLocaleCode).format(selectedSpecificDate),
                                       style: TextStyle(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.bold,
@@ -417,7 +419,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                     ),
                                     SizedBox(height: 1.h),
                                     Text(
-                                      'Ketuk untuk mengubah tanggal',
+                                      l10n.tapToChangeDate,
                                       style: TextStyle(
                                         fontSize: 10.sp,
                                         color: cs.onSurface.withValues(alpha: 0.5),
@@ -447,7 +449,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                             ),
                             child: Text(
-                              'Batal',
+                              l10n.cancel,
                               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: cs.onSurface),
                             ),
                           ),
@@ -484,7 +486,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                             ),
                             child: Text(
-                              isEditing ? 'Simpan Perubahan' : 'Tambah Target',
+                              isEditing ? l10n.saveChanges : l10n.addNewTarget,
                               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                             ),
                           ),
@@ -502,20 +504,21 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
   }
 
   void _confirmDelete(FinancialTarget target) {
+    final l10n = context.l10n;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hapus Target?'),
-        content: Text('Yakin ingin menghapus target "${target.title}"?'),
+        title: Text(l10n.deleteTargetTitle),
+        content: Text(l10n.deleteTargetConfirm(target.title)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
           TextButton(
             onPressed: () async {
               Navigator.pop(ctx);
               await SpendingPlannerService.deleteTarget(target.id);
               _refreshTargets();
             },
-            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.delete, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -527,6 +530,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
     final now = DateTime.now();
+    final l10n = context.l10n;
 
     return Container(
       constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.85),
@@ -559,12 +563,12 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Jadwal Target Pemasukan',
+                      l10n.financialTargetsTitle,
                       style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: cs.onSurface),
                     ),
                     SizedBox(height: 2.h),
                     Text(
-                      'Atur gajian & proyekan untuk hitungan jatah harian',
+                      l10n.financialTargetsSubtitle,
                       style: TextStyle(fontSize: 11.sp, color: cs.onSurface.withValues(alpha: 0.6)),
                     ),
                   ],
@@ -587,7 +591,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                         child: Padding(
                           padding: EdgeInsets.all(24.w),
                           child: Text(
-                            'Belum ada target pemasukan.\nTekan tombol + Tambah Target untuk mulai.',
+                            l10n.noTargetsYet,
                             textAlign: TextAlign.center,
                             style: TextStyle(fontSize: 13.sp, color: Colors.grey),
                           ),
@@ -604,21 +608,21 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
 
                           String scheduleInfo;
                           if (item.type == FinancialTargetType.repeat) {
-                            scheduleInfo = 'Rutin tgl ${item.dayOfMonth ?? 1}';
+                            scheduleInfo = l10n.routineScheduleDay(item.dayOfMonth ?? 1);
                           } else {
-                            final dateStr = item.specificDate != null ? DateFormat('d MMM yyyy', 'id_ID').format(item.specificDate!) : '-';
-                            scheduleInfo = 'Sekali pada $dateStr';
+                            final dateStr = item.specificDate != null ? DateFormat('d MMM yyyy', l10n.dateLocaleCode).format(item.specificDate!) : '-';
+                            scheduleInfo = l10n.oneTimeScheduleDate(dateStr);
                           }
 
                           String statusCountdown;
                           if (!item.isEnabled) {
-                            statusCountdown = 'Nonaktif';
+                            statusCountdown = l10n.inactiveStatus;
                           } else if (diffDays == null) {
-                            statusCountdown = 'Sudah lewat';
+                            statusCountdown = l10n.passedStatus;
                           } else if (diffDays == 0) {
-                            statusCountdown = 'Hari ini!';
+                            statusCountdown = l10n.todayStatus;
                           } else {
-                            statusCountdown = '$diffDays hari lagi';
+                            statusCountdown = l10n.daysLeftCount(diffDays);
                           }
 
                           return Container(
@@ -731,23 +735,23 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
                                           }
                                         },
                                         itemBuilder: (_) => [
-                                          const PopupMenuItem(
+                                          PopupMenuItem(
                                             value: 'edit',
                                             child: Row(
                                               children: [
-                                                Icon(Icons.edit_rounded, size: 16),
-                                                SizedBox(width: 8),
-                                                Text('Edit'),
+                                                const Icon(Icons.edit_rounded, size: 16),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.editCategoryTitle.replaceAll(' Kategori', '').replaceAll(' Category', '')),
                                               ],
                                             ),
                                           ),
-                                          const PopupMenuItem(
+                                          PopupMenuItem(
                                             value: 'delete',
                                             child: Row(
                                               children: [
-                                                Icon(Icons.delete_outline_rounded, size: 16, color: Colors.red),
-                                                SizedBox(width: 8),
-                                                Text('Hapus', style: TextStyle(color: Colors.red)),
+                                                const Icon(Icons.delete_outline_rounded, size: 16, color: Colors.red),
+                                                const SizedBox(width: 8),
+                                                Text(l10n.delete, style: const TextStyle(color: Colors.red)),
                                               ],
                                             ),
                                           ),
@@ -771,7 +775,7 @@ class _FinancialTargetsBottomSheetState extends State<FinancialTargetsBottomShee
               child: ElevatedButton.icon(
                 onPressed: () => _showAddEditBottomSheet(),
                 icon: const Icon(Icons.add_rounded, size: 18),
-                label: const Text('Tambah Target Pemasukan'),
+                label: Text(l10n.addNewTarget),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: cs.primary,
                   foregroundColor: cs.onPrimary,

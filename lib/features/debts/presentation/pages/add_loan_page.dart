@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -151,10 +152,11 @@ class _AddLoanPageState extends State<AddLoanPage> {
   }
 
   Future<void> _saveDebt() async {
+    final l10n = context.l10n;
     if (_amount == '0' || _contactController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(const SnackBar(content: Text('Mohon lengkapi data')));
+      ).showSnackBar(SnackBar(content: Text(l10n.completeDataError)));
       return;
     }
 
@@ -175,23 +177,25 @@ class _AddLoanPageState extends State<AddLoanPage> {
     }
   }
 
-  String _getDateLabel(DateTime date) {
+  String _getDateLabel(BuildContext context, DateTime date) {
+    final l10n = context.l10n;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(const Duration(days: 1));
     final selectedDay = DateTime(date.year, date.month, date.day);
 
     if (selectedDay == today) {
-      return 'Hari Ini';
+      return l10n.today;
     } else if (selectedDay == yesterday) {
-      return 'Kemarin';
+      return l10n.yesterday;
     } else {
-      return DateFormat('dd MMM yyyy', 'id').format(date);
+      return DateFormat('dd MMM yyyy', l10n.dateLocaleCode).format(date);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     // Determine active semantic color
     final feedbackColor = isDebt
         ? AppTheme.semanticRed
@@ -264,7 +268,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 8.h),
                               child: Text(
-                                'Saya Hutang',
+                                l10n.iOwe,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: isDebt
@@ -289,7 +293,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                             child: Container(
                               padding: EdgeInsets.symmetric(vertical: 8.h),
                               child: Text(
-                                'Pinjamkan',
+                                l10n.iLend,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: !isDebt
@@ -350,7 +354,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Jumlah Nominal',
+                                      l10n.nominalAmount,
                                       style: TextStyle(
                                         color: AppTheme.lightTextSecondary,
                                         fontSize: 12.sp,
@@ -435,8 +439,8 @@ class _AddLoanPageState extends State<AddLoanPage> {
                               // Transaction Date
                               _buildDateField(
                                 icon: Icons.calendar_today_outlined,
-                                label: 'Tanggal Transaksi',
-                                value: _getDateLabel(_transactionDate),
+                                label: l10n.transactionDateLabel,
+                                value: _getDateLabel(context, _transactionDate),
                                 onTap: () {
                                   _contactFocusNode.unfocus();
                                   _noteFocusNode.unfocus();
@@ -522,7 +526,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                         elevation: 0,
                       ),
                       child: Text(
-                        'Simpan',
+                        l10n.saveButton,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14.sp,
@@ -541,6 +545,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
   }
 
   Widget _buildContactField() {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -567,7 +572,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Kontak',
+                  l10n.contactLabel,
                   style: TextStyle(
                     fontSize: 11.sp,
                     color: cs.onSurface.withValues(alpha: 0.5),
@@ -583,7 +588,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                     }
                   },
                   decoration: InputDecoration(
-                    hintText: 'Masukkan nama kontak...',
+                    hintText: l10n.enterContactNameHint,
                     hintStyle: TextStyle(
                       color: cs.onSurface.withValues(alpha: 0.4),
                       fontSize: 14.sp,
@@ -665,6 +670,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
   }
 
   Widget _buildDueDateField() {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
@@ -701,7 +707,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Jatuh Tempo',
+                    l10n.dueDateLabel,
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: cs.onSurface.withValues(alpha: 0.5),
@@ -709,7 +715,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                   ),
                   SizedBox(height: 1.h),
                   Text(
-                    _hasDueDate ? _getDateLabel(_dueDate) : 'Tidak ada',
+                    _hasDueDate ? _getDateLabel(context, _dueDate) : l10n.noDueDate,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -736,6 +742,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
   }
 
   Widget _buildNotesField() {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -770,7 +777,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                 }
               },
               decoration: InputDecoration(
-                hintText: 'Tulis catatan di sini...',
+                hintText: l10n.writeNoteHint,
                 hintStyle: TextStyle(
                   color: cs.onSurface.withValues(alpha: 0.4),
                   fontSize: 14.sp,
@@ -797,6 +804,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
   }
 
   Widget _buildWalletField() {
+    final l10n = context.l10n;
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -851,7 +859,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Akun / Wallet',
+                          l10n.accountWalletLabel,
                           style: TextStyle(
                             fontSize: 11.sp,
                             color: cs.onSurface.withValues(alpha: 0.5),
@@ -859,7 +867,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                         ),
                         SizedBox(height: 1.h),
                         Text(
-                          _selectedWallet?.name ?? 'Pilih Wallet',
+                          _selectedWallet?.name ?? l10n.selectWallet,
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w500,
@@ -961,7 +969,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
                                   ),
                                   SizedBox(height: 1.h),
                                   Text(
-                                    'Saldo: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
+                                    '${l10n.isIndonesian ? 'Saldo' : 'Balance'}: Rp ${CurrencyFormatter.format(wallet.currentBalance.toStringAsFixed(0))}',
                                     style: TextStyle(
                                       fontSize: 11.sp,
                                       color: cs.onSurface.withValues(

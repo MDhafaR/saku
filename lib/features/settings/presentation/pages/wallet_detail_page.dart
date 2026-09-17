@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/injection.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
 import '../../../../core/utils/currency_formatter.dart';
@@ -101,6 +102,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final income = _calculateIncome();
     final expense = _calculateExpense();
 
@@ -120,7 +122,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Detail Rekening',
+          l10n.accountDetailTitle,
           style: TextStyle(
             color: Theme.of(context).colorScheme.onSurface,
             fontSize: 15.sp,
@@ -163,7 +165,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     ),
                     SizedBox(width: 10.w),
                     Text(
-                      'Edit Rekening',
+                      l10n.editWalletOption,
                       style: TextStyle(fontSize: 13.sp),
                     ),
                   ],
@@ -180,7 +182,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     ),
                     SizedBox(width: 10.w),
                     Text(
-                      _isHidden ? 'Tampilkan Rekening' : 'Sembunyikan Rekening',
+                      _isHidden ? l10n.unhideWalletOption : l10n.hideWalletOption,
                       style: TextStyle(fontSize: 13.sp),
                     ),
                   ],
@@ -205,7 +207,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Mutasi Terakhir',
+                  l10n.recentTransactions,
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
@@ -227,6 +229,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
   }
 
   Widget _buildHeaderCard() {
+    final l10n = context.l10n;
     final wallet = _wallet;
 
     return Container(
@@ -335,7 +338,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
           ),
           SizedBox(height: 12.h),
           Text(
-            'Saldo Utama',
+            l10n.mainBalanceLabel,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
               fontSize: 11.sp,
@@ -359,7 +362,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
             children: [
               _buildActionButton(
                 Icons.arrow_outward,
-                'Transfer',
+                l10n.transferAction,
                 onTap: () async {
                   final wallets = await _db.walletDao.getAllWallets();
                   if (!mounted) return;
@@ -373,7 +376,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               ),
               _buildActionButton(
                 Icons.tune_rounded,
-                'Ngepasin',
+                l10n.adjustAction,
                 onTap: () async {
                   final wallets = await _db.walletDao.getAllWallets();
                   if (!mounted) return;
@@ -393,7 +396,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               ),
               _buildActionButton(
                 Icons.history,
-                'Riwayat',
+                l10n.historyAction,
                 onTap: () {
                   Navigator.push(
                     context,
@@ -413,6 +416,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
 
 
   Widget _buildSummaryCard(double income, double expense) {
+    final l10n = context.l10n;
     return SakuCard(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
@@ -439,7 +443,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                     ),
                     SizedBox(width: 6.w),
                     Text(
-                      'Pemasukan',
+                      l10n.totalIncome,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 11.sp,
@@ -487,7 +491,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        'Pengeluaran',
+                        l10n.totalExpense,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                           fontSize: 11.sp,
@@ -515,6 +519,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
   }
 
   Widget _buildTransactionList() {
+    final l10n = context.l10n;
     if (_isLoading) {
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 32.h),
@@ -535,7 +540,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               ),
               SizedBox(height: 8.h),
               Text(
-                'Belum ada transaksi',
+                l10n.noTransactionsYet,
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w600,
@@ -544,7 +549,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
               ),
               SizedBox(height: 2.h),
               Text(
-                'Transaksi untuk rekening ini akan muncul di sini',
+                l10n.noTransactionsWalletDesc,
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3),
@@ -569,7 +574,10 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     }).toList();
 
     // Group by date
-    final grouped = groupTransactionsByDate(transactionsWithDetails);
+    final grouped = groupTransactionsByDate(
+      transactionsWithDetails,
+      context.l10n,
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -599,7 +607,7 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
                   },
                   icon: Icon(Icons.history_rounded, size: 16.sp),
                   label: Text(
-                    'Lihat Semua Riwayat (${_transactions.length})',
+                    '${l10n.seeAllHistoryWithCount} (${_transactions.length})',
                     style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600),
                   ),
                   style: TextButton.styleFrom(
@@ -660,4 +668,5 @@ class _WalletDetailPageState extends State<WalletDetailPage> {
     );
   }
 }
+
 

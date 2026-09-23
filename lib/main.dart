@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +36,17 @@ void main() async {
   await initializeDateFormatting('en_US', null);
   await NotificationService().init();
   await SakuHomeWidgetService.updateAllWidgets();
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFF1E293B),
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
+
   runApp(
     MultiBlocProvider(
       providers: [
@@ -158,15 +170,33 @@ class SakuApp extends StatelessWidget {
               GlobalCupertinoLocalizations.delegate,
             ],
             builder: (context, child) {
-              return BlocBuilder<SecurityCubit, SecurityState>(
-                builder: (context, state) {
-                  return Stack(
-                    children: [
-                      child!,
-                      if (state.isLocked) const PinPage(mode: PinMode.verify),
-                    ],
-                  );
-                },
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final overlayStyle = SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: isDark
+                    ? Brightness.light
+                    : Brightness.dark,
+                statusBarBrightness: isDark
+                    ? Brightness.dark
+                    : Brightness.light,
+                systemNavigationBarColor: isDark
+                    ? const Color(0xFF1E293B)
+                    : const Color(0xFF1E293B),
+                systemNavigationBarIconBrightness: Brightness.light,
+              );
+
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: overlayStyle,
+                child: BlocBuilder<SecurityCubit, SecurityState>(
+                  builder: (context, state) {
+                    return Stack(
+                      children: [
+                        child!,
+                        if (state.isLocked) const PinPage(mode: PinMode.verify),
+                      ],
+                    );
+                  },
+                ),
               );
             },
             home: const OnboardingWrapper(),

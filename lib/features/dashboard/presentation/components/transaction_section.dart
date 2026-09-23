@@ -12,6 +12,10 @@ class TransactionSection extends StatelessWidget {
   final List<TransactionWithDetails> transactions;
   final Function(int transactionId)? onDeleteTransaction;
   final Function(int transferId)? onDeleteTransfer;
+  final Set<String> selectedItemKeys;
+  final bool isSelectionMode;
+  final Function(TransactionWithDetails item)? onToggleSelect;
+  final Function(TransactionWithDetails item)? onLongPressSelect;
 
   const TransactionSection({
     super.key,
@@ -19,6 +23,10 @@ class TransactionSection extends StatelessWidget {
     required this.transactions,
     this.onDeleteTransaction,
     this.onDeleteTransfer,
+    this.selectedItemKeys = const {},
+    this.isSelectionMode = false,
+    this.onToggleSelect,
+    this.onLongPressSelect,
   });
 
   double get _dailyTotal {
@@ -91,6 +99,10 @@ class TransactionSection extends StatelessWidget {
               category: item.category,
               wallet: item.wallet,
               toWallet: item.toWallet,
+              isSelectionMode: isSelectionMode,
+              isSelected: selectedItemKeys.contains(item.uniqueKey),
+              onToggleSelect: () => onToggleSelect?.call(item),
+              onLongPressSelect: () => onLongPressSelect?.call(item),
               onDelete: () {
                 if (item.isTransfer && item.transfer != null) {
                   onDeleteTransfer?.call(item.transfer!.id);
@@ -126,6 +138,7 @@ class TransactionWithDetails {
   DateTime get date => isTransfer ? transfer!.transferDate : transaction!.transactionDate;
   double get amount => isTransfer ? transfer!.amount : transaction!.amount;
   String get type => isTransfer ? 'transfer' : transaction!.type;
+  String get uniqueKey => isTransfer ? 'tr_${transfer!.id}' : 'tx_${transaction!.id}';
 }
 
 /// Groups transactions and transfers by date (Today, Yesterday, or formatted date)

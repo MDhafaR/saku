@@ -7,6 +7,7 @@ import '../../../../core/injection.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../components/custom_numpad.dart';
@@ -185,50 +186,104 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
 
     showModalBottomSheet(
       context: context,
-      backgroundColor: Theme.of(context).colorScheme.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
       builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Container(
-                    width: 36.w,
-                    height: 4.h,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurfaceVariant
-                          .withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(2.r),
+        final theme = Theme.of(ctx);
+        final cs = theme.colorScheme;
+        final isDark = theme.brightness == Brightness.dark;
+        final l10n = ctx.l10n;
+
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.65,
+          ),
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
+                blurRadius: 20.r,
+                offset: Offset(0, -3.h),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Drag Handle
+              SizedBox(height: 8.h),
+              Center(
+                child: Container(
+                  width: 36.w,
+                  height: 4.h,
+                  decoration: BoxDecoration(
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.25),
+                    borderRadius: BorderRadius.circular(2.r),
+                  ),
+                ),
+              ),
+              SizedBox(height: 8.h),
+
+              // Header Title & Close Button
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      l10n.selectWallet,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.bold,
+                        color: cs.onSurface,
+                        letterSpacing: -0.2,
+                      ),
                     ),
-                  ),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(ctx),
+                      child: Container(
+                        padding: EdgeInsets.all(5.w),
+                        decoration: BoxDecoration(
+                          color: cs.onSurface.withValues(alpha: 0.06),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 16.sp,
+                          color: cs.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 16.h),
-                Text(
-                  context.l10n.selectWallet,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
-                ),
-                SizedBox(height: 12.h),
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: _wallets.length,
-                    separatorBuilder: (_, __) => SizedBox(height: 8.h),
-                    itemBuilder: (ctx, i) {
-                      final w = _wallets[i];
-                      final isSelected = w.id == _selectedWallet?.id;
-                      return InkWell(
+              ),
+
+              SizedBox(height: 8.h),
+              Divider(
+                height: 1.h,
+                thickness: 1.h,
+                color: cs.outlineVariant.withValues(alpha: 0.2),
+              ),
+
+              // Balanced Modern Wallet List
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                  itemCount: _wallets.length,
+                  separatorBuilder: (_, __) => SizedBox(height: 8.h),
+                  itemBuilder: (ctx, i) {
+                    final w = _wallets[i];
+                    final isSelected = w.id == _selectedWallet?.id;
+                    final walletColor = Color(w.iconColor);
+
+                    return Material(
+                      color: Colors.transparent,
+                      child: InkWell(
                         onTap: () {
                           Navigator.pop(ctx);
                           setState(() {
@@ -238,85 +293,164 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                             _updateDefaultNote();
                           });
                         },
-                        borderRadius: BorderRadius.circular(12.r),
-                        child: Container(
+                        borderRadius: BorderRadius.circular(14.r),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 180),
                           padding: EdgeInsets.symmetric(
-                            horizontal: 14.w,
+                            horizontal: 13.w,
                             vertical: 10.h,
                           ),
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                                : Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerLow,
-                            borderRadius: BorderRadius.circular(12.r),
+                                ? (isDark
+                                    ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                                    : const Color(0xFF10B981).withValues(alpha: 0.06))
+                                : (isDark
+                                    ? cs.surfaceContainerLow
+                                    : cs.surface),
+                            borderRadius: BorderRadius.circular(14.r),
                             border: Border.all(
                               color: isSelected
                                   ? const Color(0xFF10B981)
-                                  : Colors.transparent,
-                              width: 1.5,
+                                  : cs.outline.withValues(alpha: 0.08),
+                              width: isSelected ? 1.5 : 1.0,
                             ),
                           ),
                           child: Row(
                             children: [
+                              // Icon container
                               Container(
-                                width: 36.w,
-                                height: 36.w,
+                                width: 38.w,
+                                height: 38.w,
                                 decoration: BoxDecoration(
-                                  color: Color(w.iconColor),
-                                  borderRadius: BorderRadius.circular(10.r),
+                                  color: walletColor,
+                                  borderRadius: BorderRadius.circular(11.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: walletColor.withValues(alpha: 0.25),
+                                      blurRadius: 6.r,
+                                      offset: Offset(0, 2.h),
+                                    ),
+                                  ],
                                 ),
                                 child: Center(
                                   child: CategoryIcon(
                                     iconName: w.icon,
                                     color: Colors.white,
-                                    size: 18.sp,
+                                    size: 17.sp,
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 12.w),
+                              SizedBox(width: 11.w),
+
+                              // Info Column (Name, Type & Balance)
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(
-                                      w.name,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurface,
-                                      ),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 5.5.w,
+                                            vertical: 2.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: cs.onSurface
+                                                .withValues(alpha: 0.06),
+                                            borderRadius:
+                                                BorderRadius.circular(4.r),
+                                          ),
+                                          child: Text(
+                                            w.type.toUpperCase(),
+                                            style: TextStyle(
+                                              color: cs.onSurfaceVariant,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 8.5.sp,
+                                              letterSpacing: 0.3,
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 7.w),
+                                        Expanded(
+                                          child: Text(
+                                            w.name,
+                                            style: TextStyle(
+                                              fontSize: 13.5.sp,
+                                              fontWeight: FontWeight.w600,
+                                              color: cs.onSurface,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      '${context.l10n.isIndonesian ? 'Saldo' : 'Balance'}: Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                      ),
+                                    SizedBox(height: 3.h),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          '${l10n.isIndonesian ? 'Saldo' : 'Balance'}: ',
+                                          style: TextStyle(
+                                            fontSize: 11.5.sp,
+                                            color: cs.onSurfaceVariant
+                                                .withValues(alpha: 0.7),
+                                          ),
+                                        ),
+                                        Text(
+                                          'Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
+                                          style: TextStyle(
+                                            fontSize: 11.5.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: w.currentBalance < 0
+                                                ? const Color(0xFFEF4444)
+                                                : cs.onSurface.withValues(alpha: 0.85),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
+
+                              // Selection Indicator (Radio checkmark)
+                              SizedBox(width: 8.w),
                               if (isSelected)
-                                Icon(
-                                  Icons.check_circle_rounded,
-                                  color: const Color(0xFF10B981),
-                                  size: 20.sp,
+                                Container(
+                                  width: 18.w,
+                                  height: 18.w,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFF10B981),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.check_rounded,
+                                    color: Colors.white,
+                                    size: 12.sp,
+                                  ),
+                                )
+                              else
+                                Container(
+                                  width: 18.w,
+                                  height: 18.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: cs.outline.withValues(alpha: 0.3),
+                                      width: 1.5,
+                                    ),
+                                  ),
                                 ),
                             ],
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 6.h),
+            ],
           ),
         );
       },
@@ -327,13 +461,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
     final l10n = context.l10n;
     if (_selectedWallet == null) return;
     if (_diff == 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.noAdjustmentNeeded),
-          backgroundColor: Colors.grey.shade800,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      SakuToast.showInfo(context, l10n.noAdjustmentNeeded);
       return;
     }
 
@@ -373,24 +501,11 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white, size: 20),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: Text(
-                l10n.balanceAdjustedSuccess(
-                  _selectedWallet!.name,
-                  CurrencyFormatter.format(_targetBalance.toStringAsFixed(0)),
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF10B981),
-        behavior: SnackBarBehavior.floating,
+    SakuToast.showSuccess(
+      context,
+      l10n.balanceAdjustedSuccess(
+        _selectedWallet!.name,
+        CurrencyFormatter.format(_targetBalance.toStringAsFixed(0)),
       ),
     );
 
@@ -461,102 +576,110 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                     children: [
                       // 1. Kartu Pemilihan Dompet
                       _buildWalletCard(cs, isDark),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // 2. Kartu Input Saldo Riil Target
                       _buildTargetInputCard(cs, isDark),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // 3. Komparasi Selisih Real-Time
                       _buildDifferenceCard(cs, isDark),
-                      SizedBox(height: 12.h),
+                      SizedBox(height: 10.h),
 
                       // 4. Tanggal & Catatan
                       _buildDetailsCard(cs, isDark),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 12.h),
                     ],
                   ),
                 ),
               ),
 
               // 5. Numpad Section
-              AnimatedSize(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCubic,
-                child: _isNumpadVisible
-                    ? Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(
-                                    alpha: isDark ? 0.3 : 0.05,
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {}, // Prevent taps inside numpad from bubbling to root onTap
+                child: AnimatedSize(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOutCubic,
+                  child: _isNumpadVisible
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.surface,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                      alpha: isDark ? 0.3 : 0.05,
+                                    ),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, -2),
                                   ),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, -2),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 16.w,
-                                    vertical: 6.h,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        l10n.isIndonesian
-                                            ? 'Keypad Numerik'
-                                            : 'Numeric Keypad',
-                                        style: TextStyle(
-                                          fontSize: 11.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: cs.onSurfaceVariant,
-                                        ),
-                                      ),
-                                      GestureDetector(
-                                        onTap: () => setState(
-                                          () => _isNumpadVisible = false,
-                                        ),
-                                        child: Padding(
-                                          padding: EdgeInsets.all(4.w),
-                                          child: Icon(
-                                            Icons.keyboard_hide_rounded,
-                                            size: 18.sp,
+                                ],
+                              ),
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w,
+                                      vertical: 6.h,
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          l10n.isIndonesian
+                                              ? 'Keypad Numerik'
+                                              : 'Numeric Keypad',
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            fontWeight: FontWeight.w600,
                                             color: cs.onSurfaceVariant,
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                        GestureDetector(
+                                          onTap: () => setState(
+                                            () => _isNumpadVisible = false,
+                                          ),
+                                          child: Padding(
+                                            padding: EdgeInsets.all(4.w),
+                                            child: Icon(
+                                              Icons.keyboard_hide_rounded,
+                                              size: 18.sp,
+                                              color: cs.onSurfaceVariant,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                CustomNumpad(
-                                  onKeyPressed: _onKeyPressed,
-                                  onDelete: _onDelete,
-                                  onSubmit: () => setState(
-                                    () => _isNumpadVisible = false,
+                                  CustomNumpad(
+                                    onKeyPressed: _onKeyPressed,
+                                    onDelete: _onDelete,
+                                    onSubmit: () => setState(
+                                      () => _isNumpadVisible = false,
+                                    ),
+                                    submitColor: _isExpense
+                                        ? const Color(0xFFEF4444)
+                                        : const Color(0xFF10B981),
                                   ),
-                                  submitColor: _isExpense
-                                      ? const Color(0xFFEF4444)
-                                      : const Color(0xFF10B981),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ),
 
               // 6. Tombol Aksi Simpan
-              _buildBottomButton(cs, isDark),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {}, // Prevent taps on button bar from closing numpad unexpectedly
+                child: _buildBottomButton(cs, isDark),
+              ),
             ],
           ),
         ),
@@ -570,7 +693,8 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
     final l10n = context.l10n;
 
     return SakuCard(
-      padding: EdgeInsets.all(14.w),
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
       borderRadius: 16.r,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -583,7 +707,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                     ? 'Rekening yang Disesuaikan'
                     : 'Account to Adjust',
                 style: TextStyle(
-                  fontSize: 11.sp,
+                  fontSize: 11.5.sp,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurfaceVariant,
                 ),
@@ -598,7 +722,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                       Text(
                         l10n.changeWallet,
                         style: TextStyle(
-                          fontSize: 11.sp,
+                          fontSize: 11.5.sp,
                           fontWeight: FontWeight.w600,
                           color: const Color(0xFF10B981),
                         ),
@@ -614,12 +738,12 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 8.h),
           InkWell(
             onTap: _showWalletPicker,
             borderRadius: BorderRadius.circular(12.r),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
               decoration: BoxDecoration(
                 color: cs.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(12.r),
@@ -627,8 +751,8 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               child: Row(
                 children: [
                   Container(
-                    width: 38.w,
-                    height: 38.w,
+                    width: 36.w,
+                    height: 36.w,
                     decoration: BoxDecoration(
                       color: Color(w.iconColor),
                       borderRadius: BorderRadius.circular(10.r),
@@ -637,11 +761,11 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                       child: CategoryIcon(
                         iconName: w.icon,
                         color: Colors.white,
-                        size: 20.sp,
+                        size: 18.sp,
                       ),
                     ),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 10.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -649,26 +773,46 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                         Text(
                           w.name,
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 13.5.sp,
                             fontWeight: FontWeight.bold,
                             color: cs.onSurface,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         SizedBox(height: 2.h),
-                        Text(
-                          '${l10n.recordedBalance}: Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: cs.onSurfaceVariant,
-                          ),
+                        Row(
+                          children: [
+                            Text(
+                              '${l10n.recordedBalance}: ',
+                              style: TextStyle(
+                                fontSize: 11.5.sp,
+                                color: cs.onSurfaceVariant.withValues(alpha: 0.75),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                'Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
+                                style: TextStyle(
+                                  fontSize: 11.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: w.currentBalance < 0
+                                      ? const Color(0xFFEF4444)
+                                      : cs.onSurface.withValues(alpha: 0.9),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
                   Icon(
                     Icons.unfold_more_rounded,
-                    color: cs.onSurfaceVariant,
-                    size: 20.sp,
+                    color: cs.onSurfaceVariant.withValues(alpha: 0.7),
+                    size: 18.sp,
                   ),
                 ],
               ),
@@ -697,8 +841,8 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
         ),
         child: SakuCard(
           margin: EdgeInsets.zero,
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          borderRadius: 16,
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          borderRadius: 16.r,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -715,7 +859,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                           color: cs.onSurfaceVariant,
                         ),
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 5.w),
                       Icon(
                         _isNumpadVisible
                             ? Icons.keyboard_arrow_down_rounded
@@ -726,7 +870,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.5.h),
                     decoration: BoxDecoration(
                       color: const Color(0xFF10B981).withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6.r),
@@ -734,7 +878,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                     child: Text(
                       l10n.physicalBankMoney,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 9.5.sp,
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF10B981),
                       ),
@@ -742,16 +886,16 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                   ),
                 ],
               ),
-              SizedBox(height: 12.h),
+              SizedBox(height: 8.h),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     'Rp',
                     style: TextStyle(
-                      fontSize: 20.sp,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
-                      color: cs.onSurface.withValues(alpha: 0.6),
+                      color: cs.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   SizedBox(width: 8.w),
@@ -759,7 +903,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                     child: Text(
                       CurrencyFormatter.format(_targetAmount),
                       style: TextStyle(
-                        fontSize: 26.sp,
+                        fontSize: 24.sp,
                         fontWeight: FontWeight.bold,
                         color: cs.onSurface,
                         letterSpacing: -0.5,
@@ -767,13 +911,20 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                     ),
                   ),
                   if (_targetAmount != '0')
-                    IconButton(
-                      icon: Icon(
-                        Icons.cancel,
-                        color: cs.onSurfaceVariant.withValues(alpha: 0.5),
-                        size: 20.sp,
+                    GestureDetector(
+                      onTap: () => setState(() => _targetAmount = '0'),
+                      child: Container(
+                        padding: EdgeInsets.all(4.w),
+                        decoration: BoxDecoration(
+                          color: cs.onSurface.withValues(alpha: 0.06),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: cs.onSurfaceVariant,
+                          size: 15.sp,
+                        ),
                       ),
-                      onPressed: () => setState(() => _targetAmount = '0'),
                     ),
                 ],
               ),
@@ -821,7 +972,8 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
     }
 
     return SakuCard(
-      padding: EdgeInsets.all(14.w),
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
       borderRadius: 16.r,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -829,12 +981,12 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
           Row(
             children: [
               Container(
-                padding: EdgeInsets.all(6.w),
+                padding: EdgeInsets.all(5.w),
                 decoration: BoxDecoration(
                   color: badgeBg,
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(7.r),
                 ),
-                child: Icon(statusIcon, color: badgeColor, size: 16.sp),
+                child: Icon(statusIcon, color: badgeColor, size: 15.sp),
               ),
               SizedBox(width: 8.w),
               Expanded(
@@ -851,16 +1003,16 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               ),
               SizedBox(width: 6.w),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: badgeBg,
-                  borderRadius: BorderRadius.circular(8.r),
-                  border: Border.all(color: badgeColor.withValues(alpha: 0.3)),
+                  borderRadius: BorderRadius.circular(7.r),
+                  border: Border.all(color: badgeColor.withValues(alpha: 0.25)),
                 ),
                 child: Text(
                   badgeText,
                   style: TextStyle(
-                    fontSize: 11.sp,
+                    fontSize: 10.5.sp,
                     fontWeight: FontWeight.bold,
                     color: badgeColor,
                   ),
@@ -868,29 +1020,29 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+          SizedBox(height: 7.h),
           Container(
-            padding: EdgeInsets.all(10.w),
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
             decoration: BoxDecoration(
               color: cs.surfaceContainerLow,
-              borderRadius: BorderRadius.circular(10.r),
+              borderRadius: BorderRadius.circular(9.r),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Icon(
                   Icons.info_outline_rounded,
-                  size: 15.sp,
-                  color: cs.onSurfaceVariant,
+                  size: 14.sp,
+                  color: cs.onSurfaceVariant.withValues(alpha: 0.7),
                 ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 7.w),
                 Expanded(
                   child: Text(
                     explanation,
                     style: TextStyle(
-                      fontSize: 11.sp,
-                      color: cs.onSurfaceVariant,
-                      height: 1.4,
+                      fontSize: 10.5.sp,
+                      color: cs.onSurfaceVariant.withValues(alpha: 0.85),
+                      height: 1.35,
                     ),
                   ),
                 ),
@@ -912,7 +1064,8 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
     );
 
     return SakuCard(
-      padding: EdgeInsets.all(14.w),
+      margin: EdgeInsets.zero,
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 11.h),
       borderRadius: 16.r,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -923,21 +1076,21 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               Expanded(
                 child: InkWell(
                   onTap: _selectDate,
-                  borderRadius: BorderRadius.circular(10.r),
+                  borderRadius: BorderRadius.circular(9.r),
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
                     decoration: BoxDecoration(
                       color: cs.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(10.r),
+                      borderRadius: BorderRadius.circular(9.r),
                     ),
                     child: Row(
                       children: [
                         Icon(
                           Icons.calendar_today_rounded,
-                          size: 15.sp,
+                          size: 14.sp,
                           color: const Color(0xFF10B981),
                         ),
-                        SizedBox(width: 8.w),
+                        SizedBox(width: 7.w),
                         Expanded(
                           child: Text(
                             dateFormat.format(_selectedDate),
@@ -958,21 +1111,21 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               SizedBox(width: 8.w),
               InkWell(
                 onTap: _selectTime,
-                borderRadius: BorderRadius.circular(10.r),
+                borderRadius: BorderRadius.circular(9.r),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 7.h),
                   decoration: BoxDecoration(
                     color: cs.surfaceContainerLow,
-                    borderRadius: BorderRadius.circular(10.r),
+                    borderRadius: BorderRadius.circular(9.r),
                   ),
                   child: Row(
                     children: [
                       Icon(
                         Icons.access_time_rounded,
-                        size: 15.sp,
+                        size: 14.sp,
                         color: const Color(0xFF10B981),
                       ),
-                      SizedBox(width: 6.w),
+                      SizedBox(width: 5.w),
                       Text(
                         timeString,
                         style: TextStyle(
@@ -987,7 +1140,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               ),
             ],
           ),
-          SizedBox(height: 12.h),
+          SizedBox(height: 9.h),
 
           // Catatan Field
           Text(
@@ -998,7 +1151,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               color: cs.onSurfaceVariant,
             ),
           ),
-          SizedBox(height: 6.h),
+          SizedBox(height: 5.h),
           TextField(
             controller: _noteController,
             focusNode: _noteFocusNode,
@@ -1006,7 +1159,7 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
               setState(() => _isNumpadVisible = false);
             },
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 12.5.sp,
               color: cs.onSurface,
             ),
             decoration: InputDecoration(
@@ -1014,16 +1167,16 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
                   ? 'Tulis keterangan penyesuaian...'
                   : 'Write adjustment note...',
               hintStyle: TextStyle(
-                fontSize: 12.sp,
-                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                fontSize: 11.5.sp,
+                color: cs.onSurfaceVariant.withValues(alpha: 0.5),
               ),
               filled: true,
               fillColor: cs.surfaceContainerLow,
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.r),
+                borderRadius: BorderRadius.circular(9.r),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+              contentPadding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
             ),
           ),
         ],
@@ -1035,49 +1188,34 @@ class _AdjustBalancePageState extends State<AdjustBalancePage> {
     final l10n = context.l10n;
     final canSave = _diff != 0 && _selectedWallet != null;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 12.h),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color ?? cs.surface,
-        border: Border(
-          top: BorderSide(
-            color: cs.outline.withValues(alpha: 0.08),
-            width: 1,
-          ),
-        ),
-      ),
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
       child: SizedBox(
         width: double.infinity,
         height: 48.h,
         child: ElevatedButton(
           onPressed: canSave ? _saveAdjustment : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF10B981),
-            disabledBackgroundColor: cs.onSurface.withValues(alpha: 0.12),
+            backgroundColor: isDark ? const Color(0xFF10B981) : const Color(0xFF111111),
+            disabledBackgroundColor: isDark
+                ? cs.surfaceContainerHigh
+                : const Color(0xFFE5E7EB),
             foregroundColor: Colors.white,
-            disabledForegroundColor: cs.onSurface.withValues(alpha: 0.38),
+            disabledForegroundColor: isDark
+                ? cs.onSurfaceVariant.withValues(alpha: 0.4)
+                : const Color(0xFF9CA3AF),
             elevation: 0,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(14.r),
+              borderRadius: BorderRadius.circular(16.r),
             ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.check_rounded,
-                size: 18.sp,
-                color: canSave ? Colors.white : cs.onSurface.withValues(alpha: 0.38),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                l10n.saveAdjustment,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          child: Text(
+            l10n.saveAdjustment,
+            style: TextStyle(
+              fontSize: 14.5.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
           ),
         ),
       ),

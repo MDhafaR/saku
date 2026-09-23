@@ -5,6 +5,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../../core/injection.dart';
@@ -209,17 +210,9 @@ class _TransferPageState extends State<TransferPage> {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '${l10n.transferTitle} Rp ${CurrencyFormatter.format(amount.toStringAsFixed(0))} ${l10n.success}!',
-            ),
-            backgroundColor: const Color(0xFF43A047),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+        SakuToast.showSuccess(
+          context,
+          '${l10n.transferTitle} Rp ${CurrencyFormatter.format(amount.toStringAsFixed(0))} ${l10n.success}!',
         );
         Navigator.pop(context, true); // return true to indicate success
       }
@@ -232,14 +225,7 @@ class _TransferPageState extends State<TransferPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: AppTheme.semanticRed,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
+    SakuToast.showError(context, message);
   }
 
   bool _isSourceDropdownOpen = false;
@@ -1242,88 +1228,92 @@ class _TransferPageState extends State<TransferPage> {
             ),
 
             // Collapsible Animated Numpad and Submit Button at bottom
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                20.w,
-                10.h,
-                20.w,
-                MediaQuery.of(context).padding.bottom + 12.h,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.04),
-                    blurRadius: 8,
-                    offset: const Offset(0, -2),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Animated Slide-Up / Slide-Down Numpad
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: _isNumpadVisible
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CustomNumpad(
-                                onKeyPressed: _onNumpadKeyPressed,
-                                onDelete: _onNumpadDelete,
-                                onSubmit: () {
-                                  setState(
-                                    () =>
-                                        _numpadTarget =
-                                            TransferNumpadTarget.none,
-                                  );
-                                },
-                                submitColor: AppTheme.primaryBlue,
-                              ),
-                              SizedBox(height: 12.h),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
-
-                  // Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: ElevatedButton(
-                      onPressed: _isSubmitting ? null : _submitTransfer,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        disabledBackgroundColor: Colors.grey[400],
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isSubmitting
-                          ? SizedBox(
-                              width: 20.w,
-                              height: 20.w,
-                              child: const CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              l10n.transferNowButton,
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {}, // Prevent taps inside bottom container from bubbling to body onTap
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  10.h,
+                  20.w,
+                  MediaQuery.of(context).padding.bottom + 12.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardTheme.color,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, -2),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Animated Slide-Up / Slide-Down Numpad
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isNumpadVisible
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CustomNumpad(
+                                  onKeyPressed: _onNumpadKeyPressed,
+                                  onDelete: _onNumpadDelete,
+                                  onSubmit: () {
+                                    setState(
+                                      () =>
+                                          _numpadTarget =
+                                              TransferNumpadTarget.none,
+                                    );
+                                  },
+                                  submitColor: AppTheme.primaryBlue,
+                                ),
+                                SizedBox(height: 12.h),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
+
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: ElevatedButton(
+                        onPressed: _isSubmitting ? null : _submitTransfer,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF111111),
+                          disabledBackgroundColor: Colors.grey[400],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: _isSubmitting
+                            ? SizedBox(
+                                width: 20.w,
+                                height: 20.w,
+                                child: const CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                l10n.transferNowButton,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

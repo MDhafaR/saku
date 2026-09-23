@@ -271,6 +271,45 @@ Ngepasin saldo BNI sebesar Rp200.000.
       expect(t11[0].amount, 200000.0);
       expect(t11[0].wallet, 'BNI');
     });
+
+    test('10. Kasus Mind Space Multi-Transaksi (Batagor, Ayam, & Hutang Es Kelapa)', () {
+      const mindSpaceCard = '''
+Daily Expense Records for Food and Beverage Items
+Source: Voice memos
+
+Transcription
+Pembelian batagor sebesar 14.000 dilakukan menggunakan BNI. Pembelian ayam sebesar 9.000 dilakukan menggunakan BNI. Pembelian es kelapa sebesar 6.000 belum dibayar kepada Dani.
+
+# Shopping
+''';
+
+      final results = parser.parse(mindSpaceCard);
+
+      expect(results.length, 3);
+
+      // Item 1: Batagor (Pengeluaran Rp 14.000 via BNI)
+      expect(results[0].feature, 'transaksi');
+      expect(results[0].type, 'expense');
+      expect(results[0].amount, 14000.0);
+      expect(results[0].note, 'Batagor');
+      expect(results[0].wallet, 'BNI');
+      expect(results[0].category, 'Makanan & Minuman');
+
+      // Item 2: Ayam (Pengeluaran Rp 9.000 via BNI)
+      expect(results[1].feature, 'transaksi');
+      expect(results[1].type, 'expense');
+      expect(results[1].amount, 9000.0);
+      expect(results[1].note, 'Ayam');
+      expect(results[1].wallet, 'BNI');
+      expect(results[1].category, 'Makanan & Minuman');
+
+      // Item 3: Es Kelapa (Hutang Rp 6.000 kepada Dani)
+      expect(results[2].feature, 'hutang_piutang');
+      expect(results[2].type, 'hutang');
+      expect(results[2].amount, 6000.0);
+      expect(results[2].note, 'Es kelapa');
+      expect(results[2].contactName, 'Dani');
+    });
   });
 }
 

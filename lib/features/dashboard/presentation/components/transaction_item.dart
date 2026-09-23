@@ -16,6 +16,10 @@ class TransactionItem extends StatelessWidget {
   final Wallet? toWallet;
   final VoidCallback? onDelete;
   final VoidCallback? onEdit;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback? onToggleSelect;
+  final VoidCallback? onLongPressSelect;
 
   const TransactionItem({
     super.key,
@@ -26,6 +30,10 @@ class TransactionItem extends StatelessWidget {
     this.toWallet,
     this.onDelete,
     this.onEdit,
+    this.isSelectionMode = false,
+    this.isSelected = false,
+    this.onToggleSelect,
+    this.onLongPressSelect,
   }) : assert(transaction != null || transfer != null);
 
   bool get isTransfer => transfer != null;
@@ -116,15 +124,31 @@ class TransactionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SakuCard(
       margin: EdgeInsets.only(bottom: 8.h),
+      backgroundColor: isSelected
+          ? (isDark
+              ? const Color(0xFF10B981).withValues(alpha: 0.16)
+              : const Color(0xFF10B981).withValues(alpha: 0.08))
+          : null,
+      borderColor: isSelected ? const Color(0xFF10B981) : null,
+      borderWidth: isSelected ? 1.5 : null,
       onTap: () {
-        showModalBottomSheet(
-          context: context,
-          isScrollControlled: true,
-          backgroundColor: Colors.transparent,
-          builder: (context) => _buildBottomSheet(context),
-        );
+        if (isSelectionMode) {
+          onToggleSelect?.call();
+        } else {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: Colors.transparent,
+            builder: (context) => _buildBottomSheet(context),
+          );
+        }
+      },
+      onLongPress: () {
+        onLongPressSelect?.call();
       },
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
       child: Row(
@@ -211,6 +235,31 @@ class TransactionItem extends StatelessWidget {
               letterSpacing: -0.3,
             ),
           ),
+          if (isSelectionMode) ...[
+            SizedBox(width: 10.w),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 20.w,
+              height: 20.w,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? const Color(0xFF10B981) : Colors.transparent,
+                border: Border.all(
+                  color: isSelected
+                      ? const Color(0xFF10B981)
+                      : (isDark ? Colors.grey[600]! : Colors.grey[400]!),
+                  width: 1.5,
+                ),
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check_rounded,
+                      size: 13.sp,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
+          ],
         ],
       ),
     );

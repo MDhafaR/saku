@@ -58,6 +58,9 @@ class SmartTransactionParser {
   /// Membersihkan noise seperti hashtag dan metadata Mind Space dari teks
   String _cleanNoise(String text) {
     var cleaned = text;
+    // Buang baris header Mind Space
+    cleaned = cleaned.replaceAll(RegExp(r'^(?:Daily\s+Expense\s+Records?[^\n]*|Daily\s+Expenses?[^\n]*|Transfer\s+of[^\n]*)\s*', caseSensitive: false, multiLine: true), ' ');
+    cleaned = cleaned.replaceAll(RegExp(r'^(?:Source:\s*Voice\s*memos|Voice\s*memos)[^\n]*\s*', caseSensitive: false, multiLine: true), ' ');
     // Buang baris atau potongan hashtag (# Shopping, #Daily Life, dsb.)
     cleaned = cleaned.replaceAll(RegExp(r'#\s*[\w\s&-]+', caseSensitive: false), ' ');
     // Buang footer teks Mind Space jika ada
@@ -81,13 +84,31 @@ class SmartTransactionParser {
       final currentMatch = amountMatches[i];
       final nextMatch = amountMatches[i + 1];
 
-      // Cari kata sambung pemisah antara match saat ini dan match berikutnya
+      // Cari pemisah kalimat / klausa antara match saat ini dan match berikutnya
       final betweenText = text.substring(currentMatch.end, nextMatch.start);
-      final splitRegex = RegExp(r'\b(?:dan(?:\s+pembelian|\s+beli|\s+bayar|\s+transfer)?|serta(?:\s+pembelian|\s+beli)?|lalu|kemudian|terus|setelah itu)\b|[,\n;]', caseSensitive: false);
+
+      // Prioritas 1: Tanda titik diikuti spasi atau pemisah kalimat jelas
+      final dotRegex = RegExp(r'\.\s+(?=[A-Za-z0-9])');
+      final dotMatch = dotRegex.firstMatch(betweenText);
+
+      // Prioritas 2: Baris baru atau titik koma
+      final newlineOrSemiRegex = RegExp(r'[\n;]+');
+      final newlineOrSemiMatch = newlineOrSemiRegex.firstMatch(betweenText);
+
+      // Prioritas 3: Kata sambung atau kata pembuka transaksi baru
+      final splitRegex = RegExp(
+        r'\b(?:dan(?:\s+pembelian|\s+beli|\s+bayar|\s+transfer)?|serta(?:\s+pembelian|\s+beli)?|lalu|kemudian|terus|setelah\s+itu)\b|,\s*(?:dan|serta|lalu|kemudian|terus|setelah\s+itu|pembelian|beli|bayar|transfer)\b|(?<=\S\s+)\b(?:pembelian|beli|transfer|top\s*up|isi\s+saldo|pinjam|ngutang)\b',
+        caseSensitive: false,
+      );
       final splitMatch = splitRegex.firstMatch(betweenText);
 
       int cutIndex;
-      if (splitMatch != null) {
+      if (dotMatch != null) {
+        // Potong tepat setelah tanda titik
+        cutIndex = currentMatch.end + dotMatch.start + 1;
+      } else if (newlineOrSemiMatch != null) {
+        cutIndex = currentMatch.end + newlineOrSemiMatch.start;
+      } else if (splitMatch != null) {
         cutIndex = currentMatch.end + splitMatch.start;
       } else {
         cutIndex = currentMatch.end + (betweenText.length ~/ 2);
@@ -128,7 +149,7 @@ class SmartTransactionParser {
     final lower = cleanSegment.toLowerCase();
 
     // ── 1. Deteksi Hutang / Piutang ──────────────────────────────────────────
-    // Kasus Hutang: pinjam dari [nama], ngutang ke [nama], dapat pinjaman dari [nama]
+    // Kasus Hutang 1: pinjam dari [nama], ngutang ke [nama], dapat pinjaman dari [nama]
     final debtRegex = RegExp(
       r'\b(?:pinjam\s+(?:uang\s+)?dari|ngutang\s+ke|hutang\s+(?:ke|dari)|dapat\s+pinjaman\s+dari)\s+([A-Za-z0-9_\s]+?)(?:\s+sebesar|\s+sejumlah|\s+senilai|\s+sebanyak|\s+sebesar\s+rp|\s+rp|\s+\d|\s+buat|\s+untuk|$)',
       caseSensitive: false,
@@ -136,6 +157,24 @@ class SmartTransactionParser {
     final debtMatch = debtRegex.firstMatch(cleanSegment);
     if (debtMatch != null) {
       final contact = _cleanContactName(debtMatch.group(1));
+      return VoiceIntentModel(
+        feature: 'hutang_piutang',
+        type: 'hutang',
+        amount: amount,
+        contactName: contact,
+        note: _extractNote(cleanSegment, 'hutang', contact),
+        date: date,
+      );
+    }
+
+    // Kasus Hutang 2: Belum dibayar / bayar kepada/ke [nama] (misal: "Pembelian es kelapa sebesar 6.000 belum dibayar kepada Dani")
+    final unpaidDebtRegex = RegExp(
+      r'\b(?:belum\s+(?:di)?bayar(?:kan)?|nunggak|utang|ngutang)\s+(?:ke|kepada|sama)\s+([A-Za-z0-9_\s]+?)(?:\.|$|\s+sebesar|\s+sejumlah|\s+senilai|\s+sebanyak|\s+\d|\s+buat|\s+untuk)',
+      caseSensitive: false,
+    );
+    final unpaidDebtMatch = unpaidDebtRegex.firstMatch(cleanSegment);
+    if (unpaidDebtMatch != null) {
+      final contact = _cleanContactName(unpaidDebtMatch.group(1));
       return VoiceIntentModel(
         feature: 'hutang_piutang',
         type: 'hutang',
@@ -792,7 +831,9 @@ class SmartTransactionParser {
     if (raw == null) return '';
     var name = raw.trim();
     // Buang preposisi di ujung
-    name = name.replaceAll(RegExp(r'\s+(?:sebesar|sejumlah|senilai|rp|\d+).*$', caseSensitive: false), '');
+    name = name.replaceAll(RegExp(r'\s+(?:sebesar|sejumlah|senilai|sebanyak|rp|\d+).*$', caseSensitive: false), '');
+    // Buang tanda baca di akhir
+    name = name.replaceAll(RegExp(r'[.,;:!?]+$'), '');
     return name.trim();
   }
 
@@ -875,9 +916,9 @@ class SmartTransactionParser {
 
   /// Ekstraksi nama rekening / wallet dari preposisi atau nama bank/e-wallet populer
   String? _extractWallet(String text) {
-    // 1. Pola preposisi eksplisit: "dengan jago", "pakai bca", "pake gopay", "via ovo", "lewat dana", "dari dompet", "menggunakan spay", "pake rekening bni"
+    // 1. Pola preposisi eksplisit: "dengan jago", "pakai bca", "pake gopay", "via ovo", "lewat dana", "dari dompet", "menggunakan spay", "pake rekening bni", "dilakukan menggunakan bni"
     final prepRegex = RegExp(
-      r'\b(?:dengan|pakai|pake|via|lewat|menggunakan|by|melalui|dari)\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+|kartu\s+)?([A-Za-z0-9_]+(?:\s+[A-Za-z0-9_]+)?)\b',
+      r'\b(?:dilakukan\s+)?(?:dengan|pakai|pake|via|lewat|menggunakan|by|melalui|dari)\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+|kartu\s+)?([A-Za-z0-9_]+(?:\s+[A-Za-z0-9_]+)?)\b',
       caseSensitive: false,
     );
 
@@ -1011,7 +1052,7 @@ class SmartTransactionParser {
     }
   }
 
-  /// Membersihkan teks kalimat menjadi catatan (note) yang ringkas (mis: "Bensin", "Mi ayam serta es teh")
+  /// Membersihkan teks kalimat menjadi catatan (note) yang ringkas (mis: "Batagor", "Ayam", "Es kelapa")
   String _extractNote(String segment, String intentType, String? contact, [String? wallet, String? toWallet]) {
     var note = segment.trim();
 
@@ -1033,35 +1074,46 @@ class SmartTransactionParser {
       }
     }
 
-    // 5. Buang klausa metode pembayaran / wallet (misal: "dengan jago", "pakai bca", "via gopay", "pake dana", "menggunakan BNI")
-    note = note.replaceAll(RegExp(r'\s*(?:dengan|pakai|pake|via|lewat|menggunakan|by|melalui|dari)\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+|kartu\s+)?[A-Za-z0-9_]+(?:\s+[A-Za-z0-9_]+)?', caseSensitive: false), ' ').trim();
+    // 5. Khusus hutang / piutang: bersihkan klausa "belum dibayar kepada [nama]", "ngutang ke [nama]", "pinjam dari [nama]", dsb.
+    if (intentType == 'hutang' || intentType == 'piutang') {
+      note = note.replaceAll(RegExp(r'\b(?:belum\s+(?:di)?bayar(?:kan)?|nunggak|utang|ngutang|pinjam|meminjamkan|pinjamkan|kasih\s+pinjam)\s+(?:ke|kepada|sama|dari|oleh)?(?:\s+[A-Za-z0-9_]+)?', caseSensitive: false), ' ').trim();
+      if (contact != null && contact.isNotEmpty) {
+        note = note.replaceAll(RegExp('\\b${RegExp.escape(contact)}\\b', caseSensitive: false), ' ').trim();
+      }
+    }
+
+    // 6. Buang klausa metode pembayaran / wallet (misal: "dilakukan menggunakan BNI", "dengan jago", "pakai bca", "via gopay", "pake dana", "menggunakan BNI")
+    note = note.replaceAll(RegExp(r'\s*(?:dilakukan\s+)?(?:dengan|pakai|pake|via|lewat|menggunakan|by|melalui|dari)\s+(?:rekening\s+|bank\s+|dompet\s+|akun\s+|kartu\s+)?[A-Za-z0-9_]+(?:\s+[A-Za-z0-9_]+)?', caseSensitive: false), ' ').trim();
+
+    // Buang kata "dilakukan" yang berdiri sendiri
+    note = note.replaceAll(RegExp(r'\b(?:dilakukan)\b', caseSensitive: false), ' ').trim();
 
     if (wallet != null && wallet.isNotEmpty) {
       note = note.replaceAll(RegExp('\\b${RegExp.escape(wallet)}\\b', caseSensitive: false), ' ').trim();
     }
 
-    // 6. Buang sisa-sisa pola titik nominal seperti ".000" atau ",00"
+    // 7. Buang sisa-sisa pola titik nominal seperti ".000" atau ",00"
     note = note.replaceAll(RegExp(r'[.,]\d{2,3}\b'), ' ').trim();
 
-    // 7. Buang keterangan waktu dan tanggal
+    // 8. Buang keterangan waktu dan tanggal
     note = _cleanDatePhrases(note);
 
-    // 8. Buang kata sambung & kata kerja aksi di awal kalimat berulang kali
+    // 9. Buang kata sambung & kata kerja aksi di awal kalimat berulang kali
     var prev = '';
     while (prev != note) {
       prev = note;
       note = note.replaceFirst(RegExp(r'^(?:dan|serta|lalu|kemudian|terus|setelah itu)\s+', caseSensitive: false), '').trim();
-      note = note.replaceFirst(RegExp(r'^(?:pembelian|beli|membeli|bayar|membayar|pembayaran|isi|order|pesan|jajan|belanja|dapat|terima|kirim)\s+', caseSensitive: false), '').trim();
+      note = note.replaceFirst(RegExp(r'^(?:dilakukan\s+pembelian|dilakukan\s+pembayaran|dilakukan\s+transaksi|dilakukan|pembelian|beli|membeli|bayar|membayar|pembayaran|isi|order|pesan|jajan|belanja|dapat|terima|kirim)\s+', caseSensitive: false), '').trim();
     }
 
-    // 9. Bersihkan sisa tanda baca liar di tengah atau ujung (misal "jus alpukat . " -> "jus alpukat")
+    // 10. Bersihkan sisa tanda baca liar di tengah atau ujung (misal "jus alpukat . " -> "jus alpukat")
     note = note.replaceAll(RegExp(r'\s+[.,;:!?]+\s*'), ' ');
     note = note.replaceAll(RegExp(r'^[^\w]+|[^\w]+$'), ' ').trim();
 
-    // 10. Kompres spasi ganda
+    // 11. Kompres spasi ganda
     note = note.replaceAll(RegExp(r'\s+'), ' ');
 
-    // 11. Capitalize huruf pertama & fallback cerdas
+    // 12. Capitalize huruf pertama & fallback cerdas
     if (note.isEmpty) {
       switch (intentType) {
         case 'hutang':

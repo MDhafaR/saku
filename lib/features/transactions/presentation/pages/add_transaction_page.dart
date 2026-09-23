@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
@@ -35,6 +37,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   String amount = '0';
   String note = '';
   bool _isNumpadVisible = false;
+  bool _showValidationErrors = false;
   final FocusNode _noteFocusNode = FocusNode();
   final TextEditingController _noteController = TextEditingController();
   DateTime selectedDate = DateTime.now();
@@ -88,12 +91,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
   @override
   void dispose() {
+    SakuToast.dismiss();
     _noteFocusNode.dispose();
     _noteController.dispose();
     super.dispose();
   }
 
   void _onKeyPressed(String value) {
+    SakuToast.dismiss();
     setState(() {
       if (amount == '0') {
         amount = value;
@@ -104,6 +109,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 
   void _onDelete() {
+    SakuToast.dismiss();
     setState(() {
       if (amount.isNotEmpty) {
         amount = amount.substring(0, amount.length - 1);
@@ -217,15 +223,18 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     final l10n = context.l10n;
     // Validate
     if (amount == '0' || double.tryParse(amount) == null) {
-      _showError(l10n.enterAmount);
+      setState(() => _showValidationErrors = true);
+      _showError(l10n.amountRequired);
       return;
     }
     if (selectedCategory == null) {
-      _showError(l10n.selectCategory);
+      setState(() => _showValidationErrors = true);
+      _showError(l10n.categoryRequired);
       return;
     }
     if (selectedWallet == null) {
-      _showError(l10n.selectWallet);
+      setState(() => _showValidationErrors = true);
+      _showError(l10n.walletRequired);
       return;
     }
 
@@ -273,9 +282,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   }
 
   void _showError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
-    );
+    SakuToast.showError(context, message);
   }
 
   @override
@@ -284,12 +291,19 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         ? AppTheme.semanticRed
         : AppTheme.semanticGreen;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        ),
         leading: IconButton(
           icon: Icon(Icons.close, size: 20.sp),
           color: Theme.of(context).iconTheme.color,
@@ -352,6 +366,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
+                                    SakuToast.dismiss();
                                     _noteFocusNode.unfocus();
                                     FocusScope.of(context).unfocus();
                                     if (!isExpense) {
@@ -381,6 +396,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 child: GestureDetector(
                                   behavior: HitTestBehavior.opaque,
                                   onTap: () {
+                                    SakuToast.dismiss();
                                     _noteFocusNode.unfocus();
                                     FocusScope.of(context).unfocus();
                                     if (isExpense) {
@@ -470,22 +486,37 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   ],
                                 ),
                                 SizedBox(height: 6.h),
-                                AnimatedContainer(
+                                 AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
                                   padding: EdgeInsets.symmetric(
                                     horizontal: 14.w,
                                     vertical: 4.h,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: _isNumpadVisible
-                                        ? feedbackColor.withValues(alpha: 0.08)
-                                        : Colors.transparent,
+                                    color: (_showValidationErrors &&
+                                            (amount == '0' ||
+                                                double.tryParse(amount) == null))
+                                        ? AppTheme.semanticRed
+                                            .withValues(alpha: 0.08)
+                                        : (_isNumpadVisible
+                                            ? feedbackColor
+                                                .withValues(alpha: 0.08)
+                                            : Colors.transparent),
                                     borderRadius: BorderRadius.circular(12.r),
                                     border: Border.all(
-                                      color: _isNumpadVisible
-                                          ? feedbackColor.withValues(alpha: 0.3)
-                                          : Colors.transparent,
-                                      width: 1,
+                                      color: (_showValidationErrors &&
+                                              (amount == '0' ||
+                                                  double.tryParse(amount) == null))
+                                          ? AppTheme.semanticRed
+                                          : (_isNumpadVisible
+                                              ? feedbackColor
+                                                  .withValues(alpha: 0.3)
+                                              : Colors.transparent),
+                                      width: (_showValidationErrors &&
+                                              (amount == '0' ||
+                                                  double.tryParse(amount) == null))
+                                          ? 1.4
+                                          : 1,
                                     ),
                                   ),
                                   child: Text(
@@ -496,7 +527,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                         ?.copyWith(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 28.sp,
-                                          color: feedbackColor,
+                                          color: (_showValidationErrors &&
+                                                  (amount == '0' ||
+                                                      double.tryParse(amount) ==
+                                                          null))
+                                              ? AppTheme.semanticRed
+                                              : feedbackColor,
                                         ),
                                   ),
                                 ),
@@ -539,6 +575,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                       icon: Icons.calendar_today_outlined,
                                       label: _getDateLabel(context),
                                       onTap: () {
+                                        SakuToast.dismiss();
                                         _noteFocusNode.unfocus();
                                         FocusScope.of(context).unfocus();
                                         if (_isNumpadVisible) {
@@ -556,6 +593,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                       icon: Icons.access_time_outlined,
                                       label: _getTimeLabel(context),
                                       onTap: () {
+                                        SakuToast.dismiss();
                                         _noteFocusNode.unfocus();
                                         FocusScope.of(context).unfocus();
                                         if (_isNumpadVisible) {
@@ -588,11 +626,18 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     : null,
                                 icon: Icons.category_outlined,
                                 label: context.l10n.categoryLabel,
+                                isRequired: true,
+                                hasError: _showValidationErrors &&
+                                    selectedCategory == null,
+                                errorMessage: context.l10n.categoryRequired,
                                 value: selectedCategory != null
                                     ? selectedCategory!['name'] as String
-                                    : (context.l10n.isIndonesian ? 'Pilih kategori...' : 'Select category...'),
+                                    : (context.l10n.isIndonesian
+                                        ? 'Pilih kategori...'
+                                        : 'Select category...'),
                                 isPlaceholder: selectedCategory == null,
                                 onTap: () async {
+                                  SakuToast.dismiss();
                                   _noteFocusNode.unfocus();
                                   FocusScope.of(context).unfocus();
                                   if (_isNumpadVisible) {
@@ -610,6 +655,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                               ),
                                         ),
                                       );
+                                  SakuToast.dismiss();
                                   _noteFocusNode.unfocus();
                                   if (!mounted) return;
                                   if (result != null) {
@@ -641,11 +687,18 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                     : null,
                                 icon: Icons.account_balance_wallet_outlined,
                                 label: context.l10n.walletLabel,
+                                isRequired: true,
+                                hasError: _showValidationErrors &&
+                                    selectedWallet == null,
+                                errorMessage: context.l10n.walletRequired,
                                 value: selectedWallet != null
                                     ? '${selectedWallet!['name']} (Rp ${CurrencyFormatter.format((selectedWallet!['balance'] as double).toStringAsFixed(0))})'
-                                    : (context.l10n.isIndonesian ? 'Pilih dompet...' : 'Select wallet...'),
+                                    : (context.l10n.isIndonesian
+                                        ? 'Pilih dompet...'
+                                        : 'Select wallet...'),
                                 isPlaceholder: selectedWallet == null,
                                 onTap: () async {
+                                  SakuToast.dismiss();
                                   _noteFocusNode.unfocus();
                                   FocusScope.of(context).unfocus();
                                   if (_isNumpadVisible) {
@@ -661,6 +714,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                               const WalletSelectionPage(),
                                         ),
                                       );
+                                  SakuToast.dismiss();
                                   _noteFocusNode.unfocus();
                                   if (!mounted) return;
                                   if (result != null) {
@@ -718,6 +772,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                           note = value;
                                         },
                                         onTap: () {
+                                          SakuToast.dismiss();
                                           if (_isNumpadVisible) {
                                             setState(
                                               () => _isNumpadVisible = false,
@@ -769,67 +824,71 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ),
 
             // Collapsible Animated Numpad and Submit Button at bottom
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                20.w,
-                10.h,
-                20.w,
-                MediaQuery.of(context).padding.bottom + 12.h,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Animated Slide-Up / Slide-Down Numpad
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: _isNumpadVisible
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CustomNumpad(
-                                onKeyPressed: _onKeyPressed,
-                                onDelete: _onDelete,
-                                onSubmit: () {
-                                  setState(() => _isNumpadVisible = false);
-                                },
-                                submitColor: feedbackColor,
-                              ),
-                              SizedBox(height: 12.h),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {}, // Prevent taps inside bottom container from bubbling
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  10.h,
+                  20.w,
+                  MediaQuery.of(context).padding.bottom + 12.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardTheme.color,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Animated Slide-Up / Slide-Down Numpad
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isNumpadVisible
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CustomNumpad(
+                                  onKeyPressed: _onKeyPressed,
+                                  onDelete: _onDelete,
+                                  onSubmit: () {
+                                    setState(() => _isNumpadVisible = false);
+                                  },
+                                  submitColor: feedbackColor,
+                                ),
+                                SizedBox(height: 12.h),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
 
-                  // Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: ElevatedButton(
-                      onPressed: _saveTransaction,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: ElevatedButton(
+                        onPressed: _saveTransaction,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF111111),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        isEditMode ? context.l10n.saveChangesButton : context.l10n.saveButton,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
+                        child: Text(
+                          isEditMode ? context.l10n.saveChangesButton : context.l10n.saveButton,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
@@ -882,19 +941,39 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     required String label,
     required String value,
     bool isPlaceholder = false,
+    bool isRequired = false,
+    bool hasError = false,
+    String? errorMessage,
     required VoidCallback onTap,
   }) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Color borderColor;
+    Color bgColor;
+
+    if (hasError) {
+      borderColor = AppTheme.semanticRed;
+      bgColor = isDark
+          ? AppTheme.semanticRed.withValues(alpha: 0.12)
+          : AppTheme.semanticRed.withValues(alpha: 0.05);
+    } else {
+      borderColor =
+          isDark ? cs.outline.withValues(alpha: 0.3) : const Color(0xFFE5E7EB);
+      bgColor = isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB);
+    }
+
     return GestureDetector(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
         decoration: BoxDecoration(
-          color: isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB),
+          color: bgColor,
           borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
-            color: isDark ? cs.outline.withValues(alpha: 0.3) : const Color(0xFFE5E7EB),
+            color: borderColor,
+            width: hasError ? 1.4 : 1.0,
           ),
         ),
         child: Row(
@@ -902,7 +981,9 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             leadingWidget ??
                 Icon(
                   icon ?? Icons.category_outlined,
-                  color: iconColor ?? cs.onSurface.withValues(alpha: 0.5),
+                  color: hasError
+                      ? AppTheme.semanticRed
+                      : (iconColor ?? cs.onSurface.withValues(alpha: 0.5)),
                   size: 18.sp,
                 ),
             SizedBox(width: 10.w),
@@ -910,12 +991,29 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: cs.onSurface.withValues(alpha: 0.5),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: hasError
+                              ? AppTheme.semanticRed
+                              : cs.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                      if (isRequired) ...[
+                        Text(
+                          ' *',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.semanticRed,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   SizedBox(height: 2.h),
                   Text(
@@ -924,16 +1022,41 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: isPlaceholder
-                          ? cs.onSurface.withValues(alpha: 0.4)
+                          ? (hasError
+                              ? AppTheme.semanticRed.withValues(alpha: 0.8)
+                              : cs.onSurface.withValues(alpha: 0.4))
                           : cs.onSurface,
                     ),
                   ),
+                  if (hasError && errorMessage != null) ...[
+                    SizedBox(height: 4.h),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          size: 12.sp,
+                          color: AppTheme.semanticRed,
+                        ),
+                        SizedBox(width: 4.w),
+                        Text(
+                          errorMessage,
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.semanticRed,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
             Icon(
               Icons.chevron_right,
-              color: cs.onSurface.withValues(alpha: 0.4),
+              color: hasError
+                  ? AppTheme.semanticRed
+                  : cs.onSurface.withValues(alpha: 0.4),
               size: 20.sp,
             ),
           ],

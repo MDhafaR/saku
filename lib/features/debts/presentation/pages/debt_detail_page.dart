@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/presentation/components/category_icon.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/presentation/components/saku_card.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../cubit/debt_cubit.dart';
@@ -37,14 +39,11 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
     final phone = widget.phone;
     if (phone == null || phone.trim().isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.isIndonesian
-                  ? 'Nomor telepon tidak tersimpan'
-                  : 'Phone number not saved',
-            ),
-          ),
+        SakuToast.showInfo(
+          context,
+          l10n.isIndonesian
+              ? 'Nomor telepon tidak tersimpan'
+              : 'Phone number not saved',
         );
       }
       return;
@@ -114,83 +113,7 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
   }
 
   Future<void> _handleMarkAsPaid(double remaining) async {
-    final l10n = context.l10n;
-    final wallets = await _cubit.getWallets();
-    if (wallets.isEmpty) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.isIndonesian ? 'Belum ada wallet' : 'No wallet available',
-            ),
-          ),
-        );
-      }
-      return;
-    }
-
-    Wallet? selectedWallet = wallets.first;
-
-    if (!mounted) return;
-
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text(
-              l10n.isIndonesian ? 'Konfirmasi Pelunasan' : 'Confirm Settlement',
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.isIndonesian
-                      ? 'Catat pelunasan sebesar Rp ${_formatPrice(remaining)}?'
-                      : 'Record settlement of Rp ${_formatPrice(remaining)}?',
-                ),
-                SizedBox(height: 16.h),
-                DropdownButtonFormField<Wallet>(
-                  value: selectedWallet,
-                  decoration: InputDecoration(
-                    labelText: l10n.isIndonesian ? 'Sumber Dana' : 'Source Wallet',
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: wallets.map((w) {
-                    return DropdownMenuItem(value: w, child: Text(w.name));
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() => selectedWallet = val);
-                  },
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context, false),
-                child: Text(l10n.cancel),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context, true),
-                child: Text(l10n.isIndonesian ? 'Bayar' : 'Pay'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-
-    if (confirm == true && selectedWallet != null) {
-      await _cubit.addPayment(
-        debtId: widget.debt.id,
-        walletId: selectedWallet!.id,
-        amount: remaining,
-        paymentDate: DateTime.now(),
-        note: l10n.isIndonesian ? 'Pelunasan Otomatis' : 'Automatic Settlement',
-      );
-      _loadData();
-    }
+    await _showPaymentDialog(initialAmount: remaining);
   }
 
   Future<void> _handleUndoPayment() async {
@@ -226,17 +149,16 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
     }
   }
 
-  Future<void> _showPaymentDialog() async {
+  Future<void> _showPaymentDialog({double? initialAmount}) async {
     final l10n = context.l10n;
+    final debt = _debt ?? widget.debt;
+    final remaining = (debt.totalAmount - debt.paidAmount).clamp(0.0, double.infinity);
     final wallets = await _cubit.getWallets();
     if (wallets.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              l10n.isIndonesian ? 'Belum ada wallet' : 'No wallet available',
-            ),
-          ),
+        SakuToast.showWarning(
+          context,
+          l10n.isIndonesian ? 'Belum ada wallet' : 'No wallet available',
         );
       }
       return;
@@ -245,96 +167,563 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
     if (!mounted) return;
 
     Wallet selectedWallet = wallets.first;
-    final amountController = TextEditingController();
-    final noteController = TextEditingController();
+    final amountController = TextEditingController(
+      text: initialAmount != null && initialAmount > 0
+          ? initialAmount.toStringAsFixed(0)
+          : (remaining > 0 ? remaining.toStringAsFixed(0) : ''),
+    );
+    final noteController = TextEditingController(
+      text: initialAmount != null
+          ? (l10n.isIndonesian ? 'Pelunasan' : 'Settlement')
+          : '',
+    );
+    bool isWalletDropdownOpen = false;
 
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
-      ),
-      builder: (context) => StatefulBuilder(
-        builder: (context, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(
-            20.w,
-            20.h,
-            20.w,
-            MediaQuery.of(context).viewInsets.bottom + 20.h,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                l10n.isIndonesian ? 'Catat Pembayaran' : 'Record Payment',
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20.h),
-              TextField(
-                controller: amountController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: l10n.amountLabel,
-                  border: const OutlineInputBorder(),
-                  prefixText: 'Rp ',
-                ),
-              ),
-              SizedBox(height: 12.h),
-              DropdownButtonFormField<Wallet>(
-                value: selectedWallet,
-                decoration: InputDecoration(
-                  labelText: l10n.isIndonesian ? 'Wallet / Akun' : 'Wallet / Account',
-                  border: const OutlineInputBorder(),
-                ),
-                items: wallets.map((w) {
-                  return DropdownMenuItem(value: w, child: Text(w.name));
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) {
-                    setModalState(() => selectedWallet = val);
-                  }
-                },
-              ),
-              SizedBox(height: 12.h),
-              TextField(
-                controller: noteController,
-                decoration: InputDecoration(
-                  labelText: l10n.isIndonesian ? 'Catatan (Opsional)' : 'Note (Optional)',
-                  border: const OutlineInputBorder(),
-                ),
-              ),
-              SizedBox(height: 20.h),
-              ElevatedButton(
-                onPressed: () async {
-                  final amount = double.tryParse(amountController.text);
-                  if (amount == null || amount <= 0) return;
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final theme = Theme.of(ctx);
+        final cs = theme.colorScheme;
+        final isDark = theme.brightness == Brightness.dark;
 
-                  await _cubit.addPayment(
-                    debtId: widget.debt.id,
-                    walletId: selectedWallet.id,
-                    amount: amount,
-                    paymentDate: DateTime.now(),
-                    note: noteController.text,
-                  );
+        return StatefulBuilder(
+          builder: (context, setModalState) => Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: cs.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.1),
+                    blurRadius: 20.r,
+                    offset: Offset(0, -3.h),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 20.h),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Drag Handle
+                    Center(
+                      child: Container(
+                        width: 36.w,
+                        height: 4.h,
+                        decoration: BoxDecoration(
+                          color: cs.onSurfaceVariant.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(2.r),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 12.h),
 
-                  if (context.mounted) Navigator.pop(context);
-                  _loadData(); // Refresh history
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.primaryBlue,
-                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                ),
-                child: Text(
-                  l10n.saveButton,
-                  style: const TextStyle(color: Colors.white),
+                    // Header: Title & Close Button
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.isIndonesian ? 'Catat Pembayaran' : 'Record Payment',
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                                color: cs.onSurface,
+                                letterSpacing: -0.2,
+                              ),
+                            ),
+                            if (remaining > 0) ...[
+                              SizedBox(height: 2.h),
+                              Text(
+                                '${l10n.isIndonesian ? 'Sisa tagihan' : 'Remaining'}: Rp ${_formatPrice(remaining)}',
+                                style: TextStyle(
+                                  fontSize: 11.5.sp,
+                                  color: cs.onSurfaceVariant.withValues(alpha: 0.75),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            padding: EdgeInsets.all(5.w),
+                            decoration: BoxDecoration(
+                              color: cs.onSurface.withValues(alpha: 0.06),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.close_rounded,
+                              size: 16.sp,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    // 1. Amount Field Card (Clean Borderless Input)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: isDark
+                              ? cs.outline.withValues(alpha: 0.2)
+                              : const Color(0xFFE5E7EB),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                l10n.amountLabel,
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: cs.onSurfaceVariant,
+                                ),
+                              ),
+                              if (remaining > 0)
+                                GestureDetector(
+                                  onTap: () {
+                                    amountController.text = remaining.toStringAsFixed(0);
+                                    setModalState(() {});
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 8.w,
+                                      vertical: 2.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.semanticGreen.withValues(alpha: 0.12),
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                    child: Text(
+                                      l10n.isIndonesian ? 'Bayar Penuh' : 'Pay Full',
+                                      style: TextStyle(
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.semanticGreen,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          SizedBox(height: 6.h),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Rp ',
+                                style: TextStyle(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark
+                                      ? AppTheme.semanticGreen
+                                      : const Color(0xFF111111),
+                                ),
+                              ),
+                              Expanded(
+                                child: TextField(
+                                  controller: amountController,
+                                  keyboardType: TextInputType.number,
+                                  cursorColor: isDark
+                                      ? AppTheme.semanticGreen
+                                      : const Color(0xFF111111),
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: cs.onSurface,
+                                  ),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    filled: false,
+                                    fillColor: Colors.transparent,
+                                    contentPadding: EdgeInsets.zero,
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    hintText: '0',
+                                    hintStyle: TextStyle(
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: cs.onSurface.withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              if (amountController.text.isNotEmpty && amountController.text != '0')
+                                GestureDetector(
+                                  onTap: () {
+                                    amountController.clear();
+                                    setModalState(() {});
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(4.w),
+                                    decoration: BoxDecoration(
+                                      color: cs.onSurface.withValues(alpha: 0.06),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.close_rounded,
+                                      color: cs.onSurfaceVariant,
+                                      size: 14.sp,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 10.h),
+
+                    // 2. Source Wallet Selector Card (Inline Expandable Accordion)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: isDark
+                              ? cs.outline.withValues(alpha: 0.2)
+                              : const Color(0xFFE5E7EB),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Header (Tappable Row)
+                          InkWell(
+                            onTap: () {
+                              setModalState(() {
+                                isWalletDropdownOpen = !isWalletDropdownOpen;
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(14.r),
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 10.h,
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 32.w,
+                                    height: 32.w,
+                                    decoration: BoxDecoration(
+                                      color: Color(selectedWallet.iconColor),
+                                      borderRadius: BorderRadius.circular(8.r),
+                                    ),
+                                    child: Center(
+                                      child: CategoryIcon(
+                                        iconName: selectedWallet.icon,
+                                        color: Colors.white,
+                                        size: 16.sp,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          l10n.isIndonesian ? 'Sumber Dana' : 'Source Wallet',
+                                          style: TextStyle(
+                                            fontSize: 10.5.sp,
+                                            fontWeight: FontWeight.w500,
+                                            color: cs.onSurfaceVariant,
+                                          ),
+                                        ),
+                                        SizedBox(height: 1.h),
+                                        Text(
+                                          selectedWallet.name,
+                                          style: TextStyle(
+                                            fontSize: 13.5.sp,
+                                            fontWeight: FontWeight.bold,
+                                            color: cs.onSurface,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Rp ${CurrencyFormatter.format(selectedWallet.currentBalance.toStringAsFixed(0))}',
+                                        style: TextStyle(
+                                          fontSize: 11.5.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: selectedWallet.currentBalance < 0
+                                              ? AppTheme.semanticRed
+                                              : cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(width: 4.w),
+                                  Icon(
+                                    isWalletDropdownOpen
+                                        ? Icons.keyboard_arrow_up_rounded
+                                        : Icons.keyboard_arrow_down_rounded,
+                                    color: cs.onSurfaceVariant,
+                                    size: 18.sp,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          // Expandable Options
+                          AnimatedCrossFade(
+                            duration: const Duration(milliseconds: 200),
+                            crossFadeState: isWalletDropdownOpen
+                                ? CrossFadeState.showSecond
+                                : CrossFadeState.showFirst,
+                            firstChild: const SizedBox.shrink(),
+                            secondChild: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Divider(
+                                  height: 1,
+                                  color: isDark
+                                      ? cs.outline.withValues(alpha: 0.15)
+                                      : const Color(0xFFE5E7EB),
+                                ),
+                                ...wallets.map((w) {
+                                  final isSelected = w.id == selectedWallet.id;
+                                  return InkWell(
+                                    onTap: () {
+                                      setModalState(() {
+                                        selectedWallet = w;
+                                        isWalletDropdownOpen = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 14.w,
+                                        vertical: 9.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: isSelected
+                                            ? (isDark
+                                                ? AppTheme.semanticGreen.withValues(alpha: 0.1)
+                                                : AppTheme.semanticGreen.withValues(alpha: 0.06))
+                                            : Colors.transparent,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 26.w,
+                                            height: 26.w,
+                                            decoration: BoxDecoration(
+                                              color: Color(w.iconColor),
+                                              borderRadius: BorderRadius.circular(7.r),
+                                            ),
+                                            child: Center(
+                                              child: CategoryIcon(
+                                                iconName: w.icon,
+                                                color: Colors.white,
+                                                size: 13.sp,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 10.w),
+                                          Expanded(
+                                            child: Text(
+                                              w.name,
+                                              style: TextStyle(
+                                                fontSize: 13.sp,
+                                                fontWeight: isSelected
+                                                    ? FontWeight.bold
+                                                    : FontWeight.w500,
+                                                color: isSelected
+                                                    ? (isDark ? AppTheme.semanticGreen : const Color(0xFF111111))
+                                                    : cs.onSurface,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Rp ${CurrencyFormatter.format(w.currentBalance.toStringAsFixed(0))}',
+                                            style: TextStyle(
+                                              fontSize: 11.5.sp,
+                                              fontWeight: isSelected
+                                                  ? FontWeight.bold
+                                                  : FontWeight.w500,
+                                              color: w.currentBalance < 0
+                                                  ? AppTheme.semanticRed
+                                                  : cs.onSurfaceVariant,
+                                            ),
+                                          ),
+                                          if (isSelected) ...[
+                                            SizedBox(width: 6.w),
+                                            Icon(
+                                              Icons.check_circle_rounded,
+                                              color: AppTheme.semanticGreen,
+                                              size: 15.sp,
+                                            ),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 10.h),
+
+                    // 3. Note Field Card
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? cs.surfaceContainerLow : const Color(0xFFF9FAFB),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: isDark
+                              ? cs.outline.withValues(alpha: 0.2)
+                              : const Color(0xFFE5E7EB),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.isIndonesian ? 'Catatan (Opsional)' : 'Note (Optional)',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w500,
+                              color: cs.onSurfaceVariant,
+                            ),
+                          ),
+                          SizedBox(height: 4.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.edit_note_rounded,
+                                size: 18.sp,
+                                color: cs.onSurfaceVariant.withValues(alpha: 0.6),
+                              ),
+                              SizedBox(width: 8.w),
+                              Expanded(
+                                child: TextField(
+                                  controller: noteController,
+                                  cursorColor: isDark
+                                      ? AppTheme.semanticGreen
+                                      : const Color(0xFF111111),
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    color: cs.onSurface,
+                                  ),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    filled: false,
+                                    fillColor: Colors.transparent,
+                                    contentPadding: EdgeInsets.zero,
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    errorBorder: InputBorder.none,
+                                    disabledBorder: InputBorder.none,
+                                    hintText: l10n.isIndonesian
+                                        ? 'Contoh: Pembayaran cicilan ke-1'
+                                        : 'e.g., 1st installment payment',
+                                    hintStyle: TextStyle(
+                                      fontSize: 13.sp,
+                                      color: cs.onSurface.withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    SizedBox(height: 18.h),
+
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final amount = double.tryParse(amountController.text.replaceAll('.', '').replaceAll(',', ''));
+                          if (amount == null || amount <= 0) return;
+
+                          await _cubit.addPayment(
+                            debtId: widget.debt.id,
+                            walletId: selectedWallet.id,
+                            amount: amount,
+                            paymentDate: DateTime.now(),
+                            note: noteController.text.trim().isNotEmpty
+                                ? noteController.text.trim()
+                                : (l10n.isIndonesian ? 'Pembayaran' : 'Payment'),
+                          );
+
+                          if (context.mounted) Navigator.pop(context);
+                          _loadData(); // Refresh history
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isDark
+                              ? AppTheme.semanticGreen
+                              : const Color(0xFF111111),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          elevation: 0,
+                        ),
+                        child: Text(
+                          l10n.saveButton,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.5.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -375,17 +764,17 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFAFAFA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: Color(0xFF1F2937),
-            size: 20,
+            color: Theme.of(context).colorScheme.onSurface,
+            size: 18.sp,
           ),
           onPressed: () => Navigator.pop(context),
         ),
@@ -393,390 +782,482 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
           debt.type == 'debt'
               ? (l10n.isIndonesian ? 'Detail Hutang' : 'Debt Details')
               : (l10n.isIndonesian ? 'Detail Pinjaman' : 'Loan Details'),
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 16,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontSize: 15.5.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
         centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 100, left: 20, right: 20),
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-
-                // Profile Header Section
-                SakuCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
+      body: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 8.h,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Profile Header Section
+            SakuCard(
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              child: Column(
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
+                      Container(
+                        width: 48.w,
+                        height: 48.w,
+                        decoration: BoxDecoration(
+                          color: _getAvatarBackgroundColor(
+                            widget.personName,
+                          ).withValues(alpha: 0.15),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            _getInitials(widget.personName),
+                            style: TextStyle(
                               color: _getAvatarBackgroundColor(
                                 widget.personName,
-                              ).withValues(alpha: 0.15),
-                              shape: BoxShape.circle,
+                              ),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16.sp,
                             ),
-                            child: Center(
-                              child: Text(
-                                _getInitials(widget.personName),
-                                style: TextStyle(
-                                  color: _getAvatarBackgroundColor(
-                                    widget.personName,
-                                  ),
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  widget.personName,
-                                  style: TextStyle(
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: statusBg,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    statusText,
-                                    style: TextStyle(
-                                      color: statusColor,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      const Divider(height: 1, color: Color(0xFFF3F4F6)),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                l10n.isIndonesian ? 'Sisa Tagihan' : 'Remaining Balance',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rp ${_formatPrice(remaining)}',
-                                style: TextStyle(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF111111),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                l10n.isIndonesian ? 'Total' : 'Total',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF6B7280),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rp ${_formatPrice(debt.totalAmount)}',
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF9CA3AF),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Progress Card
-                SakuCard(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.isIndonesian ? 'Status Pelunasan' : 'Payment Status',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF6B7280),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: percentPaid >= 1.0
-                                ? _handleUndoPayment
-                                : () => _handleMarkAsPaid(remaining),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: percentPaid >= 1.0
-                                    ? const Color(0xFFFFFBEB)
-                                    : AppTheme.semanticGreen.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                borderRadius: BorderRadius.circular(12),
-                                border: percentPaid >= 1.0
-                                    ? Border.all(color: Colors.orange)
-                                    : Border.all(color: AppTheme.semanticGreen),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    percentPaid >= 1.0
-                                        ? Icons.undo
-                                        : Icons.check_circle,
-                                    size: 14,
-                                    color: percentPaid >= 1.0
-                                        ? Colors.orange
-                                        : AppTheme.semanticGreen,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    percentPaid >= 1.0
-                                        ? (l10n.isIndonesian ? 'Batalkan' : 'Undo')
-                                        : l10n.markAsPaid,
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: percentPaid >= 1.0
-                                        ? Colors.orange
-                                        : AppTheme.semanticGreen,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: LinearProgressIndicator(
-                          value: percentPaid,
-                          minHeight: 8,
-                          backgroundColor: const Color(0xFFF3F4F6),
-                          valueColor: const AlwaysStoppedAnimation<Color>(
-                            AppTheme.semanticGreen,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.personName,
+                              style: TextStyle(
+                                fontSize: 15.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            SizedBox(height: 3.h),
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 8.w,
+                                vertical: 2.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusBg,
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Text(
+                                statusText,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 10.5.sp,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12.h),
+                  Divider(
+                    height: 1,
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.08),
+                  ),
+                  SizedBox(height: 12.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            l10n.isIndonesian
-                                ? '${(percentPaid * 100).toInt()}% Terbayar'
-                                : '${(percentPaid * 100).toInt()}% Paid',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: AppTheme.semanticGreen,
+                            l10n.isIndonesian ? 'Sisa Tagihan' : 'Remaining Balance',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
+                          SizedBox(height: 2.h),
                           Text(
-                            l10n.isIndonesian
-                                ? 'Sisa ${(100 - (percentPaid * 100)).toInt()}%'
-                                : 'Remaining ${(100 - (percentPaid * 100)).toInt()}%',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF9CA3AF),
+                            'Rp ${_formatPrice(remaining)}',
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            l10n.isIndonesian ? 'Total' : 'Total',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          SizedBox(height: 2.h),
+                          Text(
+                            'Rp ${_formatPrice(debt.totalAmount)}',
+                            style: TextStyle(
+                              fontSize: 13.5.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
-                ),
+                ],
+              ),
+            ),
 
-                const SizedBox(height: 24),
+            SizedBox(height: 10.h),
 
-                // Action Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Call Button
-                    _buildActionButton(
-                      icon: Icons.call,
-                      color: AppTheme.semanticGreen,
-                      label: l10n.isIndonesian ? 'Hubungi' : 'Contact',
-                      bgColor: const Color(0xFFECFDF5),
+            // Progress Card
+            SakuCard(
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.isIndonesian ? 'Status Pelunasan' : 'Payment Status',
+                        style: TextStyle(
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: percentPaid >= 1.0
+                            ? _handleUndoPayment
+                            : () => _handleMarkAsPaid(remaining),
+                        borderRadius: BorderRadius.circular(10.r),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 3.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: percentPaid >= 1.0
+                                ? const Color(0xFFFFFBEB)
+                                : AppTheme.semanticGreen.withValues(
+                                    alpha: 0.1,
+                                  ),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: percentPaid >= 1.0
+                                ? Border.all(color: Colors.orange, width: 0.8)
+                                : Border.all(color: AppTheme.semanticGreen, width: 0.8),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                percentPaid >= 1.0
+                                    ? Icons.undo
+                                    : Icons.check_circle,
+                                size: 13.sp,
+                                color: percentPaid >= 1.0
+                                    ? Colors.orange
+                                    : AppTheme.semanticGreen,
+                              ),
+                              SizedBox(width: 3.w),
+                              Text(
+                                percentPaid >= 1.0
+                                    ? (l10n.isIndonesian ? 'Batalkan' : 'Undo')
+                                    : l10n.markAsPaid,
+                                style: TextStyle(
+                                  fontSize: 10.5.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: percentPaid >= 1.0
+                                      ? Colors.orange
+                                      : AppTheme.semanticGreen,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(6.r),
+                    child: LinearProgressIndicator(
+                      value: percentPaid,
+                      minHeight: 6.h,
+                      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                      valueColor: const AlwaysStoppedAnimation<Color>(
+                        AppTheme.semanticGreen,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.isIndonesian
+                            ? '${(percentPaid * 100).toInt()}% Terbayar'
+                            : '${(percentPaid * 100).toInt()}% Paid',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.semanticGreen,
+                        ),
+                      ),
+                      Text(
+                        l10n.isIndonesian
+                            ? 'Sisa ${(100 - (percentPaid * 100)).toInt()}%'
+                            : 'Remaining ${(100 - (percentPaid * 100)).toInt()}%',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 10.h),
+
+            // Action Buttons (Paired Structured Cards)
+            Row(
+              children: [
+                // Call Button
+                Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
                       onTap: _handleCall,
+                      borderRadius: BorderRadius.circular(14.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
+                        decoration: BoxDecoration(
+                          color: AppTheme.semanticGreen.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(
+                            color: AppTheme.semanticGreen.withValues(alpha: 0.25),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(6.w),
+                              decoration: BoxDecoration(
+                                color: AppTheme.semanticGreen.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.phone_rounded,
+                                color: AppTheme.semanticGreen,
+                                size: 16.sp,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              l10n.isIndonesian ? 'Hubungi' : 'Contact',
+                              style: TextStyle(
+                                fontSize: 12.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.semanticGreen,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
+                  ),
+                ),
+                SizedBox(width: 10.w),
 
-                    // Delete Button
-                    _buildActionButton(
-                      icon: Icons.delete,
-                      color: AppTheme.semanticRed,
-                      label: l10n.delete,
-                      bgColor: const Color(0xFFFFF0F0),
+                // Delete Button
+                Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
                       onTap: _handleDelete,
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // History Section
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.isIndonesian ? 'Riwayat Pembayaran' : 'Payment History',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF111111),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                if (_isLoading)
-                  const Center(child: CircularProgressIndicator())
-                else if (_payments.isEmpty)
-                  Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Text(
-                      l10n.isIndonesian
-                          ? 'Belum ada pembayaran'
-                          : 'No payments yet',
-                      style: TextStyle(color: Colors.grey[500]),
-                    ),
-                  )
-                else
-                  ..._payments.map(
-                    (payment) => _buildHistoryItem(
-                      title: payment.note ??
-                          (l10n.isIndonesian ? 'Pembayaran' : 'Payment'),
-                      date: intl.DateFormat(
-                        'dd MMM yyyy',
-                        l10n.dateLocaleCode,
-                      ).format(payment.paymentDate),
-                      amount: '+Rp ${_formatPrice(payment.amount)}',
-                      isSuccess: true,
+                      borderRadius: BorderRadius.circular(14.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
+                        decoration: BoxDecoration(
+                          color: AppTheme.semanticRed.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(
+                            color: AppTheme.semanticRed.withValues(alpha: 0.25),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(6.w),
+                              decoration: BoxDecoration(
+                                color: AppTheme.semanticRed.withValues(alpha: 0.15),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.delete_outline_rounded,
+                                color: AppTheme.semanticRed,
+                                size: 16.sp,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              l10n.delete,
+                              style: TextStyle(
+                                fontSize: 12.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppTheme.semanticRed,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
+                ),
               ],
             ),
-          ),
 
-          // Bottom Button (Only show if not fully paid)
-          if (debt.status != 'paid')
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                color: const Color(0xFFFAFAFA),
+            SizedBox(height: 14.h),
+
+            // History Section Header
+            Text(
+              l10n.isIndonesian ? 'Riwayat Pembayaran' : 'Payment History',
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            SizedBox(height: 8.h),
+
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_payments.isEmpty)
+              SakuCard(
+                margin: EdgeInsets.zero,
+                padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 16.w),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 44.w,
+                        height: 44.w,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.receipt_long_outlined,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                          size: 22.sp,
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        l10n.isIndonesian
+                            ? 'Belum Ada Pembayaran'
+                            : 'No Payments Yet',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      SizedBox(height: 3.h),
+                      Text(
+                        l10n.isIndonesian
+                            ? 'Riwayat cicilan atau pelunasan akan tercatat di sini'
+                            : 'Payment installments or settlements will appear here',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              ..._payments.map(
+                (payment) => _buildHistoryItem(
+                  title: payment.note ??
+                      (l10n.isIndonesian ? 'Pembayaran' : 'Payment'),
+                  date: intl.DateFormat(
+                    'dd MMM yyyy',
+                    l10n.dateLocaleCode,
+                  ).format(payment.paymentDate),
+                  amount: '+Rp ${_formatPrice(payment.amount)}',
+                  isSuccess: true,
+                ),
+              ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: debt.status != 'paid'
+          ? Container(
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 16.h),
+              decoration: BoxDecoration(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+              ),
+              child: SafeArea(
                 child: SizedBox(
                   width: double.infinity,
-                  height: 56,
+                  height: 48.h,
                   child: ElevatedButton(
                     onPressed: _showPaymentDialog,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF111111),
+                      backgroundColor: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.semanticGreen
+                          : const Color(0xFF111111),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(16.r),
                       ),
                       elevation: 0,
                     ),
                     child: Text(
                       l10n.isIndonesian ? 'Catat Pembayaran' : 'Record Payment',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
+                      style: TextStyle(
+                        fontSize: 14.5.sp,
+                        fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String label,
-    required Color bgColor,
-    required VoidCallback onTap,
-  }) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(color: bgColor, shape: BoxShape.circle),
-            child: Icon(icon, color: color, size: 24),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF4B5563),
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
+            )
+          : null,
     );
   }
 
@@ -787,46 +1268,46 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
     bool isSuccess = false,
   }) {
     return SakuCard(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
       child: Row(
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 36.w,
+            height: 36.w,
             decoration: BoxDecoration(
               color: isSuccess
                   ? const Color(0xFFECFDF5)
-                  : const Color(0xFFF3F4F6),
+                  : Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(
               isSuccess ? Icons.check_circle : Icons.payments_outlined,
               color: isSuccess
                   ? AppTheme.semanticGreen
-                  : const Color(0xFF6B7280),
-              size: 20,
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
+              size: 18.sp,
             ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF111111),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 2.h),
                 Text(
                   date,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],
@@ -834,8 +1315,8 @@ class _DebtDetailPageState extends State<DebtDetailPage> {
           ),
           Text(
             amount,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 13.5.sp,
               fontWeight: FontWeight.w700,
               color: AppTheme.semanticGreen,
             ),

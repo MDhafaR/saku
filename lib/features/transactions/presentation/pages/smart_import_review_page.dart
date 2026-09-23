@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/models/voice_intent_model.dart';
 import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../data/local/database/app_database.dart';
 import '../../../settings/presentation/pages/add_edit_wallet_page.dart';
 
@@ -420,23 +421,17 @@ class _SmartImportReviewPageState extends State<SmartImportReviewPage> {
       }
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${_items.length} transaksi berhasil disimpan ke Saku!'),
-            backgroundColor: Colors.green.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
+        SakuToast.showSuccess(
+          context,
+          '${_items.length} transaksi berhasil disimpan ke Saku!',
         );
         Navigator.of(context).pop(true);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Gagal menyimpan transaksi: $e'),
-            backgroundColor: Colors.red.shade700,
-            behavior: SnackBarBehavior.floating,
-          ),
+        SakuToast.showError(
+          context,
+          'Gagal menyimpan transaksi: $e',
         );
       }
     } finally {

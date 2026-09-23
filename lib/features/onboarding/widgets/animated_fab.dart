@@ -211,10 +211,31 @@ class _AnimatedFabState extends State<AnimatedFab> {
       children: [
         // Expanded Buttons
         if (_isFabExpanded) ...[
-          // Transaction
+          // 1. Ngepasin Saldo / Adjust Balance (Paling Atas)
           Positioned(
             right: 20,
             bottom: 354,
+            child: _buildExpandedButton(
+              context: context,
+              icon: Icons.tune_rounded,
+              iconColor: const Color(0xFF0D9488), // teal modern
+              label: l10n.adjustBalanceTitle,
+              onTap: () {
+                _toggleFabExpansion();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdjustBalancePage(),
+                  ),
+                );
+              },
+              delay: 0,
+            ),
+          ),
+          // 2. Transaction
+          Positioned(
+            right: 20,
+            bottom: 292,
             child: _buildExpandedButton(
               context: context,
               icon: Icons.add,
@@ -224,13 +245,13 @@ class _AnimatedFabState extends State<AnimatedFab> {
                 _toggleFabExpansion();
                 widget.onPressed();
               },
-              delay: 0,
+              delay: 80,
             ),
           ),
-          // Transfer
+          // 3. Transfer
           Positioned(
             right: 20,
-            bottom: 292,
+            bottom: 230,
             child: _buildExpandedButton(
               context: context,
               icon: Icons.swap_horiz,
@@ -293,13 +314,13 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   );
                 }
               },
-              delay: 80,
+              delay: 160,
             ),
           ),
-          // Loan
+          // 4. Loan / Debts
           Positioned(
             right: 20,
-            bottom: 230,
+            bottom: 168,
             child: _buildExpandedButton(
               context: context,
               icon: Icons.account_balance_wallet,
@@ -311,27 +332,6 @@ class _AnimatedFabState extends State<AnimatedFab> {
                   context,
                   MaterialPageRoute(
                       builder: (context) => const AddLoanPage()),
-                );
-              },
-              delay: 160,
-            ),
-          ),
-          // Ngepasin Saldo
-          Positioned(
-            right: 20,
-            bottom: 168,
-            child: _buildExpandedButton(
-              context: context,
-              icon: Icons.tune_rounded,
-              iconColor: const Color(0xFF0D9488), // teal modern
-              label: l10n.adjustBalanceTitle,
-              onTap: () {
-                _toggleFabExpansion();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AdjustBalancePage(),
-                  ),
                 );
               },
               delay: 240,

@@ -4,9 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 class SakuCard extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final EdgeInsetsGeometry? padding;
   final EdgeInsetsGeometry? margin;
   final Color? backgroundColor;
+  final Color? borderColor;
+  final double? borderWidth;
   final double borderRadius;
   final bool hasBorder;
 
@@ -14,11 +17,14 @@ class SakuCard extends StatelessWidget {
     super.key,
     required this.child,
     this.onTap,
+    this.onLongPress,
     this.padding,
     this.margin,
     this.borderRadius = 24.0,
     this.hasBorder = true,
     this.backgroundColor,
+    this.borderColor,
+    this.borderWidth,
   });
 
   @override
@@ -34,10 +40,11 @@ class SakuCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius.r),
         border: hasBorder
             ? Border.all(
-                color: isDark
-                    ? colorScheme.outline.withValues(alpha: 0.3)
-                    : const Color(0xFFF0F0F0),
-                width: 1,
+                color: borderColor ??
+                    (isDark
+                        ? colorScheme.outline.withValues(alpha: 0.3)
+                        : const Color(0xFFF0F0F0)),
+                width: borderWidth ?? 1,
               )
             : null,
         boxShadow: [
@@ -57,6 +64,7 @@ class SakuCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
+          onLongPress: onLongPress,
           child: Padding(
             padding: padding ?? EdgeInsets.all(20.w),
             child: child,

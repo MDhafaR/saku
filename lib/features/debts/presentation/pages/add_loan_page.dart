@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/injection.dart';
 import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/presentation/components/category_icon.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../transactions/presentation/components/custom_numpad.dart';
@@ -154,9 +155,7 @@ class _AddLoanPageState extends State<AddLoanPage> {
   Future<void> _saveDebt() async {
     final l10n = context.l10n;
     if (_amount == '0' || _contactController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.completeDataError)));
+      SakuToast.showError(context, l10n.completeDataError);
       return;
     }
 
@@ -475,67 +474,71 @@ class _AddLoanPageState extends State<AddLoanPage> {
             ),
 
             // Collapsible Animated Numpad and Submit Button at bottom
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.fromLTRB(
-                20.w,
-                10.h,
-                20.w,
-                MediaQuery.of(context).padding.bottom + 12.h,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Animated Slide-Up / Slide-Down Numpad
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOutCubic,
-                    alignment: Alignment.topCenter,
-                    child: _isNumpadVisible
-                        ? Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CustomNumpad(
-                                onKeyPressed: _onKeyPressed,
-                                onDelete: _onDelete,
-                                onSubmit: () {
-                                  setState(() => _isNumpadVisible = false);
-                                },
-                                submitColor: feedbackColor,
-                              ),
-                              SizedBox(height: 12.h),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
-                  ),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () {}, // Prevent taps inside bottom container from bubbling
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.fromLTRB(
+                  20.w,
+                  10.h,
+                  20.w,
+                  MediaQuery.of(context).padding.bottom + 12.h,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardTheme.color,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Animated Slide-Up / Slide-Down Numpad
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isNumpadVisible
+                          ? Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                CustomNumpad(
+                                  onKeyPressed: _onKeyPressed,
+                                  onDelete: _onDelete,
+                                  onSubmit: () {
+                                    setState(() => _isNumpadVisible = false);
+                                  },
+                                  submitColor: feedbackColor,
+                                ),
+                                SizedBox(height: 12.h),
+                              ],
+                            )
+                          : const SizedBox.shrink(),
+                    ),
 
-                  // Submit Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: ElevatedButton(
-                      onPressed: _saveDebt,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF111111),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16.r),
+                    // Submit Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: ElevatedButton(
+                        onPressed: _saveDebt,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF111111),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          elevation: 0,
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        l10n.saveButton,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
+                        child: Text(
+                          l10n.saveButton,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

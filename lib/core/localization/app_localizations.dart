@@ -41,6 +41,9 @@ class AppLocalizations {
   String get yesterday => isIndonesian ? 'Kemarin' : 'Yesterday';
   String get daysAgo => isIndonesian ? 'hari lalu' : 'days ago';
   String get netCashflow => isIndonesian ? 'Arus Kas Bersih' : 'Net Cash Flow';
+  String selectedCount(int count) => isIndonesian ? '$count dipilih' : '$count selected';
+  String get selectedTotal => isIndonesian ? 'Total Terpilih' : 'Selected Total';
+  String get clearSelection => isIndonesian ? 'Batal' : 'Clear';
 
   // ── 3. Aksi Cepat / FAB ──────────────────────────────────────────────────
   String get quickRecordExpense => isIndonesian ? 'Catat Pengeluaran' : 'Add Expense';
@@ -82,6 +85,10 @@ class AppLocalizations {
   String get fillRequiredFields => isIndonesian
       ? 'Mohon lengkapi nominal dan kategori'
       : 'Please complete the amount and category';
+  String get categoryRequired => isIndonesian ? 'Kategori wajib dipilih' : 'Category is required';
+  String get walletRequired => isIndonesian ? 'Dompet wajib dipilih' : 'Wallet is required';
+  String get amountRequired => isIndonesian ? 'Nominal transaksi wajib diisi' : 'Amount is required';
+  String get requiredBadge => isIndonesian ? 'Wajib' : 'Required';
 
   // ── 5. Form Pindah Buku / Transfer (TransferPage) ─────────────────────────
   String get transferTitle => isIndonesian ? 'Pindah Buku' : 'Transfer';

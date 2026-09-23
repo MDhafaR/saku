@@ -17,63 +17,67 @@ class CustomNumpad extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min, // Avoid expanded if not needed
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNumberButton(context, '1'),
-            _buildNumberButton(context, '2'),
-            _buildNumberButton(context, '3'),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNumberButton(context, '4'),
-            _buildNumberButton(context, '5'),
-            _buildNumberButton(context, '6'),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildNumberButton(context, '7'),
-            _buildNumberButton(context, '8'),
-            _buildNumberButton(context, '9'),
-          ],
-        ),
-        SizedBox(height: 8.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildButton(
-              context: context,
-              child: Text(
-                '000',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18.sp,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {}, // Absorb taps between buttons to prevent bubbling
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Avoid expanded if not needed
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNumberButton(context, '1'),
+              _buildNumberButton(context, '2'),
+              _buildNumberButton(context, '3'),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNumberButton(context, '4'),
+              _buildNumberButton(context, '5'),
+              _buildNumberButton(context, '6'),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNumberButton(context, '7'),
+              _buildNumberButton(context, '8'),
+              _buildNumberButton(context, '9'),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildButton(
+                context: context,
+                child: Text(
+                  '000',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 18.sp,
+                  ),
                 ),
+                onTap: () => onKeyPressed('000'),
               ),
-              onTap: () => onKeyPressed('000'),
-            ),
-            _buildNumberButton(context, '0'),
-            _buildButton(
-              context: context,
-              child: Icon(
-                Icons.backspace_outlined,
-                color: Theme.of(context).iconTheme.color,
-                size: 18.sp,
+              _buildNumberButton(context, '0'),
+              _buildButton(
+                context: context,
+                child: Icon(
+                  Icons.backspace_outlined,
+                  color: Theme.of(context).iconTheme.color,
+                  size: 18.sp,
+                ),
+                onTap: onDelete,
               ),
-              onTap: onDelete,
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/presentation/components/saku_toast.dart';
 import '../../../../core/services/notification_service.dart';
 
 class ReminderPage extends StatefulWidget {
@@ -60,9 +61,7 @@ class _ReminderPageState extends State<ReminderPage> {
     await notifService.rescheduleNotifications();
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.reminderSettingsSaved)),
-      );
+      SakuToast.showSuccess(context, l10n.reminderSettingsSaved);
       Navigator.pop(context);
     }
   }

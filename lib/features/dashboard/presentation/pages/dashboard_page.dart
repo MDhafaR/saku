@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -32,6 +33,7 @@ class _DashboardPageState extends State<DashboardPage> {
   String _searchQuery = '';
   DashboardFilterResult _activeFilter = const DashboardFilterResult();
   List<TransactionWithDetails> _allItems = const [];
+  final Set<String> _selectedItemKeys = {};
 
   // Cache for categories and wallets
   Map<int, Category> _categoriesCache = {};
@@ -708,13 +710,85 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  bool get _isSelectionMode => _selectedItemKeys.isNotEmpty;
+
+  void _toggleSelectItem(TransactionWithDetails item) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      final key = item.uniqueKey;
+      if (_selectedItemKeys.contains(key)) {
+        _selectedItemKeys.remove(key);
+      } else {
+        _selectedItemKeys.add(key);
+      }
+    });
+  }
+
+  void _onLongPressSelect(TransactionWithDetails item) {
+    HapticFeedback.mediumImpact();
+    setState(() {
+      final key = item.uniqueKey;
+      if (_selectedItemKeys.contains(key)) {
+        _selectedItemKeys.remove(key);
+      } else {
+        _selectedItemKeys.add(key);
+      }
+    });
+  }
+
+  void _clearSelection() {
+    HapticFeedback.lightImpact();
+    setState(() {
+      _selectedItemKeys.clear();
+    });
+  }
+
+  double get _selectedNetTotal {
+    double total = 0.0;
+    for (final item in _allItems) {
+      if (_selectedItemKeys.contains(item.uniqueKey)) {
+        if (item.isTransfer) {
+          if (item.transfer != null && item.transfer!.fee > 0) {
+            total -= item.transfer!.fee;
+          }
+        } else if (item.transaction?.type == 'income') {
+          total += item.transaction!.amount;
+        } else if (item.transaction?.type == 'expense') {
+          total -= item.transaction!.amount;
+        }
+      }
+    }
+    return total;
+  }
+
+  String get _formattedSelectedTotal {
+    final total = _selectedNetTotal;
+    final formatted = CurrencyFormatter.format(total.abs().toStringAsFixed(0));
+    if (total < 0) {
+      return '-Rp $formatted';
+    } else if (total > 0) {
+      return '+Rp $formatted';
+    } else {
+      return 'Rp 0';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _cubit,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        body: SafeArea(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+    );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: BlocProvider.value(
+        value: _cubit,
+        child: Scaffold(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          body: SafeArea(
           child: BlocBuilder<TransactionCubit, TransactionState>(
             builder: (context, state) {
               List<TransactionWithDetails> allItems = [];
@@ -741,46 +815,198 @@ class _DashboardPageState extends State<DashboardPage> {
                 allItems,
               );
 
-              return Column(
+              return Stack(
                 children: [
-                  // Fixed header section
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: Column(
-                      children: [
-                        SizedBox(height: 8.h),
-                        _buildHeader(),
+                  Column(
+                    children: [
+                      // Fixed header section
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        color: Theme.of(context).scaffoldBackgroundColor,
+                        child: Column(
+                          children: [
+                            SizedBox(height: 8.h),
+                            _buildHeader(),
 
-                        // Month navigation
-                        components.MonthNavigation(
-                          currentMonth:
-                              '${_months[_selectedDate.month - 1]} ${_selectedDate.year}',
-                          onPreviousMonth: _onPreviousMonth,
-                          onNextMonth: _onNextMonth,
-                          onMonthTap: _selectMonthYear,
-                        ),
+                            // Month navigation
+                            components.MonthNavigation(
+                              currentMonth:
+                                  '${_months[_selectedDate.month - 1]} ${_selectedDate.year}',
+                              onPreviousMonth: _onPreviousMonth,
+                              onNextMonth: _onNextMonth,
+                              onMonthTap: _selectMonthYear,
+                            ),
 
-                        // Search bar
-                        components.SearchBar(
-                          onChanged: _onSearchChanged,
-                          onFilterTap: _onFilterTap,
-                          hasActiveFilter: _activeFilter.hasActiveFilters,
+                            // Search bar
+                            components.SearchBar(
+                              onChanged: _onSearchChanged,
+                              onFilterTap: _onFilterTap,
+                              hasActiveFilter: _activeFilter.hasActiveFilters,
+                            ),
+                            if (_activeFilter.hasActiveFilters ||
+                                _searchQuery.isNotEmpty)
+                              _buildFilterSummary(),
+                          ],
                         ),
-                        if (_activeFilter.hasActiveFilters ||
-                            _searchQuery.isNotEmpty)
-                          _buildFilterSummary(),
-                      ],
-                    ),
+                      ),
+
+                      // Scrollable transaction sections
+                      Expanded(
+                        child: _buildTransactionList(state, filteredItems),
+                      ),
+                    ],
                   ),
 
-                  // Scrollable transaction sections
-                  Expanded(
-                    child: _buildTransactionList(state, filteredItems),
+                  // Floating selected total calculator pill
+                  Positioned(
+                    left: 16.w,
+                    right: 16.w,
+                    bottom: 86.h,
+                    child: _buildFloatingSelectedSummary(),
                   ),
                 ],
               );
             },
+          ),
+        ),
+      ),
+    ),
+    );
+  }
+
+  Widget _buildFloatingSelectedSummary() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
+    final isVisible = _isSelectionMode;
+    final count = _selectedItemKeys.length;
+    final totalFormatted = _formattedSelectedTotal;
+    final total = _selectedNetTotal;
+
+    return IgnorePointer(
+      ignoring: !isVisible,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeOutCubic,
+        offset: isVisible ? Offset.zero : const Offset(0, 1.8),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 200),
+          opacity: isVisible ? 1.0 : 0.0,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E293B) : const Color(0xFF111827),
+              borderRadius: BorderRadius.circular(20.r),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.28),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
+                  spreadRadius: 2,
+                ),
+              ],
+              border: Border.all(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.12)
+                    : Colors.white.withValues(alpha: 0.08),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.calculate_rounded,
+                    color: const Color(0xFF10B981),
+                    size: 18.sp,
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        l10n.selectedCount(count),
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.7),
+                        ),
+                      ),
+                      SizedBox(height: 1.h),
+                      Row(
+                        children: [
+                          Text(
+                            '${l10n.selectedTotal}: ',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                          Flexible(
+                            child: Text(
+                              totalFormatted,
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w800,
+                                color: total < 0
+                                    ? const Color(0xFFF87171)
+                                    : total > 0
+                                        ? const Color(0xFF34D399)
+                                        : Colors.white,
+                                letterSpacing: -0.3,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _clearSelection,
+                    borderRadius: BorderRadius.circular(12.r),
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.close_rounded,
+                            size: 14.sp,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            l10n.clearSelection,
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -898,12 +1124,16 @@ class _DashboardPageState extends State<DashboardPage> {
             (entry) => TransactionSection(
               sectionTitle: entry.key,
               transactions: entry.value,
+              selectedItemKeys: _selectedItemKeys,
+              isSelectionMode: _isSelectionMode,
+              onToggleSelect: _toggleSelectItem,
+              onLongPressSelect: _onLongPressSelect,
               onDeleteTransaction: _deleteTransaction,
               onDeleteTransfer: _deleteTransfer,
             ),
           ),
-          // Bottom padding for FAB
-          SizedBox(height: 120.h),
+          // Bottom padding for FAB, Nav Bar and Floating Pill
+          SizedBox(height: 160.h),
         ],
       ),
     );
